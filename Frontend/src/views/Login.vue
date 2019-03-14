@@ -2,9 +2,9 @@
     <div id="login">
         <h1>Login</h1>
         <br/>
-        <input type="email" name="email" v-model="email" placeholder="Email" />
+        <input type="email" id="email" name="email" v-model="email" placeholder="Email" />
         <br/><br/>
-        <input type="password" name="password" v-model="password" placeholder="Password" />
+        <input type="password" id="password" name="password" v-model="password" placeholder="Password" />
         <br/><br/>
         <button type="button" v-on:click="login()">Login</button>
     </div>
@@ -12,7 +12,7 @@
 
 <script>
     import axios from "axios"
-    import dev_const from '../const.js'
+    //import dev_const from '../const.js'
     
     export default {
         name: 'login',
