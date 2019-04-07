@@ -25,7 +25,7 @@
       </v-list>
     </v-menu>
     <v-btn to="login" flat v-if="!isLoggedIn.isLogin">Login</v-btn>
-    <v-menu  offset-y
+    <v-menu v-else offset-y
             content-class="dropdown-menu"
             transition="slide-y-transition" v-if="isLoggedIn.isLogin">
       <v-btn slot="activator" fab dark color="teal">

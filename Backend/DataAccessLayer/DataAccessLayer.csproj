@@ -87,6 +87,7 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApiKey.cs" />
     <Compile Include="Models\Application.cs" />
+    <Compile Include="Models\LogoutRequest.cs" />
     <Compile Include="Models\LoginRequest.cs" />
     <Compile Include="Models\Session.cs" />
     <Compile Include="Models\User.cs" />
