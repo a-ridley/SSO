@@ -1,30 +1,104 @@
 <template>
   <div id="portal">
-    <v-card>
-      <h1 id="applicationPortal">Application Portal</h1>
+    <v-card lg12>
+      <v-layout row wrap>
+        <v-flex lg9>
+          <h1 id="appPortal">Application Portal</h1>
+        </v-flex>
+        <v-flex id="appFilters" lg3>
+          <v-select :items="items" label="Filters" outline></v-select>
+        </v-flex>
+      </v-layout>
+
       <v-container fluid grid-list-md>
         <v-layout row wrap>
-          <v-flex xs12 sm6 md4 lg3 v-for="(app, index) in applications" :key="index">
-            <v-card hover>
+          <v-flex xs12 md6 lg6 v-for="(app, index) in applications" :key="index">
+            <!-- The card that shows up if the app is under maintenance -->
+            <v-card v-if="app.UnderMaintenance" class="transparent">
+              <v-card-title primary-title>
+                <!-- If there is no logo, then a default image will be shown -->
+                <img v-if="app.LogoUrl === null" src="@/assets/no-image-icon.png">
+                <img v-else :src="app.LogoUrl">
+
+                <div class="content">
+                  <!-- Launching to an app can be done by clicking the app title -->
+                  <h3 class="headline mb-0">
+                    <strong>
+                      {{ app.Title }}
+                      <v-tooltip right>
+                        <template v-slot:activator="{ on }">
+                          <v-icon color="orange" large right v-on="on">warning</v-icon>
+                        </template>
+                        <span>Under Maintenance</span>
+                      </v-tooltip>
+                    </strong>
+                  </h3>
+                </div>
+
+                <read-more
+                  v-if="app.Description === null"
+                  more-str="read more"
+                  :text="defaultDescription"
+                  less-str="read less"
+                  :max-chars="450"
+                ></read-more>
+                <!-- Allows expansion or shrinkage of app description -->
+                <read-more
+                  v-else
+                  more-str="read more"
+                  :text="app.Description"
+                  less-str="read less"
+                  :max-chars="450"
+                ></read-more>
+              </v-card-title>
+            </v-card>
+
+            <!-- The card that shows up if the app is not under maintenance -->
+            <v-card v-else hover>
               <v-card-title primary-title>
                 <!-- If there is no logo, then a default image will be shown -->
                 <img
                   v-if="app.LogoUrl === null"
-                  src="https://www.freeiconspng.com/uploads/no-image-icon-15.png"
+                  src="@/assets/no-image-icon.png"
+                  @click="launchLoading = true; launch(app.Id)"
                 >
-                <img v-else :src="app.LogoUrl">
-                <div id="content">
+                <img v-else :src="app.LogoUrl" @click="launchLoading = true; launch(app.Id)">
+                <div id="content" v-if="app.UnderMaintenance">
                   <!-- Launching to an app can be done by clicking the app title -->
-                  <h3 class="headline mb-0" @click="launchLoading = true; launch(app.Id)">
+                  <h3 class="headline mb-0">
+                    <strong>
+                      {{ app.Title }}
+                      <br>
+                    </strong>
+                  </h3>
+
+                  <p>{{app.UnderMaintenance}}</p>
+                </div>
+                <div class="content" v-else>
+                  <!-- Launching to an app can be done by clicking the app title -->
+                  <h3
+                    id="launchable"
+                    class="headline mb-0"
+                    @click="launchLoading = true; launch(app.Id)"
+                  >
                     <strong>{{ app.Title }}</strong>
                   </h3>
                 </div>
+
+                <read-more
+                  v-if="app.Description === null"
+                  more-str="read more"
+                  :text="defaultDescription"
+                  less-str="read less"
+                  :max-chars="450"
+                ></read-more>
                 <!-- Allows expansion or shrinkage of app description -->
                 <read-more
+                  v-else
                   more-str="read more"
                   :text="app.Description"
                   less-str="read less"
-                  :max-chars="150"
+                  :max-chars="450"
                 ></read-more>
               </v-card-title>
             </v-card>
@@ -56,7 +130,11 @@ export default {
   data() {
     return {
       applications: [],
+      items: ["Alphabetical", "Number of clicks", "Number of logins"],
+      defaultDescription:
+        "No Description...Sirloin short loin tenderloin tri-tip jowl chicken shank ribeye landjaeger, pancetta pork chop. Cupim filet mignon tail porchetta, biltong leberkas turkey flank pork chop frankfurter kevin short loin tenderloin tri-tip shankle. Porchetta boudin shoulder sausage, beef ribs pancetta burgdoggen prosciutto tongue. Sausage kevin strip steak, pork belly pig filet mignon chuck shankle andouille tri-tip ham cow. Pork loin t-bone doner, kevin jowl cupim sausage meatloaf.",
       launchLoading: false,
+      maintenance: false,
       error: ""
     };
   },
@@ -121,22 +199,32 @@ export default {
   margin: 1em;
 }
 
-#applicationPortal {
-  padding: 1em;
+#appPortal {
+  padding: 1em 1em 0 1em;
   font-size: 38px;
   text-decoration: underline;
 }
 
-#content {
+.content {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#appFilters {
+  padding: 2em 2em 0 2em;
+}
+
+#maintenance {
   margin-left: 1em;
 }
 
-img {
-  width: 55px;
-  height: 55px;
+#launchable:hover {
+  text-decoration: underline;
 }
 
-.headline:hover {
-  text-decoration: underline;
+.transparent {
+  background-color: white !important;
+  opacity: 0.65;
+  border-color: transparent !important;
 }
 </style>

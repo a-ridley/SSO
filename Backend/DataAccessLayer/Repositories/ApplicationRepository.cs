@@ -116,7 +116,8 @@ namespace DataAccessLayer.Repositories
                     LaunchUrl = app.LaunchUrl,
                     Title = app.Title,
                     LogoUrl = app.LogoUrl,
-                    Description = app.Description
+                    Description = app.Description,
+                    UnderMaintenance = app.UnderMaintenance
                 }).ToList();
             }
             catch (Exception)
