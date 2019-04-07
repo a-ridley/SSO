@@ -12,6 +12,7 @@ using ManagerLayer.PasswordManagement;
 using ServiceLayer.Services;
 using ManagerLayer.UserManagement;
 using DataAccessLayer.Requests;
+using System.Data.Entity.Infrastructure;
 
 namespace KFC_WebAPI.Controllers
 {
@@ -42,6 +43,7 @@ namespace KFC_WebAPI.Controllers
         [Required]
         public string securityQ3Answer { get; set; }
     }
+
 
     public class UsersController : ApiController
     {
@@ -211,5 +213,39 @@ namespace KFC_WebAPI.Controllers
                 return Content(HttpStatusCode.BadRequest, "Service Unavailable");
             }
         }
+
+        [HttpPost]
+        [Route("api/Logout")]
+        public IHttpActionResult Logout([FromBody] LogoutRequest request)
+        {
+            SessionService serv = new SessionService();
+            using (var _db = new DatabaseContext())
+            {
+                IAuthorizationManager authorizationManager = new AuthorizationManager();
+
+
+
+                try
+                {
+                    var response = authorizationManager.DeleteSession(_db, request.token);
+                    _db.SaveChanges();
+
+                    if (response != null)
+                    {
+
+                        return Ok("User has logged out");
+                    }
+
+                }
+                catch (DbUpdateException)
+                {
+                    return Content(HttpStatusCode.InternalServerError, "There was an error on the server and the request could not be completed");
+                }
+                return Content(HttpStatusCode.ExpectationFailed, "Session has not been found.");
+
+            }
+
+        }
+
     }
 }
