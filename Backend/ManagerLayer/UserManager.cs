@@ -104,7 +104,7 @@ namespace ManagerLayer
         {
             UserDeleteService uds = new UserDeleteService();
             IUserService _userService = new UserService();
-            var applications = ApplicationService.GetAllApplications(_db);
+            var applications = ApplicationService.GetAllApplicationsList(_db);
             //var appList = applications.OfType<Application>().ToList();
             var responseList = new List<HttpResponseMessage>();
             foreach(Application app in applications)

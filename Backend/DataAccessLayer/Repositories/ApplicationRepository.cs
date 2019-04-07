@@ -103,11 +103,35 @@ namespace DataAccessLayer.Repositories
         }
 
         /// <summary>
-        /// Get all applications
+        /// Get all applications as List<Application>
         /// </summary>
         /// <param name="_db">database</param>
         /// <returns>All application registered with the SSO</returns>
-        public static List<Application> GetAllApplications(DatabaseContext _db)
+        public static IEnumerable GetAllApplications(DatabaseContext _db)
+        {
+            try
+            {
+                return _db.Applications.Select(app => new
+                {
+                    Id = app.Id,
+                    LaunchUrl = app.LaunchUrl,
+                    Title = app.Title,
+                    LogoUrl = app.LogoUrl,
+                    Description = app.Description
+                }).ToList();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get all applications as List<Application>
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All application registered with the SSO</returns>
+        public static List<Application> GetAllApplicationsList(DatabaseContext _db)
         {
             try
             {

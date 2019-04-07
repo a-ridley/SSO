@@ -61,7 +61,17 @@ namespace ServiceLayer.Services
         /// </summary>
         /// <param name="_db">database</param>
         /// <returns>All applications registered with the SSO</returns>
-        public static List<Application> GetAllApplications(DatabaseContext _db)
+        public static List<Application> GetAllApplicationsList(DatabaseContext _db)
+        {
+            return ApplicationRepository.GetAllApplicationsList(_db);
+        }
+
+        /// <summary>
+        /// Call the application repository to return all applications registered with the SSO
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All applications registered with the SSO</returns>
+        public static IEnumerable GetAllApplications(DatabaseContext _db)
         {
             return ApplicationRepository.GetAllApplications(_db);
         }
