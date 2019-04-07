@@ -24,7 +24,6 @@ export default {
           alert(respData);
           localStorage.removeItem('token');
           store.state.isLogin = false;
-          store.getEmail();
           this.$router.push("/home");
          
          

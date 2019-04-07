@@ -216,7 +216,7 @@ namespace KFC_WebAPI.Controllers
 
         [HttpPost]
         [Route("api/Logout")]
-        public IHttpActionResult DeleteSession([FromBody] LogoutRequest request)
+        public IHttpActionResult Logout([FromBody] LogoutRequest request)
         {
             SessionService serv = new SessionService();
             using (var _db = new DatabaseContext())
