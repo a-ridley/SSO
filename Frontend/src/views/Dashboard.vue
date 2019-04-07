@@ -1,43 +1,110 @@
 <template>
-  <div id="portal">
-    <!-- Feel free to hardcode an app ID here until dashboard logic is complete -->
-    <!-- <button v-on:click="launch('D146A971-593A-47E4-ABCB-8B3AAF686ECD')">Fake App (hardcoded ID)</button> -->
+  <div>
+    <v-card lg12>
+      <v-layout row wrap>
+        <v-flex lg9>
+          <h1 id="appPortal">Application Portal</h1>
+        </v-flex>
+        <v-flex lg3 id="appFilters">
+          <v-select @change="filterApps" :items="sortBy" label="Sort By"></v-select>
+        </v-flex>
+      </v-layout>
 
-    <v-card>
-      <h1 id="applicationPortal">Application Portal</h1>
       <v-container fluid grid-list-md>
         <v-layout row wrap>
-          <v-flex xs12 sm6 md4 lg3 v-for="(app, index) in applications" :key="index">
-            <v-card hover>
-              <v-icon
-                v-if="app.showInfo"
-                large
-                color="orange"
-                style="float: right"
-                @click="showInfo = true"
-              >info</v-icon>
-              <!-- @click="launchLoading = true; launch(app.Id)" -->
+          <v-flex xs12 md6 lg6 v-for="(app, index) in applications" :key="index">
+            <!-- The card that shows up if the app is under maintenance -->
+            <v-card v-if="app.UnderMaintenance" class="transparent">
               <v-card-title primary-title>
-                <img src="https://www.freeiconspng.com/uploads/no-image-icon-15.png">
-                <div id="content">
+                <!-- If there is no logo, then a default image will be shown -->
+                <img v-if="app.LogoUrl === null" src="@/assets/no-image-icon.png">
+                <img v-else :src="app.LogoUrl">
+
+                <div class="content">
+                  <!-- Launching to an app can be done by clicking the app title -->
                   <h3 class="headline mb-0">
-                    <strong>{{ app.Title }}</strong>
+                    <strong class="truncate">
+                      {{ app.Title }}
+                      <v-tooltip right>
+                        <template v-slot:activator="{ on }">
+                          <v-icon color="orange" large right v-on="on">warning</v-icon>
+                        </template>
+                        <span>Under Maintenance</span>
+                      </v-tooltip>
+                    </strong>
                   </h3>
                 </div>
+
                 <read-more
+                  v-if="app.Description === null"
                   more-str="read more"
-                  :text="msg"
-                  link="#"
+                  :text="defaultDescription"
                   less-str="read less"
-                  :max-chars="100"
+                  :max-chars="175"
+                ></read-more>
+                <!-- Allows expansion or shrinkage of app description -->
+                <read-more
+                  v-else
+                  more-str="read more"
+                  :text="app.Description"
+                  less-str="read less"
+                  :max-chars="175"
                 ></read-more>
               </v-card-title>
             </v-card>
+
+            <!-- The card that shows up if the app is not under maintenance -->
+            <v-card v-else hover>
+              <v-card-title primary-title>
+                <!-- If there is no logo, then a default image will be shown -->
+                <img
+                  v-if="app.LogoUrl === null"
+                  src="@/assets/no-image-icon.png"
+                  @click="launchLoading = true; launch(app.Id)"
+                >
+                <img v-else :src="app.LogoUrl" @click="launchLoading = true; launch(app.Id)">
+                <div id="content" v-if="app.UnderMaintenance">
+                  <!-- Launching to an app can be done by clicking the app title -->
+                  <h3 class="headline mb-0" row wrap>
+                    <strong class="truncate">
+                      {{ app.Title }}
+                      <br>
+                    </strong>
+                  </h3>
+
+                  <p>{{app.UnderMaintenance}}</p>
+                </div>
+                <div class="content" v-else>
+                  <!-- Launching to an app can be done by clicking the app title -->
+                  <h3
+                    id="launchable"
+                    class="headline mb-0"
+                    @click="launchLoading = true; launch(app.Id)"
+                  >
+                    <strong>{{ app.Title }}</strong>
+                  </h3>
+                </div>
+
+                <read-more
+                  v-if="app.Description === null"
+                  more-str="read more"
+                  :text="defaultDescription"
+                  less-str="read less"
+                  :max-chars="175"
+                ></read-more>
+                <!-- Allows expansion or shrinkage of app description -->
+                <read-more
+                  v-else
+                  more-str="read more"
+                  :text="app.Description"
+                  less-str="read less"
+                  :max-chars="175"
+                ></read-more>
+              </v-card-title>
+            </v-card>
+            <!-- Loads only if app is in progress of launching -->
             <div v-if="launchLoading">
               <Loading :dialog="launchLoading"/>
-            </div>
-            <div v-if="showInfo">
-              <AppInfo :dialog="showInfo" :appDetails="app" @exitAppInfo="exitAppInfo"/>
             </div>
           </v-flex>
         </v-layout>
@@ -51,7 +118,6 @@
 <script>
 import Vue from "vue";
 import Loading from "@/components/Dialogs/Loading.vue";
-import AppInfo from "@/components/Dialogs/AppInfo.vue";
 import { signLaunch, submitLaunch } from "@/services/request";
 import { apiURL } from "@/const.js";
 import axios from "axios";
@@ -60,27 +126,31 @@ import ReadMore from "vue-read-more";
 Vue.use(ReadMore);
 
 export default {
-  components: { Loading, AppInfo },
+  components: { Loading },
   data() {
     return {
       applications: [],
-      showInfo: false,
+      sortBy: [
+        "Alphabetical (Ascending)",
+        "Alphabetical (Descending)",
+        "Number of clicks",
+        "Number of logins"
+      ],
+      defaultDescription:
+        "No Description. Sirloin short loin tenderloin tri-tip jowl chicken shank ribeye landjaeger, pancetta pork chop. Cupim filet mignon tail porchetta, biltong leberkas turkey flank pork chop frankfurter kevin short loin tenderloin tri-tip shankle. Porchetta boudin shoulder sausage, beef ribs pancetta burgdoggen prosciutto tongue. Sausage kevin strip steak, pork belly pig filet mignon chuck shankle andouille tri-tip ham cow. Pork loin t-bone doner, kevin jowl cupim sausage meatloaf.",
       launchLoading: false,
-      error: "",
-      msg:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent pharetra, ipsum sit amet aliquam rhoncus, felis tellus tempus mauris, eget interdum turpis enim vel velit. Nulla facilisi. Nulla hendrerit interdum est vel lacinia. Vivamus accumsan odio ultricies, porttitor magna non, ultrices odio. Cras consequat ipsum consequat, pharetra felis non, imperdiet sem. Vivamus vehicula pulvinar velit, et lobortis felis. In id turpis urna. Mauris dictum laoreet enim, nec sollicitudin magna. Maecenas magna quam, elementum sed volutpat at, sollicitudin in ipsum. Etiam pellentesque sem ligula, a faucibus nisl venenatis eu. Fusce rutrum, diam quis sagittis faucibus, diam orci porta diam, a fringilla odio sapien quis elit. Suspendisse semper vulputate mollis."
+      maintenance: false,
+      error: ""
     };
   },
   watch: {
+    // Loading animation will need to be modified to finish when the app finishes launching
     launchLoading(val) {
       if (!val) return;
       setTimeout(() => (this.launchLoading = false), 3000);
     }
   },
   methods: {
-    exitAppInfo(hideInfo) {
-      this.showInfo = hideInfo;
-    },
     launch(appId) {
       this.error = "";
 
@@ -119,18 +189,28 @@ export default {
               break;
           }
         });
+    },
+    filterApps: function(value) {
+      if (value === this.sortBy[0]) this.sortByAscending();
+      else if (value === this.sortBy[1]) this.sortByDescending();
+      else if (value === this.sortBy[2]) alert("Coming Soon!");
+      else alert("Coming Soon!");
+    },
+    async sortByAscending() {
+      await axios
+        .get(`${apiURL}/applications/ascending`)
+        .then(response => (this.applications = response.data));
+    },
+    async sortByDescending() {
+      await axios
+        .get(`${apiURL}/applications/descending`)
+        .then(response => (this.applications = response.data));
     }
   },
   async mounted() {
     await axios
       .get(`${apiURL}/applications`)
       .then(response => (this.applications = response.data));
-
-    // Add attribute for displaying info icon
-    // Add attribute for editing app description
-    for (var i = 0; i < this.applications.length; i++) {
-      this.$set(this.applications[i], "editDescription", false);
-    }
   }
 };
 </script>
@@ -140,18 +220,38 @@ export default {
   margin: 1em;
 }
 
-#applicationPortal {
-  padding: 1em;
+#appPortal {
+  padding: 1em 1em 0 1em;
   font-size: 38px;
   text-decoration: underline;
 }
 
-#content {
+.content {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#appFilters {
+  padding: 2em 3em 0 2em;
+}
+
+#maintenance {
   margin-left: 1em;
 }
 
-img {
-  width: 55px;
-  height: 55px;
+#launchable:hover {
+  text-decoration: underline;
+}
+
+.transparent {
+  background-color: white !important;
+  opacity: 0.65;
+  border-color: transparent !important;
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
