@@ -28,6 +28,36 @@ namespace KFC_WebAPI.Controllers
         }
 
         /// <summary>
+        /// Get all sorted individual applications registered with the SSO
+        /// </summary>
+        /// <returns>Ok Status Code with the list of all applications registered with the SSO</returns>
+        [HttpGet]
+        [Route("api/applications/ascending")]
+        public IHttpActionResult SortAllApplicationsAscending()
+        {
+            using (var _db = new DatabaseContext())
+            {
+                var applications = ApplicationService.SortAllApplicationsAlphaAscending(_db);
+                return Content((HttpStatusCode)200, applications);
+            }
+        }
+
+        /// <summary>
+        /// Get all sorted individual applications registered with the SSO
+        /// </summary>
+        /// <returns>Ok Status Code with the list of all applications registered with the SSO</returns>
+        [HttpGet]
+        [Route("api/applications/descending")]
+        public IHttpActionResult SortAllApplicationsDescending()
+        {
+            using (var _db = new DatabaseContext())
+            {
+                var applications = ApplicationService.SortAllApplicationsAlphaDescending(_db);
+                return Content((HttpStatusCode)200, applications);
+            }
+        }
+
+        /// <summary>
         /// Register application into portal
         /// </summary>
         /// <param name="request"></param>

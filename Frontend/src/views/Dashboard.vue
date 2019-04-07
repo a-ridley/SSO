@@ -1,12 +1,12 @@
 <template>
-  <div id="portal">
+  <div>
     <v-card lg12>
       <v-layout row wrap>
         <v-flex lg9>
           <h1 id="appPortal">Application Portal</h1>
         </v-flex>
-        <v-flex id="appFilters" lg3>
-          <v-select :items="items" label="Filters" outline></v-select>
+        <v-flex lg3 id="appFilters">
+          <v-select @change="filterApps" :items="sortBy" label="Sort By"></v-select>
         </v-flex>
       </v-layout>
 
@@ -23,7 +23,7 @@
                 <div class="content">
                   <!-- Launching to an app can be done by clicking the app title -->
                   <h3 class="headline mb-0">
-                    <strong>
+                    <strong class="truncate">
                       {{ app.Title }}
                       <v-tooltip right>
                         <template v-slot:activator="{ on }">
@@ -40,7 +40,7 @@
                   more-str="read more"
                   :text="defaultDescription"
                   less-str="read less"
-                  :max-chars="450"
+                  :max-chars="175"
                 ></read-more>
                 <!-- Allows expansion or shrinkage of app description -->
                 <read-more
@@ -48,7 +48,7 @@
                   more-str="read more"
                   :text="app.Description"
                   less-str="read less"
-                  :max-chars="450"
+                  :max-chars="175"
                 ></read-more>
               </v-card-title>
             </v-card>
@@ -65,8 +65,8 @@
                 <img v-else :src="app.LogoUrl" @click="launchLoading = true; launch(app.Id)">
                 <div id="content" v-if="app.UnderMaintenance">
                   <!-- Launching to an app can be done by clicking the app title -->
-                  <h3 class="headline mb-0">
-                    <strong>
+                  <h3 class="headline mb-0" row wrap>
+                    <strong class="truncate">
                       {{ app.Title }}
                       <br>
                     </strong>
@@ -90,7 +90,7 @@
                   more-str="read more"
                   :text="defaultDescription"
                   less-str="read less"
-                  :max-chars="450"
+                  :max-chars="175"
                 ></read-more>
                 <!-- Allows expansion or shrinkage of app description -->
                 <read-more
@@ -98,7 +98,7 @@
                   more-str="read more"
                   :text="app.Description"
                   less-str="read less"
-                  :max-chars="450"
+                  :max-chars="175"
                 ></read-more>
               </v-card-title>
             </v-card>
@@ -130,9 +130,14 @@ export default {
   data() {
     return {
       applications: [],
-      items: ["Alphabetical", "Number of clicks", "Number of logins"],
+      sortBy: [
+        "Alphabetical (Ascending)",
+        "Alphabetical (Descending)",
+        "Number of clicks",
+        "Number of logins"
+      ],
       defaultDescription:
-        "No Description...Sirloin short loin tenderloin tri-tip jowl chicken shank ribeye landjaeger, pancetta pork chop. Cupim filet mignon tail porchetta, biltong leberkas turkey flank pork chop frankfurter kevin short loin tenderloin tri-tip shankle. Porchetta boudin shoulder sausage, beef ribs pancetta burgdoggen prosciutto tongue. Sausage kevin strip steak, pork belly pig filet mignon chuck shankle andouille tri-tip ham cow. Pork loin t-bone doner, kevin jowl cupim sausage meatloaf.",
+        "No Description. Sirloin short loin tenderloin tri-tip jowl chicken shank ribeye landjaeger, pancetta pork chop. Cupim filet mignon tail porchetta, biltong leberkas turkey flank pork chop frankfurter kevin short loin tenderloin tri-tip shankle. Porchetta boudin shoulder sausage, beef ribs pancetta burgdoggen prosciutto tongue. Sausage kevin strip steak, pork belly pig filet mignon chuck shankle andouille tri-tip ham cow. Pork loin t-bone doner, kevin jowl cupim sausage meatloaf.",
       launchLoading: false,
       maintenance: false,
       error: ""
@@ -184,6 +189,22 @@ export default {
               break;
           }
         });
+    },
+    filterApps: function(value) {
+      if (value === this.sortBy[0]) this.sortByAscending();
+      else if (value === this.sortBy[1]) this.sortByDescending();
+      else if (value === this.sortBy[2]) alert("Coming Soon!");
+      else alert("Coming Soon!");
+    },
+    async sortByAscending() {
+      await axios
+        .get(`${apiURL}/applications/ascending`)
+        .then(response => (this.applications = response.data));
+    },
+    async sortByDescending() {
+      await axios
+        .get(`${apiURL}/applications/descending`)
+        .then(response => (this.applications = response.data));
     }
   },
   async mounted() {
@@ -211,7 +232,7 @@ export default {
 }
 
 #appFilters {
-  padding: 2em 2em 0 2em;
+  padding: 2em 3em 0 2em;
 }
 
 #maintenance {
@@ -226,5 +247,11 @@ export default {
   background-color: white !important;
   opacity: 0.65;
   border-color: transparent !important;
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

@@ -66,6 +66,26 @@ namespace ServiceLayer.Services
         }
 
         /// <summary>
+        /// Call the application repository to return all sorted applications registered with the SSO
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All sorted applications registered with the SSO</returns>
+        public static IEnumerable SortAllApplicationsAlphaAscending(DatabaseContext _db)
+        {
+            return ApplicationRepository.SortAllApplicationsAlphaAscending(_db);
+        }
+
+        /// <summary>
+        /// Call the application repository to return all sorted applications registered with the SSO
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All sorted applications registered with the SSO</returns>
+        public static IEnumerable SortAllApplicationsAlphaDescending(DatabaseContext _db)
+        {
+            return ApplicationRepository.SortAllApplicationsAlphaDescending(_db);
+        }
+
+        /// <summary>
         /// Call the application repository to update an application record
         /// </summary>
         /// <param name="_db">database</param>
