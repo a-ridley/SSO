@@ -4,9 +4,10 @@
       <span>KFC SSO</span>
     </v-toolbar-title>
     <v-spacer></v-spacer>
-
-    <v-btn v-if="!isLoggedIn.isLogin" to="/home" flat>Home</v-btn>
-    <v-btn v-else to="/dashboard" flat>Home</v-btn>
+    <div>
+      <v-btn v-if="!isLoggedIn.isLogin" to="/home" flat>Home</v-btn>
+      <v-btn v-else to="/dashboard" flat>Home</v-btn>
+    </div>
     <v-btn to="/register" flat v-if="!isLoggedIn.isLogin">Register</v-btn>
     <v-btn to="/about" flat>About</v-btn>
     <v-menu offset-y id="appDropDown">
@@ -24,24 +25,26 @@
         </v-list-tile>
       </v-list>
     </v-menu>
-    <v-btn to="login" flat v-if="!isLoggedIn.isLogin">Login</v-btn>
-    <v-menu v-else offset-y
-            content-class="dropdown-menu"
-            transition="slide-y-transition" v-if="isLoggedIn.isLogin">
-      <v-btn slot="activator" fab dark color="teal">
-        <v-avatar dark>
-          <span class="white--text headline">{{isLoggedIn.email[0]}}</span>
-        </v-avatar>
-      </v-btn>
-      <v-list dense>
-        <v-list-tile v-for="item in this.UserMenuItems"
-                      :key="item.title"
-                      route :to="item.route"
-                      @click="item.links">
-          <v-list-tile-title>{{item.title}}</v-list-tile-title>
-        </v-list-tile>
-      </v-list>
-    </v-menu>
+    <div>
+      <v-btn to="login" flat v-if="!isLoggedIn.isLogin">Login</v-btn>
+      <v-menu v-else offset-y
+              content-class="dropdown-menu"
+              transition="slide-y-transition" v-if="isLoggedIn.isLogin">
+        <v-btn slot="activator" fab dark color="teal">
+          <v-avatar dark>
+            <span class="white--text headline">{{isLoggedIn.email[0]}}</span>
+          </v-avatar>
+        </v-btn>
+        <v-list dense>
+          <v-list-tile v-for="item in this.UserMenuItems"
+                        :key="item.title"
+                        route :to="item.route"
+                        @click="">
+            <v-list-tile-title>{{item.title}}</v-list-tile-title>
+          </v-list-tile>
+        </v-list>
+      </v-menu>
+    </div>
   </v-toolbar>
 </template>
 
@@ -60,7 +63,7 @@
         links: [],
         UserMenuItems: [
           { title: 'Update Password', route: '/updatepassword' },
-          { title: 'Logout', route:'/Logout',links:'Logout' }       
+          { title: 'Logout', route:'/Logout' }       
         ],
         isLoggedIn: store.state
       }
