@@ -4,6 +4,7 @@ using DataAccessLayer.Models;
 using System.Linq;
 using System.Data.Entity;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace DataAccessLayer.Repositories
 {
@@ -106,18 +107,11 @@ namespace DataAccessLayer.Repositories
         /// </summary>
         /// <param name="_db">database</param>
         /// <returns>All application registered with the SSO</returns>
-        public static IEnumerable GetAllApplications(DatabaseContext _db)
+        public static List<Application> GetAllApplications(DatabaseContext _db)
         {
             try
             {
-                return _db.Applications.Select(app => new
-                {
-                    Id = app.Id,
-                    LaunchUrl = app.LaunchUrl,
-                    Title = app.Title,
-                    LogoUrl = app.LogoUrl,
-                    Description = app.Description
-                }).ToList();
+                return _db.Applications.ToList();
             }
             catch (Exception)
             {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using DataAccessLayer.Repositories;
@@ -60,7 +61,7 @@ namespace ServiceLayer.Services
         /// </summary>
         /// <param name="_db">database</param>
         /// <returns>All applications registered with the SSO</returns>
-        public static IEnumerable GetAllApplications(DatabaseContext _db)
+        public static List<Application> GetAllApplications(DatabaseContext _db)
         {
             return ApplicationRepository.GetAllApplications(_db);
         }

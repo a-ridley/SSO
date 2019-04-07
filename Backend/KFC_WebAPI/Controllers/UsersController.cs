@@ -5,6 +5,7 @@ using System;
 using System.Data.Entity.Validation;
 using System.Net;
 using System.Web.Http;
+using System.Threading.Tasks;
 using ManagerLayer;
 using ServiceLayer.Exceptions;
 using System.ComponentModel.DataAnnotations;
@@ -46,7 +47,7 @@ namespace KFC_WebAPI.Controllers
     public class UserDeleteRequest
     {
         [Required]
-        public string token { get; set; }
+        public string id { get; set; }
     }
 
     public class UsersController : ApiController
@@ -218,22 +219,20 @@ namespace KFC_WebAPI.Controllers
             }
         }
 
+
         [HttpPost]
-        [Route("api/users/delete")]
-        public IHttpActionResult Delete([FromBody] UserDeleteRequest request)
+        [Route("api/users/deleteuser")]
+        public async Task<IHttpActionResult> DeleteUser([FromBody] UserDeleteRequest request)
         {
             using (var _db = new DatabaseContext())
             {
-                IAuthorizationManager authorizationManager = new AuthorizationManager();
-                Session session = authorizationManager.ValidateAndUpdateSession(_db, request.token);
-                if (session == null)
-                {
-                    return Unauthorized();
-                }
                 UserManager um = new UserManager();
-                um.DeleteUser(_db, session.UserId);
-                return Ok();
-                // need to handle errors for invalid session and server errors
+                User user = await um.DeleteUser(_db, Guid.Parse(request.id));
+                if(user != null)
+                {
+                    return Ok();
+                }
+                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
             }
         }
     }

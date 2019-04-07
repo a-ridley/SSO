@@ -99,38 +99,26 @@ namespace ManagerLayer
             return _userService.GetUser(_db, userId);
         }
 
-        /// <summary>
-        ///     Delete user from SSO
-        ///     - in development
-        /// </summary>
-        public User DeleteUser(DatabaseContext _db, Guid userId)
+
+        public async Task<User> DeleteUser(DatabaseContext _db, Guid userId)
         {
             UserDeleteService uds = new UserDeleteService();
             IUserService _userService = new UserService();
-            User user = _userService.GetUser(_db, userId);
             var applications = ApplicationService.GetAllApplications(_db);
-            List<Application> appList = applications.Cast<Application>().ToList();
-            try
+            //var appList = applications.OfType<Application>().ToList();
+            var responseList = new List<HttpResponseMessage>();
+            foreach(Application app in applications)
             {
-                Parallel.ForEach(appList, app =>
-                {
-                    Task<HttpResponseMessage> HttpResponse = uds.DeleteFromApp(app, user.Id, user.Email);
-                    if (!HttpResponse.Result.IsSuccessStatusCode || HttpResponse.Result.StatusCode != System.Net.HttpStatusCode.NotFound)
-                    {
-                        //means individual application failed to perform user delete if not a 404 not found
-
-                        //re run delete service
-                    }
-
-                });
-
+                var request = await uds.SendDeleteRequest(app.UserDeletionUrl, app.SharedSecretKey,userId.ToString());
+                responseList.Add(request);
             }
-            catch
+            if (responseList.All(response => response.IsSuccessStatusCode))
             {
-
-
+                User deletedUser = _userService.DeleteUser(_db, userId);
+                _db.SaveChanges();
+                return deletedUser;
             }
-            return _userService.DeleteUser(_db, userId);
+            return null;
         }
     }
 }
