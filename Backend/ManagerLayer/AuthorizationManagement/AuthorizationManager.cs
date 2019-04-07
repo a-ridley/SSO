@@ -2,6 +2,7 @@
 using DataAccessLayer.Models;
 using ServiceLayer.Services;
 using System;
+using System.Data.Entity.Infrastructure;
 using System.Security.Cryptography;
 
 namespace ManagerLayer
@@ -42,10 +43,29 @@ namespace ManagerLayer
 			{
 				return _sessionService.UpdateSession(_db, response);
 			}
-			else
+			else 
 			{
-				_sessionService.DeleteSession(_db, token);
-				return null;
+				try
+				{
+					_sessionService.DeleteSession(_db, token);
+					_db.SaveChanges();
+					return null;
+				}
+				catch (DbUpdateException ex)
+				{
+					if (ex.InnerException == null)
+					{
+						throw;
+					}
+					else
+					{
+						//Log?
+						var decodeErrors = ex.Entries;
+						return null;
+					}
+
+				}
+			
 			}
 		}
 

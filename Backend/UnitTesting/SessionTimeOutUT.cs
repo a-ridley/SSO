@@ -69,6 +69,7 @@ namespace UnitTesting
 			newUser5 = tu.CreateUserInDb();
 			ValidSession = tu.CreateSessionInDb(newUser5);
 			Session TestValid = _am.ValidateAndUpdateSession(_db, ValidSession.Token);
+			//Assert
 			Assert.AreEqual(TestValid.Token, ValidSession.Token);
 		}
 	}
