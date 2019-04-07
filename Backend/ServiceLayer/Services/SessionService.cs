@@ -1,6 +1,8 @@
 ﻿using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using DataAccessLayer.Repositories;
+using System;
+using System.Collections.Generic;
 
 namespace ServiceLayer.Services
 {
@@ -21,6 +23,11 @@ namespace ServiceLayer.Services
         public Session GetSession(DatabaseContext _db, string token)
         {
             return _SessionRepo.GetSession(_db, token);
+        }
+
+        public List<Session> GetSessions(DatabaseContext _db, Guid userId)
+        {
+            return _SessionRepo.GetSessions(_db, userId);
         }
 
         public Session UpdateSession(DatabaseContext _db, Session session)

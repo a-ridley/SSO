@@ -37,7 +37,7 @@ namespace ServiceLayer.Services
 
     public class UserDeleteService
     {
-        public async Task<HttpResponseMessage> SendDeleteRequest(string deleteurl, string appkey, string ssoId)
+        public async Task<HttpResponseMessage> SendDeleteRequest(Application app, string ssoId)
         {
             HttpClient client = new HttpClient();
             UserDeletePayload deletePayload = new UserDeletePayload
@@ -46,14 +46,14 @@ namespace ServiceLayer.Services
                 SsoId = ssoId,
                 Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
             };
-            HMACSHA256 hmacsha1 = new HMACSHA256(Encoding.ASCII.GetBytes(appkey));
+            HMACSHA256 hmacsha1 = new HMACSHA256(Encoding.ASCII.GetBytes(app.SharedSecretKey));
             byte[] deletePayloadBuffer = Encoding.ASCII.GetBytes(deletePayload.PreSignatureString());
             byte[] signatureBytes = hmacsha1.ComputeHash(deletePayloadBuffer);
             deletePayload.Signature = Convert.ToBase64String(signatureBytes);
 
             var stringPayload = JsonConvert.SerializeObject(deletePayload);
             var jsonPayload = new StringContent(stringPayload, Encoding.UTF8, "application/json");
-            var request = await client.PostAsync(deleteurl, jsonPayload);
+            var request = await client.PostAsync(app.UserDeletionUrl, jsonPayload);
             return request;
         }
 

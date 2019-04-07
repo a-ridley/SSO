@@ -47,7 +47,7 @@ namespace KFC_WebAPI.Controllers
     public class UserDeleteRequest
     {
         [Required]
-        public string id { get; set; }
+        public string token { get; set; }
     }
 
     public class UsersController : ApiController
@@ -226,8 +226,14 @@ namespace KFC_WebAPI.Controllers
         {
             using (var _db = new DatabaseContext())
             {
+                IAuthorizationManager authorizationManager = new AuthorizationManager();
+                Session session = authorizationManager.ValidateAndUpdateSession(_db, request.token);
+                if (session == null)
+                {
+                    return Unauthorized();
+                }
                 UserManager um = new UserManager();
-                User user = await um.DeleteUser(_db, Guid.Parse(request.id));
+                User user = await um.DeleteUser(_db, session.UserId);
                 if(user != null)
                 {
                     return Ok();

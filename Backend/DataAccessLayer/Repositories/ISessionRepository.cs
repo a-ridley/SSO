@@ -1,5 +1,7 @@
 ﻿using DataAccessLayer.Database;
 using DataAccessLayer.Models;
+using System;
+using System.Collections.Generic;
 
 namespace DataAccessLayer.Repositories
 {
@@ -9,5 +11,6 @@ namespace DataAccessLayer.Repositories
         Session CreateSession(DatabaseContext _db, Session session);
         Session UpdateSession(DatabaseContext _db, Session session);
         Session DeleteSession(DatabaseContext _db, string token);
+        List<Session> GetSessions(DatabaseContext _db, Guid userId);
     }
 }
