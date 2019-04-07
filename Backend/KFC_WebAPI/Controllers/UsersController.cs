@@ -222,7 +222,7 @@ namespace KFC_WebAPI.Controllers
 
         [HttpPost]
         [Route("api/users/deleteuser")]
-        public async Task<IHttpActionResult> DeleteUser([FromBody] UserDeleteRequest request)
+        public async Task<IHttpActionResult> Delete([FromBody] UserDeleteRequest request)
         {
             using (var _db = new DatabaseContext())
             {
