@@ -14,7 +14,9 @@ const register = registrationData => {
     });
 }
 
-const signLaunch = appId => {
+const signLaunch = appId =>
+{
+  token = localStorage.getItem('token');
   return axios.get(`${apiURL}/launch`, {
     params: {
       token,
