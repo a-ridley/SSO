@@ -166,6 +166,11 @@ export default {
                     "An unexpected server error occurred. Please try again momentarily.";
                   break;
               }
+            })
+            .finally( () => {
+              this.launchLoading = false
+              this.error =
+                "Communication with the application can not be established."
             });
         })
         .catch(err => {
@@ -181,6 +186,11 @@ export default {
                 "An unexpected server error occurred. Please try again momentarily.";
               break;
           }
+        })
+        .finally( () => {
+          this.launchLoading = false
+          this.error =
+            "An unexpected server error occurred. Please try again momentarily."
         });
     },
     filterApps: function(value) {
