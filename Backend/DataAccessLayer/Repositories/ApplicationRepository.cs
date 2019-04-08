@@ -117,7 +117,58 @@ namespace DataAccessLayer.Repositories
                     LaunchUrl = app.LaunchUrl,
                     Title = app.Title,
                     LogoUrl = app.LogoUrl,
-                    Description = app.Description
+                    Description = app.Description,
+                    UnderMaintenance = app.UnderMaintenance
+                }).ToList();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get all applications sorted in alphabetical ascending order
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All sorted application registered with the SSO</returns>
+        public static IEnumerable SortAllApplicationsAlphaAscending(DatabaseContext _db)
+        {
+            try
+            {
+                return _db.Applications.OrderBy(app => app.Title).Select(app => new
+                {
+                    Id = app.Id,
+                    LaunchUrl = app.LaunchUrl,
+                    Title = app.Title,
+                    LogoUrl = app.LogoUrl,
+                    Description = app.Description,
+                    UnderMaintenance = app.UnderMaintenance
+                }).ToList();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get all applications sorted in alphabetical ascending order
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All sorted application registered with the SSO</returns>
+        public static IEnumerable SortAllApplicationsAlphaDescending(DatabaseContext _db)
+        {
+            try
+            {
+                return _db.Applications.OrderByDescending(app => app.Title).Select(app => new
+                {
+                    Id = app.Id,
+                    LaunchUrl = app.LaunchUrl,
+                    Title = app.Title,
+                    LogoUrl = app.LogoUrl,
+                    Description = app.Description,
+                    UnderMaintenance = app.UnderMaintenance
                 }).ToList();
             }
             catch (Exception)
