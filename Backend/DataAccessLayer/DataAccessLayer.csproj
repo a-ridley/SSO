@@ -84,6 +84,10 @@
     <Compile Include="Migrations\201904021012527_upate-passwordresets-modify-table.Designer.cs">
       <DependentUpon>201904021012527_upate-passwordresets-modify-table.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201904081702539_update-applications-add-click-count.cs" />
+    <Compile Include="Migrations\201904081702539_update-applications-add-click-count.Designer.cs">
+      <DependentUpon>201904081702539_update-applications-add-click-count.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApiKey.cs" />
     <Compile Include="Models\Application.cs" />
@@ -145,6 +149,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201904021012527_upate-passwordresets-modify-table.resx">
       <DependentUpon>201904021012527_upate-passwordresets-modify-table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904081702539_update-applications-add-click-count.resx">
+      <DependentUpon>201904081702539_update-applications-add-click-count.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />
