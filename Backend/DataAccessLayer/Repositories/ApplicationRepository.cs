@@ -103,7 +103,7 @@ namespace DataAccessLayer.Repositories
         }
 
         /// <summary>
-        /// Get all applications
+        /// Get all applications as List<Application>
         /// </summary>
         /// <param name="_db">database</param>
         /// <returns>All application registered with the SSO</returns>
@@ -170,6 +170,23 @@ namespace DataAccessLayer.Repositories
                     Description = app.Description,
                     UnderMaintenance = app.UnderMaintenance
                 }).ToList();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get all applications as List<Application>
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All application registered with the SSO</returns>
+        public static List<Application> GetAllApplicationsList(DatabaseContext _db)
+        {
+            try
+            {
+                return _db.Applications.ToList();
             }
             catch (Exception)
             {

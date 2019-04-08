@@ -63,7 +63,8 @@
         links: [],
         UserMenuItems: [
           { title: 'Update Password', route: '/updatepassword' },
-          { title: 'Logout', route:'/Logout' }       
+          { title: 'Logout', route:'/Logout' },
+          { title: 'Delete Account', route: '/deleteaccount'  }       
         ],
         isLoggedIn: store.state
       }
