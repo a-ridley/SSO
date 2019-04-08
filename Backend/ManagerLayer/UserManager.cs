@@ -104,6 +104,7 @@ namespace ManagerLayer
         {
             UserDeleteService uds = new UserDeleteService();
             IUserService _userService = new UserService();
+            User deletingUser = _userService.GetUser(_db, userId);
             ISessionService _sessionService = new SessionService();
             var sessions = _sessionService.GetSessions(_db, userId);
             var applications = ApplicationService.GetAllApplicationsList(_db);
@@ -111,7 +112,7 @@ namespace ManagerLayer
             var responseList = new List<HttpResponseMessage>();
             foreach(Application app in applications)
             {
-                var request = await uds.SendDeleteRequest(app,userId.ToString());
+                var request = await uds.SendDeleteRequest(app,userId, deletingUser.Email );
                 responseList.Add(request);
             }
             if (responseList.All(response => response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound))

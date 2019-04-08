@@ -16,20 +16,20 @@ namespace ServiceLayer.Services
     public class UserDeletePayload
     {
         // Included in signature
-        public string SsoId { get; set; }
-        public string Email { get; set; }
-        public long Timestamp { get; set; }
+        public Guid ssoUserId { get; set; }
+        public string email { get; set; }
+        public long timestamp { get; set; }
 
         // Excluded from signature
-        public string Signature { get; set; }
+        public string signature { get; set; }
 
         // Generate string to be signed
         public string PreSignatureString()
         {
             string acc = "";
-            acc += "ssoUserId=" + SsoId + ";";
-            acc += "email=" + Email + ";";
-            acc += "timestamp=" + Timestamp + ";";
+            acc += "ssoUserId=" + ssoUserId + ";";
+            acc += "email=" + email + ";";
+            acc += "timestamp=" + timestamp + ";";
             return acc;
         }
     }
@@ -37,19 +37,19 @@ namespace ServiceLayer.Services
 
     public class UserDeleteService
     {
-        public async Task<HttpResponseMessage> SendDeleteRequest(Application app, string ssoId)
+        public async Task<HttpResponseMessage> SendDeleteRequest(Application app, Guid ssoId, string email)
         {
             HttpClient client = new HttpClient();
             UserDeletePayload deletePayload = new UserDeletePayload
             {
-                Email = "email@email.com",
-                SsoId = ssoId,
-                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+                email = email,
+                ssoUserId = ssoId,
+                timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
             };
             HMACSHA256 hmacsha1 = new HMACSHA256(Encoding.ASCII.GetBytes(app.SharedSecretKey));
             byte[] deletePayloadBuffer = Encoding.ASCII.GetBytes(deletePayload.PreSignatureString());
             byte[] signatureBytes = hmacsha1.ComputeHash(deletePayloadBuffer);
-            deletePayload.Signature = Convert.ToBase64String(signatureBytes);
+            deletePayload.signature = Convert.ToBase64String(signatureBytes);
 
             var stringPayload = JsonConvert.SerializeObject(deletePayload);
             var jsonPayload = new StringContent(stringPayload, Encoding.UTF8, "application/json");
@@ -57,20 +57,5 @@ namespace ServiceLayer.Services
             return request;
         }
 
-        public async Task<HttpResponseMessage> SendDeleteTest(string ssoId)
-        {
-            HttpClient client = new HttpClient();
-            UserDeletePayload payload = new UserDeletePayload
-            {
-                Email = "email@email.com",
-                SsoId = ssoId,
-                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
-            };
-
-            var stringPayload = JsonConvert.SerializeObject(payload);
-            var jsonPayload = new StringContent(stringPayload, Encoding.UTF8, "application/json");
-            var request = await client.PostAsync("http://localhost:52324/api/sso/deleteuser", jsonPayload);
-            return request;
-        }
     }
 }
