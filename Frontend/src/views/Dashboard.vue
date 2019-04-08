@@ -168,9 +168,11 @@ export default {
               }
             })
             .finally( () => {
-              this.launchLoading = false
-              this.error =
-                "Communication with the application can not be established."
+              if (this.launchLoading !== false){
+                this.launchLoading = false;
+                this.error =
+                  "Communication with the application can not be established.";
+              }
             });
         })
         .catch(err => {
