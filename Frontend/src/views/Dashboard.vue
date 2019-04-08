@@ -143,26 +143,19 @@ export default {
       error: ""
     };
   },
-  watch: {
-    // Loading animation will need to be modified to finish when the app finishes launching
-    launchLoading(val) {
-      if (!val) return;
-      setTimeout(() => (this.launchLoading = false), 3000);
-    }
-  },
   methods: {
     launch(appId) {
       this.error = "";
-
       signLaunch(appId)
         .then(launchData => {
           submitLaunch(launchData)
             .then(launchResponse => {
+              this.launchLoading = false;
               window.location.href = launchResponse.redirectURL;
             })
             .catch(err => {
               let code = err.response.status;
-
+              this.launchLoading = false;
               switch (code) {
                 case 500:
                   this.error =
@@ -173,11 +166,18 @@ export default {
                     "An unexpected server error occurred. Please try again momentarily.";
                   break;
               }
+            })
+            .finally( () => {
+              if (this.launchLoading !== false){
+                this.launchLoading = false;
+                this.error =
+                  "Communication with the application can not be established.";
+              }
             });
         })
         .catch(err => {
           let code = err.response.status;
-
+          this.launchLoading = false;
           switch (code) {
             case 500:
               this.error =
