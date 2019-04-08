@@ -10,12 +10,12 @@
     </v-alert>
 
     <v-alert
-      :value="errorMessage"
+      :value="error"
       dismissible
       type="error"
       transition="scale-transition"
     >
-    {{errorMessage}}
+    {{error}}
     </v-alert>
 
     </div>
@@ -80,8 +80,12 @@ export default {
             'Access-Control-Allow-Credentials': true
           }
         })
-        .then(response => {this.message = response.data}, store.state.isLogin = false ,setTimeout(() => this.redirectToHome(), 1500))
-        .catch(e => { this.error = e.response.data })
+        .then(response => {this.message = response.data;
+          if (response.ok){
+            store.state.isLogin = false ,setTimeout(() => this.redirectToHome(), 1500)
+          }
+        })
+        .catch(e => { this.error = "Failed to delete user, try again" })
         .finally(() => { this.loading = false; })
     }
   }
