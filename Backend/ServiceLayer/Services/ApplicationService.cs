@@ -87,6 +87,16 @@ namespace ServiceLayer.Services
         }
 
         /// <summary>
+        /// Call the application repository to return all sorted applications by number of clicks
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All sorted applications registered with the SSO</returns>
+        public static IEnumerable SortAllApplicationsNumOfClicks(DatabaseContext _db)
+        {
+            return ApplicationRepository.SortAllApplicationsNumOfClicks(_db);
+        }
+
+        /// <summary>
         /// Call the application repository to return all sorted applications registered with the SSO
         /// </summary>
         /// <param name="_db">database</param>
@@ -106,5 +116,6 @@ namespace ServiceLayer.Services
         {
             return ApplicationRepository.UpdateApplication(_db, app);
         }
+
     }
 }

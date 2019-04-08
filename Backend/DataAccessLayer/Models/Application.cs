@@ -12,6 +12,7 @@ namespace DataAccessLayer.Models
         {
             Id = Guid.NewGuid();
             UnderMaintenance = false;
+            ClickCount = 0;
         }
 
         [Key]
@@ -39,6 +40,8 @@ namespace DataAccessLayer.Models
 
         [Required]
         public bool UnderMaintenance { get; set; }
+
+        public long ClickCount { get; set; }
     }
 
     
