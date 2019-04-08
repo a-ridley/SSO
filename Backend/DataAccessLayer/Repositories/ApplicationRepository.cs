@@ -116,9 +116,11 @@ namespace DataAccessLayer.Repositories
                     Id = app.Id,
                     LaunchUrl = app.LaunchUrl,
                     Title = app.Title,
+                    Email = app.Email,
                     LogoUrl = app.LogoUrl,
                     Description = app.Description,
-                    UnderMaintenance = app.UnderMaintenance
+                    UnderMaintenance = app.UnderMaintenance,
+                    ClickCount = app.ClickCount
                 }).ToList();
             }
             catch (Exception)
@@ -141,9 +143,11 @@ namespace DataAccessLayer.Repositories
                     Id = app.Id,
                     LaunchUrl = app.LaunchUrl,
                     Title = app.Title,
+                    Email = app.Email,
                     LogoUrl = app.LogoUrl,
                     Description = app.Description,
-                    UnderMaintenance = app.UnderMaintenance
+                    UnderMaintenance = app.UnderMaintenance,
+                    ClickCount = app.ClickCount
                 }).ToList();
             }
             catch (Exception)
@@ -166,9 +170,38 @@ namespace DataAccessLayer.Repositories
                     Id = app.Id,
                     LaunchUrl = app.LaunchUrl,
                     Title = app.Title,
+                    Email = app.Email,
                     LogoUrl = app.LogoUrl,
                     Description = app.Description,
-                    UnderMaintenance = app.UnderMaintenance
+                    UnderMaintenance = app.UnderMaintenance,
+                    ClickCount = app.ClickCount
+                }).ToList();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get all applications sorted by number of clicks
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All sorted application registered with the SSO</returns>
+        public static IEnumerable SortAllApplicationsNumOfClicks(DatabaseContext _db)
+        {
+            try
+            {
+                return _db.Applications.OrderByDescending(app => app.ClickCount).Select(app => new
+                {
+                    Id = app.Id,
+                    LaunchUrl = app.LaunchUrl,
+                    Title = app.Title,
+                    Email = app.Email,
+                    LogoUrl = app.LogoUrl,
+                    Description = app.Description,
+                    UnderMaintenance = app.UnderMaintenance,
+                    ClickCount = app.ClickCount
                 }).ToList();
             }
             catch (Exception)
