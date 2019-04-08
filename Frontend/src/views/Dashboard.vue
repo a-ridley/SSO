@@ -60,7 +60,7 @@
                 <img
                   v-if="app.LogoUrl === null"
                   src="@/assets/no-image-icon.png"
-                  @click="launchLoading = true; launch(app.Id)"
+                  @click="launchLoading = true; launch(app.Id, app)"
                 >
                 <img v-else :src="app.LogoUrl" @click="launchLoading = true; launch(app.Id)">
                 <div id="content" v-if="app.UnderMaintenance">
@@ -79,7 +79,7 @@
                   <h3
                     id="launchable"
                     class="headline mb-0"
-                    @click="launchLoading = true; launch(app.Id)"
+                    @click="launchLoading = true; launch(app.Id, app)"
                   >
                     <strong>{{ app.Title }}</strong>
                   </h3>
@@ -147,12 +147,14 @@ export default {
     // Loading animation will need to be modified to finish when the app finishes launching
     launchLoading(val) {
       if (!val) return;
-      setTimeout(() => (this.launchLoading = false), 3000);
+      setTimeout(() => (this.launchLoading = false), 5000);
     }
   },
   methods: {
-    launch(appId) {
+    launch(appId, app) {
       this.error = "";
+
+      this.updateClickCount(app);
 
       signLaunch(appId)
         .then(launchData => {
@@ -193,7 +195,7 @@ export default {
     filterApps: function(value) {
       if (value === this.sortBy[0]) this.sortByAscending();
       else if (value === this.sortBy[1]) this.sortByDescending();
-      else if (value === this.sortBy[2]) alert("Coming Soon!");
+      else if (value === this.sortBy[2]) this.sortByNumberOfClicks();
       else alert("Coming Soon!");
     },
     async sortByAscending() {
@@ -205,6 +207,26 @@ export default {
       await axios
         .get(`${apiURL}/applications/descending`)
         .then(response => (this.applications = response.data));
+    },
+    async sortByNumberOfClicks() {
+      await axios
+        .get(`${apiURL}/applications/clicks`)
+        .then(response => (this.applications = response.data));
+    },
+    async updateClickCount(app) {
+      app.ClickCount += 1;
+      await axios.put(`${apiURL}/applications/update`, {
+        Title: app.Title,
+        Email: app.Email,
+        Description: app.Description,
+        LogoUrl: app.LogoUrl,
+        UnderMaintenance: app.UnderMaintenance,
+        ClickCount: app.ClickCount,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        }
+      });
     }
   },
   async mounted() {
