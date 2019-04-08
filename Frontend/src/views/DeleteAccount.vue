@@ -58,6 +58,7 @@ export default {
   name: 'DeleteAccount',
   data(){
       return{
+          token: "",
           error: "",
           message: "",
           loading: false
@@ -80,10 +81,12 @@ export default {
             'Access-Control-Allow-Credentials': true
           }
         })
-        .then(response => {this.message = response.data;
-          if (response.ok){
-            store.state.isLogin = false ,setTimeout(() => this.redirectToHome(), 1500)
-          }
+        .then(response => {
+          this.message = response.data;
+          localStorage.removeItem('token'),
+          store.state.isLogin = false ,
+          setTimeout(() => this.redirectToHome(), 1000)
+          
         })
         .catch(e => { this.error = "Failed to delete user, try again" })
         .finally(() => { this.loading = false; })
