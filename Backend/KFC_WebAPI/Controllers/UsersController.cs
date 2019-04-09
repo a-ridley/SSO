@@ -8,37 +8,10 @@ using System.Web.Http;
 using ManagerLayer;
 using ServiceLayer.Exceptions;
 using System.ComponentModel.DataAnnotations;
+using KFC_WebAPI.RequestModels;
 
 namespace KFC_WebAPI.Controllers
 {
-    public class UserRegistrationRequest
-    {
-        [Required]
-        public string email { get; set; }
-        [Required]
-        public string password { get; set; }
-        [Required]
-        public DateTime dob { get; set; }
-        [Required]
-        public string city { get; set; }
-        [Required]
-        public string state { get; set; }
-        [Required]
-        public string country { get; set; }
-        [Required]
-        public string securityQ1 { get; set; }
-        [Required]
-        public string securityQ1Answer { get; set; }
-        [Required]
-        public string securityQ2 { get; set; }
-        [Required]
-        public string securityQ2Answer { get; set; }
-        [Required]
-        public string securityQ3 { get; set; }
-        [Required]
-        public string securityQ3Answer { get; set; }
-    }
-
     public class UsersController : ApiController
     {
         [HttpPost]
