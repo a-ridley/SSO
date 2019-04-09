@@ -216,7 +216,7 @@ export default {
     },
     async updateClickCount(app) {
       app.ClickCount += 1;
-      await axios.put(`${apiURL}/applications/update`, {
+      await axios.post(`${apiURL}/applications/update`, {
         Title: app.Title,
         Email: app.Email,
         Description: app.Description,
