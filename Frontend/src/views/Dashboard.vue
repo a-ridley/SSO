@@ -143,13 +143,6 @@ export default {
       error: ""
     };
   },
-  watch: {
-    // Loading animation will need to be modified to finish when the app finishes launching
-    launchLoading(val) {
-      if (!val) return;
-      setTimeout(() => (this.launchLoading = false), 5000);
-    }
-  },
   methods: {
     launch(appId, app) {
       this.error = "";
@@ -177,8 +170,8 @@ export default {
                   break;
               }
             })
-            .finally( () => {
-              if (this.launchLoading !== false){
+            .finally(() => {
+              if (this.launchLoading !== false) {
                 this.launchLoading = false;
                 this.error =
                   "Communication with the application can not be established.";
