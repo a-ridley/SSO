@@ -24,15 +24,15 @@ namespace KFC_WebAPI.Controllers
         {
             using (var _db = new DatabaseContext())
             {
-                IAuthorizationManager authorizationManager = new AuthorizationManager();
-                Session session = authorizationManager.ValidateAndUpdateSession(_db, request.token);
+                IAuthorizationManager authorizationManager = new AuthorizationManager(_db);
+                Session session = authorizationManager.ValidateAndUpdateSession(request.token);
                 if (session == null)
                 {
                     return Unauthorized();
                 }
 
-                ILaunchManager launchManager = new LaunchManager();
-                LaunchResponse launchResponse = launchManager.SignLaunch(_db, session, request.appId);
+                ILaunchManager launchManager = new LaunchManager(_db);
+                LaunchResponse launchResponse = launchManager.SignLaunch(session, request.appId);
 
                 return Ok(launchResponse);
             }

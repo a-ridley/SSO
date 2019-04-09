@@ -18,7 +18,6 @@ namespace ManagerLayer.PasswordManagement
         private const double TimeToExpire = 5;
 
         private IResetService _resetService;
-        private IUserService _userService;
         private IPasswordService _passwordService;
         private IEmailService _emailService;
         private ITokenService _tokenService;
@@ -26,7 +25,6 @@ namespace ManagerLayer.PasswordManagement
         public PasswordManager()
         {
             _resetService = new ResetService();
-            _userService = new UserService();
             _emailService = new EmailService();
         }
 
@@ -186,9 +184,10 @@ namespace ManagerLayer.PasswordManagement
         {
             using(var _db = CreateDbContext())
             {
-                if(_userService.ExistingUser(_db, email))
+                UserService _userService = new UserService(_db);
+                if(_userService.ExistingUser(email))
                 {
-                    Guid userID = _userService.GetUser(_db, email).Id;
+                    Guid userID = _userService.GetUser(email).Id;
 
                     if(CountResetLinksMade24Hours(userID) < 3)
                     {
@@ -272,7 +271,8 @@ namespace ManagerLayer.PasswordManagement
 
             using (var _db = CreateDbContext())
             {
-                User retrievedUser = _userService.GetUser(_db, userID);
+                UserService _userService = new UserService(_db);
+                User retrievedUser = _userService.GetUser(userID);
                 var securityQ1 = retrievedUser.SecurityQ1;
                 var securityQ2 = retrievedUser.SecurityQ2;
                 var securityQ3 = retrievedUser.SecurityQ3;
@@ -291,7 +291,8 @@ namespace ManagerLayer.PasswordManagement
             var userID = retrievedPasswordReset.UserID;
             using (var _db = CreateDbContext())
             {
-                User retrievedUser = _userService.GetUser(_db, userID);
+                UserService _userService = new UserService(_db);
+                User retrievedUser = _userService.GetUser(userID);
                 var securityA1 = retrievedUser.SecurityQ1Answer;
                 var securityA2 = retrievedUser.SecurityQ2Answer;
                 var securityA3 = retrievedUser.SecurityQ3Answer;

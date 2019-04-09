@@ -11,47 +11,47 @@ namespace ServiceLayer.Services
 {
     public class UserService : IUserService
     {
-        private UserManagementRepository _UserManagementRepo;
+        private UserManagementRepository _userManagementRepo;
 
-        public UserService()
+        public UserService(DatabaseContext _db)
         {
-            _UserManagementRepo = new UserManagementRepository();
+            _userManagementRepo = new UserManagementRepository(_db);
         }
 
-        public User CreateUser(DatabaseContext _db, User user)
+        public User CreateUser(User user)
         {
-            if (_UserManagementRepo.ExistingUser(_db, user.Email))
+            if (_userManagementRepo.ExistingUser(user.Email))
             {
                 throw new ArgumentException("A user with that email address already exists");
             }
-            return _UserManagementRepo.CreateNewUser(_db, user);
+            return _userManagementRepo.CreateNewUser(user);
         }
 
-        public User DeleteUser(DatabaseContext _db, Guid Id)
+        public User DeleteUser(Guid Id)
         {
-            return _UserManagementRepo.DeleteUser(_db, Id);
+            return _userManagementRepo.DeleteUser(Id);
         }
 
-        public User GetUser(DatabaseContext _db, string email)
+        public User GetUser(string email)
         {
-            return _UserManagementRepo.GetUser(_db, email);
+            return _userManagementRepo.GetUser(email);
         }
 
-        public User GetUser(DatabaseContext _db, Guid Id)
+        public User GetUser(Guid Id)
         {
-            return _UserManagementRepo.GetUser(_db, Id);
+            return _userManagementRepo.GetUser(Id);
         }
 
-        public User UpdateUser(DatabaseContext _db, User user)
+        public User UpdateUser(User user)
         {
-            return _UserManagementRepo.UpdateUser(_db, user);
+            return _userManagementRepo.UpdateUser(user);
         }
 
-        public User Login(DatabaseContext _db, string email, string password)
+        public User Login(string email, string password)
         {
             UserRepository userRepo = new UserRepository();
             PasswordService _passwordService = new PasswordService();
-            var user = _UserManagementRepo.GetUser(_db, email);
+            var user = _userManagementRepo.GetUser(email);
             if (user != null)
             {
                 string hashedPassword = _passwordService.HashPassword(password, user.PasswordSalt);
@@ -67,9 +67,9 @@ namespace ServiceLayer.Services
             return null;
         }
 
-        public bool ExistingUser(DatabaseContext _db, string email)
+        public bool ExistingUser(string email)
         {
-            return _UserManagementRepo.ExistingUser(_db, email);
+            return _userManagementRepo.ExistingUser(email);
         }
     }
 }

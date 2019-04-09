@@ -1,13 +1,12 @@
 ﻿using DataAccessLayer.Models;
-using DataAccessLayer.Database;
 
 namespace ServiceLayer.Services
 {
     public interface ISessionService
     {
-        Session CreateSession(DatabaseContext _db, Session session);
-        Session GetSession(DatabaseContext _db, string token);
-        Session UpdateSession(DatabaseContext _db, Session session);
-        Session DeleteSession(DatabaseContext _db, string  token);
+        Session CreateSession(Session session);
+        Session GetSession(string token);
+        Session UpdateSession(Session session);
+        Session DeleteSession(string token);
     }
 }

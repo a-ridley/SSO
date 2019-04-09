@@ -55,9 +55,8 @@ namespace KFC_WebAPI.Controllers
                 User user;
                 try
                 {
-                    UserManager userManager = new UserManager();
+                    UserManager userManager = new UserManager(_db);
                     user = userManager.CreateUser(
-                        _db,
                         request.email,
                         request.password,
                         request.dob,
@@ -90,8 +89,8 @@ namespace KFC_WebAPI.Controllers
                     return Content((HttpStatusCode)401, "This software is intended for persons over 18 years of age.");
                 }
 
-                AuthorizationManager authorizationManager = new AuthorizationManager();
-                Session session = authorizationManager.CreateSession(_db, user);
+                AuthorizationManager authorizationManager = new AuthorizationManager(_db);
+                Session session = authorizationManager.CreateSession(user);
                 try
                 {
                     _db.SaveChanges();

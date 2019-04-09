@@ -17,14 +17,6 @@ namespace ManagerLayer.UserManagement
 {
     public class UserManagementManager
     {
-        private IPasswordService _passwordService;
-        private IUserService _userService;
-
-        public UserManagementManager()
-        {
-            _userService = new UserService();
-        }
-
         private DatabaseContext CreateDbContext()
         {
             return new DatabaseContext();
@@ -34,7 +26,8 @@ namespace ManagerLayer.UserManagement
         {
             using (var _db = CreateDbContext())
             {
-                var response = _userService.DeleteUser(_db, user.Id);
+                IUserService _userService = new UserService(_db);
+                var response = _userService.DeleteUser(user.Id);
                 // will return null if user does not exist
                 return _db.SaveChanges();
             }
@@ -44,7 +37,8 @@ namespace ManagerLayer.UserManagement
         {
             using (var _db = CreateDbContext())
             {
-                var response = _userService.DeleteUser(_db, id);
+                IUserService _userService = new UserService(_db);
+                var response = _userService.DeleteUser(id);
                 return _db.SaveChanges();
             }
         }
@@ -53,7 +47,8 @@ namespace ManagerLayer.UserManagement
         {
             using (var _db = CreateDbContext())
             {
-                return _userService.GetUser(_db, id);
+                IUserService _userService = new UserService(_db);
+                return _userService.GetUser(id);
             }
         }
 
@@ -61,7 +56,8 @@ namespace ManagerLayer.UserManagement
         {
             using (var _db = CreateDbContext())
             {
-                return  _userService.GetUser(_db, email);
+                IUserService _userService = new UserService(_db);
+                return  _userService.GetUser(email);
             }
         }
 
@@ -81,7 +77,8 @@ namespace ManagerLayer.UserManagement
             {
                 if (enable == null) enable = !user.Disabled;
                 user.Disabled = !(bool)enable;
-                var response = _userService.UpdateUser(_db, user);
+                IUserService _userService = new UserService(_db);
+                var response = _userService.UpdateUser(user);
                 return _db.SaveChanges();
             }
         }
@@ -90,7 +87,8 @@ namespace ManagerLayer.UserManagement
         {
             using (var _db = CreateDbContext())
             {
-                var response = _userService.UpdateUser(_db, user);
+                IUserService _userService = new UserService(_db);
+                var response = _userService.UpdateUser(user);
                 try
                 {
                     return _db.SaveChanges();
@@ -110,7 +108,8 @@ namespace ManagerLayer.UserManagement
         {
             using (var _db = CreateDbContext())
             {
-                return _userService.ExistingUser(_db, email);
+                IUserService _userService = new UserService(_db);
+                return _userService.ExistingUser(email);
             }
         }
     }
