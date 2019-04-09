@@ -135,8 +135,8 @@ namespace ManagerLayer.ApplicationManagement
             //}
 
 
-            // Return success messge
-            response = new HttpResponseContent(HttpStatusCode.OK, apiKey.Key, app.SharedSecretKey);
+            // Return success message
+            response = new HttpResponseContent(HttpStatusCode.OK, apiKey.Key, app.SharedSecretKey, app.Id);
             return response;
         }
 
