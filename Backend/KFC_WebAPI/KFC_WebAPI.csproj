@@ -107,6 +107,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RequestModels\RegistrationRequestModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
