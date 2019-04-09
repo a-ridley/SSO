@@ -92,7 +92,7 @@ namespace KFC_WebAPI.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPut]
+        [HttpPost]
         [Route("api/applications/publish")]
         public HttpResponseMessage Publish([FromBody] ApplicationRequest request)
         {
