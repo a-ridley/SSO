@@ -45,7 +45,7 @@
             label="Confirm New Password"/>
       <br />
         <br/>
-        <v-btn color="success" v-on:click="submitPasswords">Update Password</v-btn>
+        <v-btn id="submit" color="success" v-on:click="submitPasswords">Update Password</v-btn>
     </div>
   </div>
 </template>

@@ -31,9 +31,9 @@
 
         <br />
 
-        <v-btn color="success" v-on:click="login">Login</v-btn>
+        <v-btn id="login" color="success" v-on:click="login">Login</v-btn>
 
-        <v-btn color="success" v-on:click="goToResetPassword">Reset Password</v-btn>
+        <v-btn id="reset" color="success" v-on:click="goToResetPassword">Reset Password</v-btn>
         </v-form>
 
     </div>
