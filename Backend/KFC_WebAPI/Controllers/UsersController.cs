@@ -5,11 +5,15 @@ using System;
 using System.Data.Entity.Validation;
 using System.Net;
 using System.Web.Http;
+using System.Threading.Tasks;
 using ManagerLayer;
 using ServiceLayer.Exceptions;
 using System.ComponentModel.DataAnnotations;
+using ManagerLayer.PasswordManagement;
 using ServiceLayer.Services;
 using ManagerLayer.UserManagement;
+using DataAccessLayer.Requests;
+using System.Data.Entity.Infrastructure;
 
 namespace KFC_WebAPI.Controllers
 {
@@ -39,6 +43,12 @@ namespace KFC_WebAPI.Controllers
         public string securityQ3 { get; set; }
         [Required]
         public string securityQ3Answer { get; set; }
+    }
+
+    public class UserDeleteRequest
+    {
+        [Required]
+        public string token { get; set; }
     }
 
     public class UsersController : ApiController
@@ -166,5 +176,105 @@ namespace KFC_WebAPI.Controllers
                 }
             }
         }
+
+        [HttpPost]
+        [Route("api/users/updatepassword")]
+        public IHttpActionResult UpdatePassword([FromBody] UpdatePasswordRequest request)
+        {
+            try
+            {
+                PasswordManager pm = new PasswordManager();
+                int result = pm.UpdatePasswordController(request);
+                if (result == 1)
+                {
+                    return Content(HttpStatusCode.OK, "Password has been updated");
+                }
+                else if (result == -1)
+                {
+                    return Content(HttpStatusCode.BadRequest, "New password matches old password");
+                }
+                else if (result == -2)
+                {
+                    return Content(HttpStatusCode.BadRequest, "Password has been pwned, please use a different password");
+                }
+                else if (result == -3)
+                {
+                    return Content(HttpStatusCode.BadRequest, "New password does not meet minimum password requirements");
+                }
+                else if (result == -4)
+                {
+                    return Content(HttpStatusCode.BadRequest, "Current password inputted does not match current password");
+                }
+                else if (result == -5)
+                {
+                    return Content(HttpStatusCode.Unauthorized, "Session invalid");
+                }
+                else
+                {
+                    return Content(HttpStatusCode.BadRequest, "Service Unavailable");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
+            }
+        }
+
+
+        [HttpPost]
+        [Route("api/users/deleteuser")]
+        public async Task<IHttpActionResult> Delete([FromBody] UserDeleteRequest request)
+        {
+            using (var _db = new DatabaseContext())
+            {
+                IAuthorizationManager authorizationManager = new AuthorizationManager();
+                Session session = authorizationManager.ValidateAndUpdateSession(_db, request.token);
+                if (session == null)
+                {
+                    return Unauthorized();
+                }
+                UserManager um = new UserManager();
+                User user = await um.DeleteUser(_db, session.UserId);
+                if(user != null)
+                {
+                    return Ok();
+                }
+                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
+            }
+        }
+
+        [HttpPost]
+        [Route("api/Logout")]
+        public IHttpActionResult Logout([FromBody] LogoutRequest request)
+        {
+            SessionService serv = new SessionService();
+            using (var _db = new DatabaseContext())
+            {
+                IAuthorizationManager authorizationManager = new AuthorizationManager();
+
+
+
+                try
+                {
+                    var response = authorizationManager.DeleteSession(_db, request.token);
+                    _db.SaveChanges();
+
+                    if (response != null)
+                    {
+
+                        return Ok("User has logged out");
+                    }
+
+                }
+                catch (DbUpdateException)
+                {
+                    return Content(HttpStatusCode.InternalServerError, "There was an error on the server and the request could not be completed");
+                }
+                return Content(HttpStatusCode.ExpectationFailed, "Session has not been found.");
+
+            }
+
+        }
+
     }
 }

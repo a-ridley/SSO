@@ -1,5 +1,6 @@
 ﻿using DataAccessLayer.Database;
 using DataAccessLayer.Models;
+using ServiceLayer.Exceptions;
 using ServiceLayer.Services;
 using System;
 using System.Data.Entity.Infrastructure;
@@ -38,7 +39,10 @@ namespace ManagerLayer
         public Session ValidateAndUpdateSession(DatabaseContext _db, string token)
         {
             Session response = _sessionService.GetSession(_db, token);
-
+            if (response == null)
+            {
+                throw new InvalidTokenException();
+            }
 			if (response.ExpiresAt > DateTime.UtcNow)
 			{
 				return _sessionService.UpdateSession(_db, response);

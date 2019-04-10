@@ -135,8 +135,8 @@ namespace ManagerLayer.ApplicationManagement
             //}
 
 
-            // Return success messge
-            response = new HttpResponseContent(HttpStatusCode.OK, apiKey.Key, app.SharedSecretKey);
+            // Return success message
+            response = new HttpResponseContent(HttpStatusCode.OK, apiKey.Key, app.SharedSecretKey, app.Id);
             return response;
         }
 
@@ -388,6 +388,44 @@ namespace ManagerLayer.ApplicationManagement
             }
         }
 
+
+        public HttpResponseContent ValidateUpdate(ApplicationRequest request)
+        {
+            // Http status code and message
+            HttpResponseContent response;
+
+            using (var _db = new DatabaseContext())
+            {
+                // Attempt to find application
+                var app = ApplicationService.GetApplication(_db, request.Title, request.Email);
+                if (app == null)
+                {
+                    response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Application");
+                    return response;
+                }
+
+                // Update click count of application record
+
+                app.ClickCount = request.ClickCount;
+                var appResponse = ApplicationService.UpdateApplication(_db, app);
+
+                List<object> responses = new List<object>();
+                responses.Add(appResponse);
+
+                // Attempt to save database changes
+                if (!SaveChanges(_db, responses))
+                {
+                    // Error response
+                    response = new HttpResponseContent(HttpStatusCode.InternalServerError, "Unable to save database changes");
+                    return response;
+                }
+
+                // Successful publish
+                response = new HttpResponseContent(HttpStatusCode.OK, "Updated application from SSO");
+                return response;
+            }
+        }
+
         /// <summary>
         /// Validates a string length
         /// </summary>
@@ -542,9 +580,9 @@ namespace ManagerLayer.ApplicationManagement
                 string resetPasswordBodyString = string.Format(template, data);
 
                 //Create the message that will be sent
-                MimeMessage emailToSend = _emailService.createEmailPlainBody(userFullName, receiverEmail, registrationSubjectString, resetPasswordBodyString);
+                MimeMessage emailToSend = _emailService.CreateEmailPlainBody(userFullName, receiverEmail, registrationSubjectString, resetPasswordBodyString);
                 //Send the email with the message
-                _emailService.sendEmail(emailToSend);
+                _emailService.SendEmail(emailToSend);
                 return true;
             }
             catch (Exception)
@@ -575,9 +613,9 @@ namespace ManagerLayer.ApplicationManagement
                 string resetPasswordBodyString = string.Format(template, data);
 
                 //Create the message that will be sent
-                MimeMessage emailToSend = _emailService.createEmailPlainBody(userFullName, receiverEmail, newKeySubjectString, resetPasswordBodyString);
+                MimeMessage emailToSend = _emailService.CreateEmailPlainBody(userFullName, receiverEmail, newKeySubjectString, resetPasswordBodyString);
                 //Send the email with the message
-                _emailService.sendEmail(emailToSend);
+                _emailService.SendEmail(emailToSend);
 
                 return true;
             }

@@ -53,13 +53,14 @@ namespace UnitTesting
         }
 
         [TestMethod]
+        [ExpectedException(typeof(InvalidTokenException))]
         public void Validate_Invalid_Token()
         {
             using (var _db = new DatabaseContext())
             {
                 Session validatedSession = _am.ValidateAndUpdateSession(_db, "invalidToken");
                 
-                Assert.IsNull(validatedSession);
+                // Assert exception
             }
         }
 
@@ -76,14 +77,17 @@ namespace UnitTesting
                 Session deletedSession = _am.DeleteSession(_db, session.Token);
 
                 _db.SaveChanges();
-
-                Session validatedSession = _am.ValidateAndUpdateSession(_db, session.Token);
-
-                // Assert 
-                Assert.IsNotNull(deletedSession);
-                Assert.AreEqual(session.Token, deletedSession.Token);
-                Assert.AreEqual(session.Id, deletedSession.Id);
-                Assert.IsNull(validatedSession);
+                try
+                {
+                    Session validatedSession = _am.ValidateAndUpdateSession(_db, session.Token);
+                }
+                catch (InvalidTokenException)
+                {
+                    // Assert 
+                    Assert.IsNotNull(deletedSession);
+                    Assert.AreEqual(session.Token, deletedSession.Token);
+                    Assert.AreEqual(session.Id, deletedSession.Id);
+                }
             }
         }
     }
