@@ -65,12 +65,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthorizationManagerUT.cs" />
+    <Compile Include="PasswordResetManagerUT.cs" />
     <Compile Include="UserManagerUT.cs" />
     <Compile Include="ApplicationServiceUT.cs" />
     <Compile Include="EmailServiceUT.cs" />
     <Compile Include="ITestingUtils.cs" />
     <Compile Include="LoginManagerUT.cs" />
-    <Compile Include="ResetPasswordUT.cs" />
+    <Compile Include="PasswordResetServiceUT.cs" />
     <Compile Include="PasswordServiceUT.cs" />
     <Compile Include="SessionServiceUT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

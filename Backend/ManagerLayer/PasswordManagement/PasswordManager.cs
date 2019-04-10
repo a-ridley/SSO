@@ -256,22 +256,26 @@ namespace ManagerLayer.PasswordManagement
         public bool ResetPassword(string resetToken, string newPasswordHash)
         {
             var retrievedPasswordReset = GetPasswordReset(resetToken);
-            var userIDAssociatedWithPasswordReset = retrievedPasswordReset.UserID;
-
-            using (var _db = CreateDbContext())
+            if(retrievedPasswordReset != null)
             {
-                var userToUpdate = _db.Users.Find(userIDAssociatedWithPasswordReset);
-                if (userToUpdate != null)
+                var userIDAssociatedWithPasswordReset = retrievedPasswordReset.UserID;
+
+                using (var _db = CreateDbContext())
                 {
-                    userToUpdate.PasswordHash = newPasswordHash;
-                    _db.SaveChanges();
-                    LockPasswordReset(resetToken);
-                    _db.SaveChanges();
-                    SendPasswordChange(userToUpdate.Email);
-                    return true;
+                    var userToUpdate = _db.Users.Find(userIDAssociatedWithPasswordReset);
+                    if (userToUpdate != null)
+                    {
+                        userToUpdate.PasswordHash = newPasswordHash;
+                        _db.SaveChanges();
+                        LockPasswordReset(resetToken);
+                        _db.SaveChanges();
+                        SendPasswordChange(userToUpdate.Email);
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
             }
+            return false;
         }
 
         //This password update function is for when the user is already logged in and wants to update their password
@@ -438,24 +442,24 @@ namespace ManagerLayer.PasswordManagement
                     string oldPasswordHashed = HashPassword(request.oldPassword, user.PasswordSalt);
                     if (oldPasswordHashed == user.PasswordHash)
                     {
-                        if (request.newPassword.Length >= 12 || request.newPassword.Length <= 2000)
+                        if (request.newPassword.Length >= 12 && request.newPassword.Length <= 2000)
                         {
                             if (!CheckIsPasswordPwned(request.newPassword))
                             {
                                 string newPasswordHashed = HashPassword(request.newPassword, user.PasswordSalt);
                                 if (UpdatePassword(user, newPasswordHashed))
                                 {
-                                    return 1;
+                                    return 1; //OK
                                 }
-                                return -1;
+                                return -1; //Bad Request, new password is same as old password
                             }
-                            return -2;
+                            return -2; //Bad Request, pwned password
                         }
-                        return -3;
+                        return -3; //Bad Request, password length
                     }
-                    return -4;
+                    return -4; //Unauthorized, inputted password not the same as old password
                 }
-                return -5;
+                return -5; //Bad Request, invalid session
             }
         }
         #endregion 
