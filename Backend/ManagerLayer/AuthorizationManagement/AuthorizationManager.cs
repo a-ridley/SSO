@@ -41,7 +41,7 @@ namespace ManagerLayer
             Session response = _sessionService.GetSession(_db, token);
             if (response == null)
             {
-                throw new InvalidTokenException();
+                return null;
             }
 			if (response.ExpiresAt > DateTime.UtcNow)
 			{
