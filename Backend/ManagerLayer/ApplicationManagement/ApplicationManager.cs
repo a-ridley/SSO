@@ -15,7 +15,7 @@ namespace ManagerLayer.ApplicationManagement
         public ApplicationManager()
         {
             // TODO: set up email server to implement email services
-            //_emailService = new EmailService();
+            _emailService = new EmailService();
             _tokenService = new TokenService();
         }
 
@@ -120,20 +120,9 @@ namespace ManagerLayer.ApplicationManagement
                     return response;
                 }
             }
-            
-            // Attempt to send api key to application email
-            //if (SendAppRegistrationApiKeyEmail(app.Email, apiKey.Key))
-            //{
-            //    // Alert front end that email was sent
-            //    string message = "Sent to " + app.Email;
-            //    response = new HttpResponseContent(HttpStatusCode.OK, message);
-            //}
-            //else
-            //{
-            //    // Email could not be sent. Send api key to frontend.
-            //    response = new HttpResponseContent(HttpStatusCode.OK, apiKey.Key, app.SharedSecretKey);
-            //}
 
+            // Attempt to send api key to application email
+            SendAppRegistrationApiKeyEmail(app.Email, apiKey.Key, app.SharedSecretKey, app.Id);
 
             // Return success message
             response = new HttpResponseContent(HttpStatusCode.OK, apiKey.Key, app.SharedSecretKey, app.Id);
@@ -564,7 +553,7 @@ namespace ManagerLayer.ApplicationManagement
         /// <param name="receiverEmail"></param>
         /// <param name="apiKey"></param>
         /// <returns>Whether email was successfully sent</returns>
-        public bool SendAppRegistrationApiKeyEmail(string receiverEmail, string apiKey)
+        public bool SendAppRegistrationApiKeyEmail(string receiverEmail, string apiKey, string sharedSecretKey, Guid appId)
         {
             _emailService = new EmailService();
             try
@@ -573,14 +562,16 @@ namespace ManagerLayer.ApplicationManagement
                 string userFullName = receiverEmail;
                 string template = "Hi, \r\n" +
                                                  "You recently registered your application to the KFC SSO portal.\r\n" +
-                                                 "Below is a single-use API Key to publish your application into the portal.\r\n {0}" +
-                                                 "If you did not register to KFC, please contact us by responding to this email.\r\n\r\n" +
+                                                 "This is the ID of your application.\r\n {0}" +
+                                                 "This is a single-use API Key to publish your application into the portal.\r\n {1}" +
+                                                 "This is the Shared Secret Key between your application and the KFC SSO Portal.\r\n {2}" +
+                                                 "If you did not register your application to KFC, please contact us by responding to this email.\r\n\r\n" +
                                                  "Thanks, KFC Team";
-                string data = apiKey;
-                string resetPasswordBodyString = string.Format(template, data);
+
+                string appRegisterBodyString = string.Format(template, appId, apiKey, sharedSecretKey);
 
                 //Create the message that will be sent
-                MimeMessage emailToSend = _emailService.CreateEmailPlainBody(userFullName, receiverEmail, registrationSubjectString, resetPasswordBodyString);
+                MimeMessage emailToSend = _emailService.CreateEmailPlainBody(userFullName, receiverEmail, registrationSubjectString, appRegisterBodyString);
                 //Send the email with the message
                 _emailService.SendEmail(emailToSend);
                 return true;
