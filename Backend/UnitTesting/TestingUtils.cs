@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ServiceLayer.Services;
 using System.Data.Entity;
 using System.Security.Cryptography;
+using ManagerLayer;
 
 namespace UnitTesting
 {
@@ -52,6 +53,20 @@ namespace UnitTesting
                 _db.SaveChanges();
 
                 return user;
+            }
+        }
+
+        public User CreateUserInDbManager()
+        {
+            UserManager um = new UserManager();
+            using (var _db = new DatabaseContext())
+            {
+                User u = um.CreateUser(_db,"cf2080@icloud.com","qwertyuiop136_!2019",new DateTime(1996,12,15),"Long Beach", "CA",
+                    "USA", "securityQ1?", "q1", "securityQ2?", "q2", "securityQ3?", "q3");
+
+                _db.SaveChanges();
+
+                return u;
             }
         }
 
