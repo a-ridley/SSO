@@ -137,7 +137,7 @@ namespace KFC_WebAPI.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPut]
+        [HttpPost]
         [Route("api/applications/update")]
         public HttpResponseMessage UpdateApplication([FromBody] ApplicationRequest request)
         {

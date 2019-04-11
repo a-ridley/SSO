@@ -143,13 +143,6 @@ export default {
       error: ""
     };
   },
-  watch: {
-    // Loading animation will need to be modified to finish when the app finishes launching
-    launchLoading(val) {
-      if (!val) return;
-      setTimeout(() => (this.launchLoading = false), 5000);
-    }
-  },
   methods: {
     launch(appId, app) {
       this.error = "";
@@ -177,8 +170,8 @@ export default {
                   break;
               }
             })
-            .finally( () => {
-              if (this.launchLoading !== false){
+            .finally(() => {
+              if (this.launchLoading !== false) {
                 this.launchLoading = false;
                 this.error =
                   "Communication with the application can not be established.";
@@ -223,7 +216,7 @@ export default {
     },
     async updateClickCount(app) {
       app.ClickCount += 1;
-      await axios.put(`${apiURL}/applications/update`, {
+      await axios.post(`${apiURL}/applications/update`, {
         Title: app.Title,
         Email: app.Email,
         Description: app.Description,
