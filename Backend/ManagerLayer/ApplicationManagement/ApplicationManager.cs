@@ -121,11 +121,21 @@ namespace ManagerLayer.ApplicationManagement
                 }
             }
 
-            // Attempt to send api key to application email
-            SendAppRegistrationApiKeyEmail(app.Email, apiKey.Key, app.SharedSecretKey, app.Id);
+            string message;
 
-            // Return success message
-            response = new HttpResponseContent(HttpStatusCode.OK, apiKey.Key, app.SharedSecretKey, app.Id);
+            // Email the application ID, api key, and shared secret key
+            try
+            {
+                SendAppRegistrationEmail(app.Email, apiKey.Key, app.SharedSecretKey, app.Id);
+                message = "Successful Registration!  An email has also been sent containing the following information.";
+            }
+            catch
+            {
+                message = "Successful Registration!  Please save the following information.  An email containing this information was unable to send.";
+            }
+
+            // Return success response
+            response = new HttpResponseContent(HttpStatusCode.OK, message, apiKey.Key, app.SharedSecretKey, app.Id);
             return response;
         }
 
@@ -218,8 +228,21 @@ namespace ManagerLayer.ApplicationManagement
                     return response;
                 }
 
-                // Successful publish
-                response = new HttpResponseContent(HttpStatusCode.OK, "Published to KFC SSO");
+                string message;
+
+                // Email successful publish confirmation
+                try
+                {
+                    SendAppPublishEmail(app.Email, app);
+                    message = "Successful Publish to the KFC SSO portal!  An email has been sent confirming your publish.";
+                }
+                catch
+                {
+                    message = "Successful Publish to the KFC SSO portal!  A confirmation email was unable to send.";
+                }
+
+                // Return successful publish response
+                response = new HttpResponseContent(HttpStatusCode.OK, message);
                 return response;
             }
 
@@ -299,23 +322,21 @@ namespace ManagerLayer.ApplicationManagement
                     return response;
                 }
 
-                string message = apiKey.Key;
-                // TODO: Set up email server to implement email services
-                //string message;
+                string message;
 
-                //// Attempt to send api key to application email
-                //if (SendNewApiKeyEmail(app.Email, apiKey.Key))
-                //{
-                //    // Alert front end that email was sent
-                //    message = "Sent to " + app.Email;
-                //}
-                //else
-                //{
-                //    // Email could not be sent. Send api key to frontend.
-                //    message = apiKey.Key;
-                //}
+                // Email the new api key
+                try
+                {
+                    SendNewApiKeyEmail(app.Email, apiKey.Key);
+                    message = "Successful Key Generation!  An email has been sent containing your new API Key.";
+                }
+                catch
+                {
+                    message = "Successful Key Generation!  Please save the following information.  An email containing this information was unable to send.";
+                }
 
-                response = new HttpResponseContent(HttpStatusCode.OK, apiKey.Key);
+                // Return successful key generation response
+                response = new HttpResponseContent(HttpStatusCode.OK, message, apiKey.Key);
                 return response;
             }
 
@@ -371,8 +392,21 @@ namespace ManagerLayer.ApplicationManagement
                     return response;
                 }
 
-                // Successful deletion
-                response = new HttpResponseContent(HttpStatusCode.OK, "Application Deleted from KFC SSO");
+                string message;
+
+                // Email application deletion confirmation
+                try
+                {
+                    SendAppDeleteEmail(app.Email, app.Title);
+                    message = "Application Deleted.  An email has been sent confirming your deletion.";
+                }
+                catch
+                {
+                    message = "Application Deleted.  A confirmation email was unable to send.";
+                }
+
+                // Return successful deletion response
+                response = new HttpResponseContent(HttpStatusCode.OK, message);
                 return response;
             }
         }
@@ -546,41 +580,59 @@ namespace ManagerLayer.ApplicationManagement
             }
         }
 
+        #region Emails
 
         /// <summary>
-        /// Creates an email to send an api key to newly registered applications.
+        /// Creates an email to send the application id, api key,
+        /// and shared secret key to newly registered application.
         /// </summary>
         /// <param name="receiverEmail"></param>
         /// <param name="apiKey"></param>
-        /// <returns>Whether email was successfully sent</returns>
-        public bool SendAppRegistrationApiKeyEmail(string receiverEmail, string apiKey, string sharedSecretKey, Guid appId)
+        /// <param name="sharedSecretKey"></param>
+        /// <param name="appId"></param>
+        public void SendAppRegistrationEmail(string receiverEmail, string apiKey, string sharedSecretKey, Guid appId)
         {
-            _emailService = new EmailService();
-            try
-            {
-                string registrationSubjectString = "KFC SSO Registration";
-                string userFullName = receiverEmail;
-                string template = "Hi, \r\n" +
-                                                 "You recently registered your application to the KFC SSO portal.\r\n" +
-                                                 "This is the ID of your application.\r\n {0}" +
-                                                 "This is a single-use API Key to publish your application into the portal.\r\n {1}" +
-                                                 "This is the Shared Secret Key between your application and the KFC SSO Portal.\r\n {2}" +
-                                                 "If you did not register your application to KFC, please contact us by responding to this email.\r\n\r\n" +
-                                                 "Thanks, KFC Team";
+            string appRegisterSubjectString = "KFC SSO: Application Registration";
+            string userFullName = receiverEmail;
+            string template = "Hi, \r\n \r\n" +
+                                             "You recently registered your application to the KFC SSO portal.\r\n \r\n" +
+                                             "Your Application ID:\r\n {0} \r\n \r\n" +
+                                             "A single-use API Key to publish your application into the portal:\r\n {1} \r\n \r\n" +
+                                             "The Shared Secret Key between your application and the KFC SSO Portal.\r\n {2} \r\n \r\n" +
+                                             "If you did not register your application to KFC, please contact us by responding to this email.\r\n\r\n" +
+                                             "Thanks, \r\nKFC Team";
 
-                string appRegisterBodyString = string.Format(template, appId, apiKey, sharedSecretKey);
+            string appRegisterBodyString = string.Format(template, appId, apiKey, sharedSecretKey);
 
-                //Create the message that will be sent
-                MimeMessage emailToSend = _emailService.CreateEmailPlainBody(userFullName, receiverEmail, registrationSubjectString, appRegisterBodyString);
-                //Send the email with the message
-                _emailService.SendEmail(emailToSend);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            //Create the message that will be sent
+            MimeMessage emailToSend = _emailService.CreateEmailPlainBody(userFullName, receiverEmail, appRegisterSubjectString, appRegisterBodyString);
+            //Send the email with the message
+            _emailService.SendEmail(emailToSend);
+        }
 
+        /// <summary>
+        /// Creates an email to send a confirmation of app publish.
+        /// </summary>
+        /// <param name="receiverEmail"></param>
+        /// <param name="app"></param>
+        public void SendAppPublishEmail(string receiverEmail, Application app)
+        {
+            string appPublishSubjectString = "KFC SSO: Application Publish";
+            string userFullName = receiverEmail;
+            string template = "Hi, \r\n \r\n" +
+                                             "Your application, {0}, was successfully published to the KFC SSO portal with the following details:\r\n \r\n" +
+                                             "Description: {1}\r\n" +
+                                             "Logo URL: {2}\r\n" +
+                                             "Under Maintenance: {3}\r\n \r\n" +
+                                             "If you did not make this request, please contact us by responding to this email.\r\n \r\n" +
+                                             "Thanks, \r\nKFC Team";
+            
+            string appPublishBodyString = string.Format(template, app.Title, app.Description, app.LogoUrl, app.UnderMaintenance);
+
+            //Create the message that will be sent
+            MimeMessage emailToSend = _emailService.CreateEmailPlainBody(userFullName, receiverEmail, appPublishSubjectString, appPublishBodyString);
+            //Send the email with the message
+            _emailService.SendEmail(emailToSend);
         }
 
         /// <summary>
@@ -588,33 +640,46 @@ namespace ManagerLayer.ApplicationManagement
         /// </summary>
         /// <param name="receiverEmail"></param>
         /// <param name="apiKey"></param>
-        /// <returns>Whether email was successfully sent.</returns>
-        public bool SendNewApiKeyEmail(string receiverEmail, string apiKey)
+        public void SendNewApiKeyEmail(string receiverEmail, string apiKey)
         {
-            try
-            {
-                string newKeySubjectString = "KFC SSO New API Key";
-                string userFullName = receiverEmail;
-                string template = "Hi, \r\n" +
-                                                 "You recently requested a new API Key for you KFC application.\r\n" +
-                                                 "Below is a new single-use API Key to publish your application into the portal.\r\n {0}" +
-                                                 "If you did not make this request, please contact us by responding to this email.\r\n\r\n" +
-                                                 "Thanks, KFC Team";
-                string data = apiKey;
-                string resetPasswordBodyString = string.Format(template, data);
+            string generateKeySubjectString = "KFC SSO: New API Key";
+            string userFullName = receiverEmail;
+            string template = "Hi, \r\n \r\n" +
+                                             "You recently requested a new API Key for you KFC application.\r\n \r\n" +
+                                             "Below is a new single-use API Key to publish your application into the portal.\r\n {0} \r\n \r\n" +
+                                             "If you did not make this request, please contact us by responding to this email.\r\n \r\n" +
+                                             "Thanks, \r\nKFC Team";
+            
+            string generateKeyBodyString = string.Format(template, apiKey);
 
-                //Create the message that will be sent
-                MimeMessage emailToSend = _emailService.CreateEmailPlainBody(userFullName, receiverEmail, newKeySubjectString, resetPasswordBodyString);
-                //Send the email with the message
-                _emailService.SendEmail(emailToSend);
-
-                return true;
-            }
-            catch(Exception)
-            {
-                return false;
-            }
-
+            //Create the message that will be sent
+            MimeMessage emailToSend = _emailService.CreateEmailPlainBody(userFullName, receiverEmail, generateKeySubjectString, generateKeyBodyString);
+            //Send the email with the message
+            _emailService.SendEmail(emailToSend);
         }
+
+        /// <summary>
+        /// Creates an email to send a confirmation of app deletion.
+        /// </summary>
+        /// <param name="receiverEmail"></param>
+        /// <param name="appTitle"></param>
+        public void SendAppDeleteEmail(string receiverEmail, string appTitle)
+        {
+            string appDeleteSubjectString = "KFC SSO: Application Deletion";
+            string userFullName = receiverEmail;
+            string template = "Hi, \r\n \r\n" +
+                                             "Your application, {0}, was successfully deleted from the KFC SSO portal.\r\n \r\n" +
+                                             "If you did not make this request, please contact us by responding to this email.\r\n \r\n" +
+                                             "Thanks, \r\nKFC Team";
+
+            string appDeleteBodyString = string.Format(template, appTitle);
+
+            //Create the message that will be sent
+            MimeMessage emailToSend = _emailService.CreateEmailPlainBody(userFullName, receiverEmail, appDeleteSubjectString, appDeleteBodyString);
+            //Send the email with the message
+            _emailService.SendEmail(emailToSend);
+        }
+
+        #endregion
     }
 }

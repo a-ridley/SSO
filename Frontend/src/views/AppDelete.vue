@@ -33,8 +33,7 @@
         </v-alert>
 
         <div v-if="validation" id="deleteMessage">
-            <h3>Successful Deletion!</h3>
-            <p>{{ validation }}</p>
+            <h3>{{ validation }}</h3>
         </div>
 
         <br />
@@ -79,7 +78,7 @@ export default {
         }
       })
         .then(response => {
-            this.validation = response.data; // Retrieve deletion validation
+            this.validation = response.data.Message; // Retrieve deletion validation
         })
         .catch(err => {
             this.error = err.response.data

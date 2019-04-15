@@ -32,6 +32,10 @@
             {{error}}
         </v-alert>
 
+        <div v-if="message" id="responseMessage">
+            <h3>{{ message }}</h3>
+            <br />
+        </div>
         <div v-if="key" id="keyMessage">
             <h3>Your New API Key:</h3>
             <p>{{ key }}</p>
@@ -53,6 +57,7 @@ import { apiURL } from '@/const.js'
 export default {
   data () {
     return {
+      message: null,
       key: null,
       title: '',
       email: '',
@@ -79,7 +84,8 @@ export default {
         }
       })
         .then(response => {
-            this.key = response.data; // Retrieve api key from response
+            this.message = response.data.Message;
+            this.key = response.data.Key; // Retrieve api key from response
         })
         .catch(err => {
             this.error = err.response.data

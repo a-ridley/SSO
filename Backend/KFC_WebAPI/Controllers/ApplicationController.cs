@@ -97,7 +97,7 @@ namespace KFC_WebAPI.Controllers
         public HttpResponseMessage Publish([FromBody] ApplicationRequest request)
         {
             HttpResponseContent responseContent = manager.ValidatePublish(request);
-            HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent.Message);
+            HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent);
 
             return response;
         }
@@ -112,7 +112,7 @@ namespace KFC_WebAPI.Controllers
         public HttpResponseMessage GenerateKey([FromBody] ApplicationRequest request)
         {
             HttpResponseContent responseContent = manager.ValidateKeyGeneration(request);
-            HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent.Message);
+            HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent);
 
             return response;
         }
@@ -127,7 +127,7 @@ namespace KFC_WebAPI.Controllers
         public HttpResponseMessage DeleteApplication([FromBody] ApplicationRequest request)
         {
             HttpResponseContent responseContent = manager.ValidateDeletion(request);
-            HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent.Message);
+            HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent);
 
             return response;
         }

@@ -48,9 +48,11 @@
             {{error}}
         </v-alert>
 
-        <div id="applicationId" v-if="appId">
-            <h3>Successful Registration!</h3>
+        <div id="responseMessage" v-if="message">
+            <h3>{{ message }}</h3>
             <br />
+        </div>
+        <div id="applicationId" v-if="appId">
             <h3>Your Application ID</h3>
             <p>{{ appId }}</p>
         </div>
@@ -79,6 +81,7 @@ import { apiURL } from '@/const.js'
 export default {
   data () {
     return {
+      message: null,
       key: null,
       secretKey: null,
       appId: null,
@@ -111,6 +114,7 @@ export default {
         }
       })
         .then(response => {
+            this.message = response.data.Message;
             this.key = response.data.Key; // Retrieve api key from response
             this.secretKey = response.data.SharedSecretKey // Retrieve shared api key from response
             this.appId = response.data.AppId // Retrieve application id from response
