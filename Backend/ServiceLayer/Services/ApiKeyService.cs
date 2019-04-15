@@ -7,8 +7,15 @@ using System.Net.Mail;
 
 namespace ServiceLayer.Services
 {
-    public static class ApiKeyService
+    public class ApiKeyService: IApiKeyService
     {
+        // Repository
+        IApiKeyRepository _apiKeyRepository;
+
+        public ApiKeyService()
+        {
+            _apiKeyRepository = new ApiKeyRepository();
+        }
 
         /// <summary>
         /// Call the Api Key repository to create a new api key record
@@ -16,9 +23,9 @@ namespace ServiceLayer.Services
         /// <param name="_db">database</param>
         /// <param name="key">api key</param>
         /// <returns>The created api key</returns>
-        public static ApiKey CreateKey(DatabaseContext _db, ApiKey key)
+        public ApiKey CreateKey(DatabaseContext _db, ApiKey key)
         {
-            return ApiKeyRepository.CreateNewKey(_db, key);
+            return _apiKeyRepository.CreateNewKey(_db, key);
         }
 
         /// <summary>
@@ -27,9 +34,9 @@ namespace ServiceLayer.Services
         /// <param name="_db">database</param>
         /// <param name="key">key value of api key</param>
         /// <returns>The deleted api key</returns>
-        public static ApiKey DeleteKey(DatabaseContext _db, Guid id)
+        public ApiKey DeleteKey(DatabaseContext _db, Guid id)
         {
-            return ApiKeyRepository.DeleteKey(_db, id);
+            return _apiKeyRepository.DeleteKey(_db, id);
         }
 
         /// <summary>
@@ -38,9 +45,9 @@ namespace ServiceLayer.Services
         /// <param name="_db">database</param>
         /// <param name="id">api key id</param>
         /// <returns>The retrieved api key</returns>
-        public static ApiKey GetKey(DatabaseContext _db, Guid id)
+        public ApiKey GetKey(DatabaseContext _db, Guid id)
         {
-            return ApiKeyRepository.GetKey(_db, id);
+            return _apiKeyRepository.GetKey(_db, id);
         }
 
         /// <summary>
@@ -50,9 +57,9 @@ namespace ServiceLayer.Services
         /// <param name="applicationId"></param>
         /// <param name="isUsed">whether the key has been used</param>
         /// <returns></returns>
-        public static ApiKey GetKey(DatabaseContext _db, Guid applicationId, bool isUsed)
+        public ApiKey GetKey(DatabaseContext _db, Guid applicationId, bool isUsed)
         {
-            return ApiKeyRepository.GetKey(_db, applicationId, isUsed);
+            return _apiKeyRepository.GetKey(_db, applicationId, isUsed);
         }
 
         /// <summary>
@@ -61,9 +68,9 @@ namespace ServiceLayer.Services
         /// <param name="_db">database</param>
         /// <param name="key">key value of api key</param>
         /// <returns></returns>
-        public static ApiKey GetKey(DatabaseContext _db, string key)
+        public ApiKey GetKey(DatabaseContext _db, string key)
         {
-            return ApiKeyRepository.GetKey(_db, key);
+            return _apiKeyRepository.GetKey(_db, key);
         }
 
         /// <summary>
@@ -72,9 +79,9 @@ namespace ServiceLayer.Services
         /// <param name="_db">database</param>
         /// <param name="key">api key</param>
         /// <returns>The updated api key</returns>
-        public static ApiKey UpdateKey(DatabaseContext _db, ApiKey key)
+        public ApiKey UpdateKey(DatabaseContext _db, ApiKey key)
         {
-            return ApiKeyRepository.UpdateKey(_db, key);
+            return _apiKeyRepository.UpdateKey(_db, key);
         }
         
     }

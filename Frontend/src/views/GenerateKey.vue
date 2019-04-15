@@ -88,7 +88,7 @@ export default {
             this.key = response.data.Key; // Retrieve api key from response
         })
         .catch(err => {
-            this.error = err.response.data
+            this.error = err.response.data.Message
         })
     }
   }

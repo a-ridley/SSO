@@ -1,9 +1,11 @@
 ﻿using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using MimeKit;
+using ServiceLayer.Exceptions;
 using ServiceLayer.Services;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Validation;
 using System.Drawing;
 using System.IO;
 using System.Net;
@@ -14,7 +16,8 @@ namespace ManagerLayer.ApplicationManagement
     {
         public ApplicationManager()
         {
-            // TODO: set up email server to implement email services
+            _applicationService = new ApplicationService();
+            _apiKeyService = new ApiKeyService();
             _emailService = new EmailService();
             _tokenService = new TokenService();
         }
@@ -28,24 +31,19 @@ namespace ManagerLayer.ApplicationManagement
         private const int urlLength = 500;
 
         // Services
+        private IApplicationService _applicationService;
+        private IApiKeyService _apiKeyService;
         private IEmailService _emailService;
         private ITokenService _tokenService;
 
         /// <summary>
-        /// Validate the app registration field values, and call registration services
+        /// Validate the app registration request values, and call registration services
         /// </summary>
-        /// <param name="request">Values from POST request</param>
-        /// <returns>Http status code and message</returns>
+        /// <param name="request">Values from Register POST request</param>
+        /// <returns>Http status code and content</returns>
         public HttpResponseContent ValidateRegistration(ApplicationRequest request)
         {
-            // Http status code and message
-            HttpResponseContent response;
-
-            if (request == null)
-            {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Request.");
-                return response;
-            }
+            HttpResponseContent response; // Body of http response content
 
             Uri launchUrl = null;
             Uri deleteUrl = null;
@@ -53,36 +51,32 @@ namespace ManagerLayer.ApplicationManagement
             // Validate request values
             if (request.Title == null || !IsValidStringLength(request.Title, titleLength))
             {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Title: Cannot be more than 100 characters in length.");
-                return response;
+                throw new InvalidStringException("Invalid Title: Length cannot be greater than " + titleLength + " characters");
             }
             else if (request.Email == null || !IsValidEmail(request.Email))
             {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Email");
-                return response;
+                throw new InvalidEmailException("Invalid Email Format");
             }
             else if (request.LaunchUrl == null || !IsValidUrl(request.LaunchUrl, ref launchUrl) || !IsValidStringLength(request.LaunchUrl, urlLength))
             {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Application Url");
-                return response;
+                throw new InvalidUrlException("Invalid Launch Url Format");
             }
             else if (request.DeleteUrl == null || !IsValidUrl(request.DeleteUrl, ref deleteUrl) || !IsValidStringLength(request.DeleteUrl, urlLength))
             {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid User Deletion Url");
-                return response;
+                throw new InvalidUrlException("Invalid User Deletion Url Format");
             }
 
-            // Create a new application
+            // Create application from request data
             Application app = new Application
             {
                 Title = request.Title,
-                LaunchUrl = launchUrl.ToString(),
+                LaunchUrl = request.LaunchUrl,
                 Email = request.Email,
                 UserDeletionUrl = request.DeleteUrl,
                 SharedSecretKey = _tokenService.GenerateToken()
             };
 
-            // Create a new ApiKey
+            // Create a new api key for application
             ApiKey apiKey = new ApiKey
             {
                 // Generate a unique key
@@ -92,33 +86,30 @@ namespace ManagerLayer.ApplicationManagement
 
             using (var _db = new DatabaseContext())
             {
-                // Attempt to create an Application record
-                var appResponse = ApplicationService.CreateApplication(_db, app);
-                if (appResponse == null)
+                // Create an Application entry
+                var appResponse = _applicationService.CreateApplication(_db, app);
+                if (appResponse == null) // Application was not created
                 {
-                    response = new HttpResponseContent(HttpStatusCode.BadRequest, "Application Already Exists");
-                    return response;
+                    throw new ArgumentException("Application Already Exists.");
                 }
 
-                // Attempt to create an ApiKey record
-                var keyResponse = ApiKeyService.CreateKey(_db, apiKey);
+                // Create an ApiKey entry
+                var keyResponse = _apiKeyService.CreateKey(_db, apiKey);
+
                 // Keep generating a new key until a unique one is made.
                 while (keyResponse == null)
                 {
                     apiKey.Key = _tokenService.GenerateToken();
-                    keyResponse = ApiKeyService.CreateKey(_db, apiKey);
+                    keyResponse = _apiKeyService.CreateKey(_db, apiKey);
                 }
 
+                // Changes to data store
                 List<object> responses = new List<object>();
                 responses.Add(appResponse);
                 responses.Add(keyResponse);
 
-                // Save database changes
-                if (!SaveChanges(_db, responses))
-                {
-                    response = new HttpResponseContent(HttpStatusCode.InternalServerError, "Unable to save database changes");
-                    return response;
-                }
+                // Save data store changes
+                SaveChanges(_db, responses);
             }
 
             string message;
@@ -135,98 +126,80 @@ namespace ManagerLayer.ApplicationManagement
             }
 
             // Return success response
-            response = new HttpResponseContent(HttpStatusCode.OK, message, apiKey.Key, app.SharedSecretKey, app.Id);
+            response = new HttpResponseContent(message, apiKey.Key, app.SharedSecretKey, app.Id);
             return response;
         }
 
         /// <summary>
-        /// Validate the app publish field values, and call publish services
+        /// Validate the app publish request values, and call publish services
         /// </summary>
-        /// <param name="request">Values from POST request</param>
-        /// <returns>Http status code and message</returns>
+        /// <param name="request">Values from Publish POST request</param>
+        /// <returns>Http status code and content</returns>
         public HttpResponseContent ValidatePublish(ApplicationRequest request)
         {
-            // Http status code and message
-            HttpResponseContent response;
-
-            if (request == null)
-            {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Request.");
-                return response;
-            }
+            HttpResponseContent response; // Body of http response content
 
             Uri logoUrl = null;
 
             // Validate publish request values
             if (request.Title == null)
             {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Title.");
-                return response;
+                throw new InvalidStringException("Invalid Title: Null");
             }
             else if (!IsValidStringLength(request.Description, descriptionLength))
             {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Description: Cannot be more than 2000 characters in length.");
-                return response;
+                throw new InvalidStringException("Invalid Description: Length cannot be greater than " + descriptionLength + " characters.");
             }
-            else if (!IsValidUrl(request.LogoUrl, ref logoUrl))
+            else if (!IsValidUrl(request.LogoUrl, ref logoUrl) || !IsValidStringLength(request.LogoUrl, urlLength))
             {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Logo Url.");
-                return response;
+                throw new InvalidUrlException("Invalid Logo Url Format");
             }
             else if (!IsValidImageExtension(logoUrl, imageType))
             {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Logo Image Extension: Can only be .PNG");
-                return response;
+                throw new InvalidImageException("Invalid Logo Image Extension: Can only be " + imageType);
             }
             else if (!IsValidDimensions(logoUrl,xDimension,yDimension))
             {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Logo Dimensions: Can be no more than 55x55 pixels.");
-                return response;
+                throw new InvalidImageException("Invalid Logo Dimensions: Can be no more than " + xDimension + "x" + yDimension + " pixels.");
             }
 
             using (var _db = new DatabaseContext())
             {
                 // Attempt to find api key
-                var apiKey = ApiKeyService.GetKey(_db, request.Key);
+                var apiKey = _apiKeyService.GetKey(_db, request.Key);
 
                 // Key must exist and be unused.
                 if (apiKey == null || apiKey.IsUsed == true)
                 {
-                    response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Key");
-                    return response;
+                    throw new InvalidApiKeyException("Invalid API Key");
                 }
 
                 // Attempt to get application based on ApplicationId from api key
-                var app = ApplicationService.GetApplication(_db, apiKey.ApplicationId);
+                var app = _applicationService.GetApplication(_db, apiKey.ApplicationId);
 
                 // Published application title is used to authenticate the app.
                 if (app == null || !request.Title.Equals(app.Title))
                 {
-                    response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Key");
-                    return response;
+                    throw new InvalidApiKeyException("Invalid API Key");
                 }
 
                 // Update values of application record
                 app.Description = request.Description;
                 app.LogoUrl = request.LogoUrl;
                 app.UnderMaintenance = request.UnderMaintenance;
-                var appResponse = ApplicationService.UpdateApplication(_db, app);
+                var appResponse = _applicationService.UpdateApplication(_db, app);
 
                 // Update values of api key record
                 apiKey.IsUsed = true;
-                var keyResponse = ApiKeyService.UpdateKey(_db, apiKey);
+                var keyResponse = _apiKeyService.UpdateKey(_db, apiKey);
 
+                // Data store changes
                 List<object> responses = new List<object>();
                 responses.Add(appResponse);
                 responses.Add(keyResponse);
 
-                // Attempt to save database changes
-                if (!SaveChanges(_db, responses))
-                {
-                    // Error response
-                    response = new HttpResponseContent(HttpStatusCode.InternalServerError, "Unable to save database changes");
-                    return response;
-                }
+                // Attempt to save data store changes
+                SaveChanges(_db, responses);
 
                 string message;
 
@@ -242,48 +215,38 @@ namespace ManagerLayer.ApplicationManagement
                 }
 
                 // Return successful publish response
-                response = new HttpResponseContent(HttpStatusCode.OK, message);
+                response = new HttpResponseContent(message);
                 return response;
             }
 
         }
 
         /// <summary>
-        /// Validate the key generation field values, and call key generation services
+        /// Validate the key generation request values, and call key generation services
         /// </summary>
-        /// <param name="request">Values from POST request</param>
-        /// <returns>Http status code and message</returns>
+        /// <param name="request">Values from Key Generation POST request</param>
+        /// <returns>Http status code and content</returns>
         public HttpResponseContent ValidateKeyGeneration(ApplicationRequest request)
         {
-            // Http status code and message
-            HttpResponseContent response;
-
-            if (request == null)
-            {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Request.");
-                return response;
-            }
+            HttpResponseContent response; // Body of http response content
 
             // Validate key generation request values
             if (request.Title == null)
             {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Title");
-                return response;
+                throw new InvalidStringException("Invalid Title: Null");
             }
             else if (request.Email == null || !IsValidEmail(request.Email))
             {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Email");
-                return response;
+                throw new InvalidEmailException("Invalid Email Format");
             }
 
             using (var _db = new DatabaseContext())
             {
                 // Attempt to find application
-                var app = ApplicationService.GetApplication(_db, request.Title, request.Email);
+                var app = _applicationService.GetApplication(_db, request.Title, request.Email);
                 if (app == null)
                 {
-                    response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Application");
-                    return response;
+                    throw new ArgumentException("Application Does Not Exist");
                 }
 
                 // Create a new ApiKey
@@ -294,33 +257,30 @@ namespace ManagerLayer.ApplicationManagement
                 };
 
                 // Invalidate old unused api key
-                var keyOld = ApiKeyService.GetKey(_db, app.Id, false);
+                var keyOld = _apiKeyService.GetKey(_db, app.Id, false);
                 if(keyOld != null)
                 {
                     keyOld.IsUsed = true;
-                    keyOld = ApiKeyService.UpdateKey(_db, keyOld);
+                    keyOld = _apiKeyService.UpdateKey(_db, keyOld);
                 }
 
-                // Attempt to create an apiKey record
-                var keyResponse = ApiKeyService.CreateKey(_db, apiKey);
+                // Attempt to create an apiKey entry
+                var keyResponse = _apiKeyService.CreateKey(_db, apiKey);
 
                 // Keep generating a new key until a unique one is made.
                 while (keyResponse == null)
                 {
                     apiKey.Key = _tokenService.GenerateToken();
-                    keyResponse = ApiKeyService.CreateKey(_db, apiKey);
+                    keyResponse = _apiKeyService.CreateKey(_db, apiKey);
                 }
 
+                // Data store changes
                 List<object> responses = new List<object>();
                 responses.Add(keyResponse);
                 responses.Add(keyOld);
 
-                // Save database changes
-                if (!SaveChanges(_db, responses))
-                {
-                    response = new HttpResponseContent(HttpStatusCode.InternalServerError, "Unable to save database changes");
-                    return response;
-                }
+                // Save data store changes
+                SaveChanges(_db, responses);
 
                 string message;
 
@@ -336,61 +296,53 @@ namespace ManagerLayer.ApplicationManagement
                 }
 
                 // Return successful key generation response
-                response = new HttpResponseContent(HttpStatusCode.OK, message, apiKey.Key);
+                response = new HttpResponseContent(message, apiKey.Key);
                 return response;
             }
 
         }
 
         /// <summary>
-        /// Validate the App Deletion field values, and call deletion services
+        /// Validate the App Deletion request values, and call deletion services
         /// </summary>
-        /// <param name="request">Values from POST request</param>
-        /// <returns>Http status code and message</returns>
+        /// <param name="request">Values from App Deletion POST request</param>
+        /// <returns>Http status code and content</returns>
         public HttpResponseContent ValidateDeletion(ApplicationRequest request)
         {
-            // Http status code and message
-            HttpResponseContent response;
+            HttpResponseContent response; // Body of http response content
 
             // Validate deletion request values
             if (request.Title == null)
             {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Title");
-                return response;
+                throw new InvalidStringException("Invalid Title: Null");
             }
             else if (!IsValidEmail(request.Email))
             {
-                response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Email");
-                return response;
+                throw new InvalidEmailException("Invalid Email Format");
             }
 
             using (var _db = new DatabaseContext())
             {
                 // Attempt to find application
-                var app = ApplicationService.GetApplication(_db, request.Title, request.Email);
+                var app = _applicationService.GetApplication(_db, request.Title, request.Email);
                 if (app == null)
                 {
-                    response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Application");
-                    return response;
+                    throw new ArgumentException("Application Does Not Exist");
                 }
 
-                // Attempt to create an apiKey record
-                var appResponse = ApplicationService.DeleteApplication(_db, app.Id);
+                // Attempt to delete application
+                var appResponse = _applicationService.DeleteApplication(_db, app.Id);
                 if (appResponse == null)
                 {
-                    response = new HttpResponseContent(HttpStatusCode.InternalServerError, "Unable to delete application.");
-                    return response;
+                    throw new ArgumentException("Application Does Not Exist");
                 }
 
+                // Data store changes
                 List<object> responses = new List<object>();
                 responses.Add(appResponse);
 
-                // Save database changes
-                if (!SaveChanges(_db, responses))
-                {
-                    response = new HttpResponseContent(HttpStatusCode.InternalServerError, "Unable to save database changes");
-                    return response;
-                }
+                // Save data store changes
+                SaveChanges(_db, responses);
 
                 string message;
 
@@ -406,7 +358,7 @@ namespace ManagerLayer.ApplicationManagement
                 }
 
                 // Return successful deletion response
-                response = new HttpResponseContent(HttpStatusCode.OK, message);
+                response = new HttpResponseContent(message);
                 return response;
             }
         }
@@ -420,31 +372,38 @@ namespace ManagerLayer.ApplicationManagement
             using (var _db = new DatabaseContext())
             {
                 // Attempt to find application
-                var app = ApplicationService.GetApplication(_db, request.Title, request.Email);
+                var app = _applicationService.GetApplication(_db, request.Title, request.Email);
                 if (app == null)
                 {
-                    response = new HttpResponseContent(HttpStatusCode.BadRequest, "Invalid Application");
+                    response = new HttpResponseContent("Invalid Application");
+                    response.Code = HttpStatusCode.BadRequest;
                     return response;
                 }
 
                 // Update click count of application record
 
                 app.ClickCount = request.ClickCount;
-                var appResponse = ApplicationService.UpdateApplication(_db, app);
+                var appResponse = _applicationService.UpdateApplication(_db, app);
 
                 List<object> responses = new List<object>();
                 responses.Add(appResponse);
 
                 // Attempt to save database changes
-                if (!SaveChanges(_db, responses))
+                try
+                {
+                    SaveChanges(_db, responses);
+                }
+                catch
                 {
                     // Error response
-                    response = new HttpResponseContent(HttpStatusCode.InternalServerError, "Unable to save database changes");
+                    response = new HttpResponseContent("Unable to save database changes");
+                    response.Code = HttpStatusCode.InternalServerError;
                     return response;
                 }
 
                 // Successful publish
-                response = new HttpResponseContent(HttpStatusCode.OK, "Updated application from SSO");
+                response = new HttpResponseContent("Updated application from SSO");
+                response.Code = HttpStatusCode.OK;
                 return response;
             }
         }
@@ -477,9 +436,12 @@ namespace ManagerLayer.ApplicationManagement
                 var valid = new System.Net.Mail.MailAddress(email);
                 return true;
             }
-            catch (Exception)
+            catch (FormatException)
             {
-                // Invalid email
+                return false;
+            }
+            catch (ArgumentNullException)
+            {
                 return false;
             }
         }
@@ -557,16 +519,14 @@ namespace ManagerLayer.ApplicationManagement
         /// <param name="_db">database</param>
         /// <param name="responses">changes made</param>
         /// <returns>Whether the changes were saved</returns>
-        public bool SaveChanges(DatabaseContext _db, List<object> responses)
+        public void SaveChanges(DatabaseContext _db, List<object> responses)
         {
             try
             {
                 // Save changes in the database
                 _db.SaveChanges();
-
-                return true;
             }
-            catch (System.Data.Entity.Validation.DbEntityValidationException)
+            catch (DbEntityValidationException)
             {
                 // Catch error
                 // Detach item attempted to be changed from the db context - rollback
@@ -576,7 +536,7 @@ namespace ManagerLayer.ApplicationManagement
                 }
 
                 // Error
-                return false;
+                throw new DbEntityValidationException("Cannot Save Database Changes");
             }
         }
 

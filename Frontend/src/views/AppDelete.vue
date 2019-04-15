@@ -81,7 +81,7 @@ export default {
             this.validation = response.data.Message; // Retrieve deletion validation
         })
         .catch(err => {
-            this.error = err.response.data
+            this.error = err.response.data.Message
         })
     }
   }

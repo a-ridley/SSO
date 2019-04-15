@@ -104,6 +104,8 @@
       <DependentUpon>201903051936518_PasswordReset.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\PasswordReset.cs" />
+    <Compile Include="Repositories\IApiKeyRepository.cs" />
+    <Compile Include="Repositories\IApplicationRepository.cs" />
     <Compile Include="Repositories\ISessionRepository.cs" />
     <Compile Include="Repositories\ResetRepository.cs" />
     <Compile Include="Repositories\SessionRepository.cs" />

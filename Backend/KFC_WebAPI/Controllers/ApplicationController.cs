@@ -1,9 +1,13 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Data.Entity.Validation;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using DataAccessLayer.Database;
+using DataAccessLayer.Models;
 using ManagerLayer.ApplicationManagement;
+using ServiceLayer.Exceptions;
 using ServiceLayer.Services;
 
 namespace KFC_WebAPI.Controllers
@@ -11,6 +15,7 @@ namespace KFC_WebAPI.Controllers
     public class ApplicationController : ApiController
     {
         private ApplicationManager manager = new ApplicationManager();
+        IApplicationService _applicationService = new ApplicationService();
 
         /// <summary>
         /// Get all individual applications registered with the SSO
@@ -22,7 +27,7 @@ namespace KFC_WebAPI.Controllers
         {
             using (var _db = new DatabaseContext())
             {
-                var applications = ApplicationService.GetAllApplications(_db);
+                var applications = _applicationService.GetAllApplications(_db);
                 return Content((HttpStatusCode) 200, applications);
             }
         }
@@ -37,7 +42,7 @@ namespace KFC_WebAPI.Controllers
         {
             using (var _db = new DatabaseContext())
             {
-                var applications = ApplicationService.SortAllApplicationsAlphaAscending(_db);
+                var applications = _applicationService.SortAllApplicationsAlphaAscending(_db);
                 return Content((HttpStatusCode)200, applications);
             }
         }
@@ -52,7 +57,7 @@ namespace KFC_WebAPI.Controllers
         {
             using (var _db = new DatabaseContext())
             {
-                var applications = ApplicationService.SortAllApplicationsAlphaDescending(_db);
+                var applications = _applicationService.SortAllApplicationsAlphaDescending(_db);
                 return Content((HttpStatusCode)200, applications);
             }
         }
@@ -67,7 +72,7 @@ namespace KFC_WebAPI.Controllers
         {
             using (var _db = new DatabaseContext())
             {
-                var applications = ApplicationService.SortAllApplicationsNumOfClicks(_db);
+                var applications = _applicationService.SortAllApplicationsNumOfClicks(_db);
                 return Content((HttpStatusCode)200, applications);
             }
         }
@@ -79,12 +84,48 @@ namespace KFC_WebAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("api/applications/create")]
-        public HttpResponseMessage Register([FromBody] ApplicationRequest request)
+        public IHttpActionResult Register([FromBody] ApplicationRequest request)
         {
-            HttpResponseContent responseContent = manager.ValidateRegistration(request);
-            HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent);
-            
-            return  response;
+            HttpResponseContent responseContent = new HttpResponseContent(); // Body of Response Message
+
+            if (!ModelState.IsValid || request == null)
+            {
+                // 412 Response
+                responseContent.Code = HttpStatusCode.PreconditionFailed;
+                responseContent.Message = "Invalid Request";
+                return Content(responseContent.Code, responseContent);
+            }
+
+            try
+            {
+                // Validate request and register application
+                responseContent = manager.ValidateRegistration(request);
+                responseContent.Code = HttpStatusCode.OK;
+            }
+            catch(Exception ex)
+            {
+                // Request inputs are invalid format or violate business rules
+                if(ex is InvalidStringException ||
+                    ex is InvalidEmailException ||
+                    ex is InvalidUrlException ||
+                    ex is ArgumentException)
+                {
+                    responseContent.Code = HttpStatusCode.BadRequest;
+                }
+                // Error in data store
+                else if(ex is DbEntityValidationException)
+                {
+                    responseContent.Code = HttpStatusCode.InternalServerError;
+                }
+                else
+                {
+                    responseContent.Code = HttpStatusCode.InternalServerError;
+                }
+
+                responseContent.Message = ex.Message;
+            }
+
+            return Content(responseContent.Code, responseContent);
         }
 
         /// <summary>
@@ -94,27 +135,98 @@ namespace KFC_WebAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("api/applications/publish")]
-        public HttpResponseMessage Publish([FromBody] ApplicationRequest request)
+        public IHttpActionResult Publish([FromBody] ApplicationRequest request)
         {
-            HttpResponseContent responseContent = manager.ValidatePublish(request);
-            HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent);
+            HttpResponseContent responseContent = new HttpResponseContent();  // Body of Response Message
 
-            return response;
+            if (!ModelState.IsValid || request == null)
+            {
+                // 412 Response
+                responseContent.Code = HttpStatusCode.PreconditionFailed;
+                responseContent.Message = "Invalid Request";
+                return Content(responseContent.Code, responseContent);
+            }
+
+            try
+            {
+                // Validate request inputs and publish application
+                responseContent = manager.ValidatePublish(request);
+                responseContent.Code = HttpStatusCode.OK;
+            }
+            catch(Exception ex)
+            {
+                // User inputs are invalid format or violate business rules
+                if(ex is InvalidStringException ||
+                    ex is InvalidUrlException ||
+                    ex is InvalidImageException ||
+                    ex is InvalidApiKeyException)
+                {
+                    responseContent.Code = HttpStatusCode.BadRequest;
+                }
+                // Error in data store
+                else if(ex is DbEntityValidationException)
+                {
+                    responseContent.Code = HttpStatusCode.InternalServerError;
+                }
+                else
+                {
+                    responseContent.Code = HttpStatusCode.InternalServerError;
+                }
+
+                responseContent.Message = ex.Message;
+            }
+            
+            return Content(responseContent.Code, responseContent);
         }
 
         /// <summary>
-        /// Generate a new api key
+        /// Generate a new api key for an application
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost]
         [Route("api/applications/generatekey")]
-        public HttpResponseMessage GenerateKey([FromBody] ApplicationRequest request)
+        public IHttpActionResult GenerateKey([FromBody] ApplicationRequest request)
         {
-            HttpResponseContent responseContent = manager.ValidateKeyGeneration(request);
-            HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent);
+            HttpResponseContent responseContent = new HttpResponseContent();  // Body of Response Message
 
-            return response;
+            if (!ModelState.IsValid || request == null)
+            {
+                // 412 Response
+                responseContent.Code = HttpStatusCode.PreconditionFailed;
+                responseContent.Message = "Invalid Request";
+                return Content(responseContent.Code, responseContent);
+            }
+
+            try
+            {
+                // Validate request inputs and generate a new api key
+                responseContent = manager.ValidateKeyGeneration(request);
+                responseContent.Code = HttpStatusCode.OK;
+            }
+            catch(Exception ex)
+            {
+                // User inputs are invalid format or violate business rules
+                if (ex is InvalidStringException ||
+                    ex is InvalidEmailException ||
+                    ex is ArgumentException)
+                {
+                    responseContent.Code = HttpStatusCode.BadRequest;
+                }
+                // Error in data store
+                else if(ex is DbEntityValidationException)
+                {
+                    responseContent.Code = HttpStatusCode.InternalServerError;
+                }
+                else
+                {
+                    responseContent.Code = HttpStatusCode.InternalServerError;
+                }
+
+                responseContent.Message = ex.Message;
+            }
+
+            return Content(responseContent.Code, responseContent);
         }
 
         /// <summary>
@@ -124,12 +236,47 @@ namespace KFC_WebAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("api/applications/delete")]
-        public HttpResponseMessage DeleteApplication([FromBody] ApplicationRequest request)
+        public IHttpActionResult DeleteApplication([FromBody] ApplicationRequest request)
         {
-            HttpResponseContent responseContent = manager.ValidateDeletion(request);
-            HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent);
+            HttpResponseContent responseContent = new HttpResponseContent();  // Body of Response Message
 
-            return response;
+            if (!ModelState.IsValid || request == null)
+            {
+                // 412 Response
+                responseContent.Code = HttpStatusCode.PreconditionFailed;
+                responseContent.Message = "Invalid Request";
+                return Content(responseContent.Code, responseContent);
+            }
+
+            try
+            {
+                // Validate request inputs and delete application from portal
+                responseContent = manager.ValidateDeletion(request);
+                responseContent.Code = HttpStatusCode.OK;
+            }
+            catch(Exception ex)
+            {
+                // User inputs are invalid format or violate business rules
+                if (ex is InvalidStringException ||
+                    ex is InvalidEmailException ||
+                    ex is ArgumentException)
+                {
+                    responseContent.Code = HttpStatusCode.BadRequest;
+                }
+                // Error in data store
+                else if(ex is DbEntityValidationException)
+                {
+                    responseContent.Code = HttpStatusCode.InternalServerError;
+                }
+                else
+                {
+                    responseContent.Code = HttpStatusCode.InternalServerError;
+                }
+
+                responseContent.Message = ex.Message;
+            }
+
+            return Content(responseContent.Code, responseContent);
         }
 
         /// <summary>

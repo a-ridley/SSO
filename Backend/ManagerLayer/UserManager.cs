@@ -14,6 +14,8 @@ namespace ManagerLayer
 {
     public class UserManager
     {
+        IApplicationService _applicationService = new ApplicationService();
+
         public User CreateUser(
             DatabaseContext _db,
             string email,
@@ -107,7 +109,7 @@ namespace ManagerLayer
             User deletingUser = _userService.GetUser(_db, userId);
             ISessionService _sessionService = new SessionService();
             var sessions = _sessionService.GetSessions(_db, userId);
-            var applications = ApplicationService.GetAllApplicationsList(_db);
+            var applications = _applicationService.GetAllApplicationsList(_db);
             //var appList = applications.OfType<Application>().ToList();
             var responseList = new List<HttpResponseMessage>();
             foreach(Application app in applications)

@@ -8,8 +8,15 @@ using DataAccessLayer.Repositories;
 
 namespace ServiceLayer.Services
 {
-    public static class ApplicationService
+    public class ApplicationService: IApplicationService
     {
+        // Repository
+        IApplicationRepository _applicationRepository;
+
+        public ApplicationService()
+        {
+            _applicationRepository = new ApplicationRepository();
+        }
 
         /// <summary>
         /// Call the application repository to create a new application record
@@ -17,9 +24,9 @@ namespace ServiceLayer.Services
         /// <param name="_db">database</param>
         /// <param name="app">application</param>
         /// <returns>The application created</returns>
-        public static Application CreateApplication(DatabaseContext _db, Application app)
+        public Application CreateApplication(DatabaseContext _db, Application app)
         {
-            return ApplicationRepository.CreateNewApplication(_db, app);
+            return _applicationRepository.CreateNewApplication(_db, app);
         }
 
         /// <summary>
@@ -28,9 +35,9 @@ namespace ServiceLayer.Services
         /// <param name="_db">database</param>
         /// <param name="url">application url</param>
         /// <returns>The deleted application</returns>
-        public static Application DeleteApplication(DatabaseContext _db, Guid id)
+        public Application DeleteApplication(DatabaseContext _db, Guid id)
         {
-            return ApplicationRepository.DeleteApplication(_db, id);
+            return _applicationRepository.DeleteApplication(_db, id);
         }
 
         /// <summary>
@@ -39,9 +46,9 @@ namespace ServiceLayer.Services
         /// <param name="_db">database</param>
         /// <param name="url">application</param>
         /// <returns>The retrieved application</returns>
-        public static Application GetApplication(DatabaseContext _db, Guid id)
+        public Application GetApplication(DatabaseContext _db, Guid id)
         {
-            return ApplicationRepository.GetApplication(_db, id);
+            return _applicationRepository.GetApplication(_db, id);
         }
 
         /// <summary>
@@ -51,9 +58,9 @@ namespace ServiceLayer.Services
         /// <param name="title">application title</param>
         /// <param name="email">email</param>
         /// <returns></returns>
-        public static Application GetApplication(DatabaseContext _db, string title, string email)
+        public Application GetApplication(DatabaseContext _db, string title, string email)
         {
-            return ApplicationRepository.GetApplication(_db, title, email);
+            return _applicationRepository.GetApplication(_db, title, email);
         }
 
         /// <summary>
@@ -61,9 +68,9 @@ namespace ServiceLayer.Services
         /// </summary>
         /// <param name="_db">database</param>
         /// <returns>All applications registered with the SSO</returns>
-        public static List<Application> GetAllApplicationsList(DatabaseContext _db)
+        public List<Application> GetAllApplicationsList(DatabaseContext _db)
         {
-            return ApplicationRepository.GetAllApplicationsList(_db);
+            return _applicationRepository.GetAllApplicationsList(_db);
         }
 
         /// <summary>
@@ -71,9 +78,9 @@ namespace ServiceLayer.Services
         /// </summary>
         /// <param name="_db">database</param>
         /// <returns>All applications registered with the SSO</returns>
-        public static IEnumerable GetAllApplications(DatabaseContext _db)
+        public IEnumerable GetAllApplications(DatabaseContext _db)
         {
-            return ApplicationRepository.GetAllApplications(_db);
+            return _applicationRepository.GetAllApplications(_db);
         }
 
         /// <summary>
@@ -81,9 +88,9 @@ namespace ServiceLayer.Services
         /// </summary>
         /// <param name="_db">database</param>
         /// <returns>All sorted applications registered with the SSO</returns>
-        public static IEnumerable SortAllApplicationsAlphaAscending(DatabaseContext _db)
+        public IEnumerable SortAllApplicationsAlphaAscending(DatabaseContext _db)
         {
-            return ApplicationRepository.SortAllApplicationsAlphaAscending(_db);
+            return _applicationRepository.SortAllApplicationsAlphaAscending(_db);
         }
 
         /// <summary>
@@ -91,9 +98,9 @@ namespace ServiceLayer.Services
         /// </summary>
         /// <param name="_db">database</param>
         /// <returns>All sorted applications registered with the SSO</returns>
-        public static IEnumerable SortAllApplicationsNumOfClicks(DatabaseContext _db)
+        public IEnumerable SortAllApplicationsNumOfClicks(DatabaseContext _db)
         {
-            return ApplicationRepository.SortAllApplicationsNumOfClicks(_db);
+            return _applicationRepository.SortAllApplicationsNumOfClicks(_db);
         }
 
         /// <summary>
@@ -101,9 +108,9 @@ namespace ServiceLayer.Services
         /// </summary>
         /// <param name="_db">database</param>
         /// <returns>All sorted applications registered with the SSO</returns>
-        public static IEnumerable SortAllApplicationsAlphaDescending(DatabaseContext _db)
+        public IEnumerable SortAllApplicationsAlphaDescending(DatabaseContext _db)
         {
-            return ApplicationRepository.SortAllApplicationsAlphaDescending(_db);
+            return _applicationRepository.SortAllApplicationsAlphaDescending(_db);
         }
 
         /// <summary>
@@ -112,9 +119,9 @@ namespace ServiceLayer.Services
         /// <param name="_db">database</param>
         /// <param name="app">application</param>
         /// <returns>The updated application</returns>
-        public static Application UpdateApplication(DatabaseContext _db, Application app)
+        public Application UpdateApplication(DatabaseContext _db, Application app)
         {
-            return ApplicationRepository.UpdateApplication(_db, app);
+            return _applicationRepository.UpdateApplication(_db, app);
         }
 
     }
