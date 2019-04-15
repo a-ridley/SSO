@@ -106,10 +106,10 @@ namespace ManagerLayer
         public async Task<User> DeleteUser(DatabaseContext _db, Guid userId)
         {
             UserDeleteService uds = new UserDeleteService();
-            IUserService _userService = new UserService();
-            User deletingUser = _userService.GetUser(_db, userId);
-            ISessionService _sessionService = new SessionService();
-            var sessions = _sessionService.GetSessions(_db, userId);
+            IUserService _userService = new UserService(_db);
+            User deletingUser = _userService.GetUser(userId);
+            ISessionService _sessionService = new SessionService(_db);
+            var sessions = _sessionService.GetSessions(userId);
             var applications = ApplicationService.GetAllApplicationsList(_db);
             //var appList = applications.OfType<Application>().ToList();
             var responseList = new List<HttpResponseMessage>();
@@ -120,11 +120,11 @@ namespace ManagerLayer
             }
             if (responseList.All(response => response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound))
             {
-                User deletedUser = _userService.DeleteUser(_db, userId);
+                User deletedUser = _userService.DeleteUser(userId);
                 if(deletedUser != null){
                     foreach(Session sess in sessions)
                     {
-                        _sessionService.DeleteSession(_db, sess.Token);
+                        _sessionService.DeleteSession(sess.Token);
                     }
                 }
                 _db.SaveChanges(); //foreign key error

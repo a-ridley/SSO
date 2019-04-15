@@ -99,14 +99,14 @@ namespace KFC_WebAPI.Controllers
         public string GetEmail(string token)
         {
             UserManagementManager umm = new UserManagementManager();
-            SessionService ss = new SessionService();
             Session session = new Session();
             User user;
             string email;
 
             using (var _db = new DatabaseContext())
             {
-                session = ss.GetSession(_db,token);
+                SessionService ss = new SessionService(_db);
+                session = ss.GetSession(token);
                 Console.WriteLine(session);
             }
 
@@ -199,13 +199,13 @@ namespace KFC_WebAPI.Controllers
         {
             using (var _db = new DatabaseContext())
             {
-                IAuthorizationManager authorizationManager = new AuthorizationManager();
-                Session session = authorizationManager.ValidateAndUpdateSession(_db, request.token);
+                IAuthorizationManager authorizationManager = new AuthorizationManager(_db);
+                Session session = authorizationManager.ValidateAndUpdateSession(request.token);
                 if (session == null)
                 {
                     return Unauthorized();
                 }
-                UserManager um = new UserManager();
+                UserManager um = new UserManager(_db);
                 User user = await um.DeleteUser(_db, session.UserId);
                 if(user != null)
                 {
@@ -219,16 +219,16 @@ namespace KFC_WebAPI.Controllers
         [Route("api/Logout")]
         public IHttpActionResult Logout([FromBody] LogoutRequest request)
         {
-            SessionService serv = new SessionService();
             using (var _db = new DatabaseContext())
             {
-                IAuthorizationManager authorizationManager = new AuthorizationManager();
+                SessionService serv = new SessionService(_db);
+                IAuthorizationManager authorizationManager = new AuthorizationManager(_db);
 
 
 
                 try
                 {
-                    var response = authorizationManager.DeleteSession(_db, request.token);
+                    var response = authorizationManager.DeleteSession(request.token);
                     _db.SaveChanges();
 
                     if (response != null)

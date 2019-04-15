@@ -12,9 +12,12 @@ namespace ManagerLayer
     {
         private ISessionService _sessionService;
 
+        private DatabaseContext _db;
+
         public AuthorizationManager(DatabaseContext _db)
         {
-             _sessionService = new SessionService(_db);
+            this._db = _db;
+            _sessionService = new SessionService(_db);
         }
 
         public string GenerateSessionToken()
@@ -38,7 +41,7 @@ namespace ManagerLayer
 
         public Session ValidateAndUpdateSession(string token)
         {
-            Session response = _sessionService.GetSession(_db, token);
+            Session response = _sessionService.GetSession(token);
             if (response == null)
             {
                 return null;
@@ -52,7 +55,7 @@ namespace ManagerLayer
 				try
 				{
 					_sessionService.DeleteSession(token);
-					_db.SaveChanges();
+                    _db.SaveChanges();
 					return null;
 				}
 				catch (DbUpdateException ex)

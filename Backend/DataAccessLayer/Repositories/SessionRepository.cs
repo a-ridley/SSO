@@ -50,7 +50,7 @@ namespace DataAccessLayer.Repositories
             return session;
         }
 
-        public List<Session> GetSessions(DatabaseContext _db, Guid userId)
+        public List<Session> GetSessions(Guid userId)
         {
             var sessions = _db.Sessions
                 .Where(s => s.UserId == userId)

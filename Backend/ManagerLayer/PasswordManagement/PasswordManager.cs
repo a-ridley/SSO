@@ -19,7 +19,6 @@ namespace ManagerLayer.PasswordManagement
         private IPasswordService _passwordService;
         private IEmailService _emailService;
         private ITokenService _tokenService;
-        private ISessionService _sessionService;
 
         public PasswordManager()
         {
@@ -27,7 +26,6 @@ namespace ManagerLayer.PasswordManagement
             _emailService = new EmailService();
             _tokenService = new TokenService();
             _passwordService = new PasswordService();
-            _sessionService = new SessionService();
         }
 
         private DatabaseContext CreateDbContext()
@@ -431,11 +429,13 @@ namespace ManagerLayer.PasswordManagement
         {
             using (var _db = CreateDbContext())
             {
-                AuthorizationManager am = new AuthorizationManager();
-                if (am.ValidateAndUpdateSession(_db, request.sessionToken) != null)
+                var _userService = new UserService(_db);
+                var _sessionService = new SessionService(_db);
+                AuthorizationManager am = new AuthorizationManager(_db);
+                if (am.ValidateAndUpdateSession(request.sessionToken) != null)
                 {
-                    var session = _sessionService.GetSession(_db, request.sessionToken);
-                    var user = _userService.GetUser(_db, session.UserId);
+                    var session = _sessionService.GetSession(request.sessionToken);
+                    var user = _userService.GetUser(session.UserId);
                     string oldPasswordHashed = HashPassword(request.oldPassword, user.PasswordSalt);
                     if (oldPasswordHashed == user.PasswordHash)
                     {
