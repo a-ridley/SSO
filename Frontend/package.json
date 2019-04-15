@@ -11,13 +11,14 @@
   "dependencies": {
     "axios": "^0.18.0",
     "vue": "^2.6.6",
+    "vue-read-more": "^1.1.1",
     "vue-router": "^3.0.1",
     "vuetify": "^1.5.5"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.4.1",
     "@vue/cli-plugin-eslint": "^3.4.1",
-    "@vue/cli-service": "^3.4.1",
+    "@vue/cli-service": "^3.5.3",
     "babel-eslint": "^10.0.1",
     "chai": "^4.2.0",
     "eslint": "^5.8.0",

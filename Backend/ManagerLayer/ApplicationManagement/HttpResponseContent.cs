@@ -15,16 +15,18 @@ namespace ManagerLayer.ApplicationManagement
             Message = message;
         }
 
-        public HttpResponseContent(HttpStatusCode code, string key, string secretKey)
+        public HttpResponseContent(HttpStatusCode code, string key, string secretKey, Guid appId)
         {
             Code = code;
             Key = key;
             SharedSecretKey = secretKey;
+            AppId = appId;
         }
 
         public HttpStatusCode Code { get; set; }
         public string Message { get; set; }
         public string Key { get; set; }
         public string SharedSecretKey { get; set; }
+        public Guid AppId { get; set; }
     }
 }

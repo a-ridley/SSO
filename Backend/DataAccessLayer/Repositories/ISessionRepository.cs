@@ -1,4 +1,6 @@
-﻿using DataAccessLayer.Models;
+using DataAccessLayer.Models;
+using System;
+using System.Collections.Generic;
 
 namespace DataAccessLayer.Repositories
 {
@@ -8,5 +10,6 @@ namespace DataAccessLayer.Repositories
         Session CreateSession(Session session);
         Session UpdateSession(Session session);
         Session DeleteSession(string token);
+        List<Session> GetSessions(Guid userId);
     }
 }

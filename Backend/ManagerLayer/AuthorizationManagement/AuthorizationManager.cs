@@ -1,7 +1,9 @@
 ﻿using DataAccessLayer.Database;
 using DataAccessLayer.Models;
+using ServiceLayer.Exceptions;
 using ServiceLayer.Services;
 using System;
+using System.Data.Entity.Infrastructure;
 using System.Security.Cryptography;
 
 namespace ManagerLayer
@@ -36,19 +38,42 @@ namespace ManagerLayer
 
         public Session ValidateAndUpdateSession(string token)
         {
-            Session response = _sessionService.GetSession(token);
-
-            if(response != null)
-            {
-                return _sessionService.UpdateSession(response);
-            }
-            else
+            Session response = _sessionService.GetSession(_db, token);
+            if (response == null)
             {
                 return null;
             }
-        }
+			if (response.ExpiresAt > DateTime.UtcNow)
+			{
+				return _sessionService.UpdateSession(response);
+			}
+			else 
+			{
+				try
+				{
+					_sessionService.DeleteSession(token);
+					_db.SaveChanges();
+					return null;
+				}
+				catch (DbUpdateException ex)
+				{
+					if (ex.InnerException == null)
+					{
+						throw;
+					}
+					else
+					{
+						//Log?
+						var decodeErrors = ex.Entries;
+						return null;
+					}
 
-        public Session DeleteSession(string token)
+				}
+			
+			}
+		}
+
+		public Session DeleteSession(string token)
         {
             return _sessionService.DeleteSession(token);
         }

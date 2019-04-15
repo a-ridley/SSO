@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
 import Home from '@/views/Home.vue'
 import NotFound from '@/views/NotFound.vue'
 import AppRegister from '@/views/AppRegister.vue'
@@ -8,6 +7,11 @@ import GenerateKey from '@/views/GenerateKey.vue'
 import AppDelete from '@/views/AppDelete.vue'
 import Login from '@/views/Login.vue'
 import Dashboard from '@/views/Dashboard.vue'
+import UpdatePassword from '@/views/UpdatePassword.vue'
+import SendResetLink from '@/views/SendResetLink.vue'
+import ResetPassword from '@/views/ResetPassword.vue'
+import Logout from '@/views/Logout.vue'
+import DeleteAccount from '@/views/DeleteAccount.vue'
 
 Vue.use(VueRouter)
 
@@ -61,10 +65,53 @@ let router = new VueRouter({
       component: Dashboard
     },
     {
+      path: '/updatepassword',
+      name: 'updatepassword',
+      component: UpdatePassword
+    },
+    {
+      path: '/sendresetlink',
+      name: 'sendresetlink',
+      component: SendResetLink
+    },
+    {
+      path: '/resetpassword/:id',
+      name: 'resetpassword',
+      component: ResetPassword
+    },
+    {
+      path: '/logout',
+      name: 'Logout',
+      component: Logout
+    },
+    {
+      path: '/deleteaccount',
+      name: 'deleteaccount',
+      component: DeleteAccount
+    },
+    {
       path: '*',
       component: NotFound
     }
   ]
+})
+
+router.beforeEach((to, from, next) => {
+  if(to.fullPath === '/dashboard' && from.fullPath !== '/login'){
+    if(!localStorage.getItem('token')){
+      next('/login');
+    }
+    else{
+      next();
+    }
+  }
+  else if(from.fullPath === '/login' && to.fullPath === '/dashboard'){
+    if(!localStorage.getItem('token')){
+      next('/home');
+      alert('Please login');
+    }
+  }
+  next();
 })
 
 export default router

@@ -5,13 +5,25 @@ using System;
 using System.Data.Entity.Validation;
 using System.Net;
 using System.Web.Http;
+using System.Threading.Tasks;
 using ManagerLayer;
 using ServiceLayer.Exceptions;
 using System.ComponentModel.DataAnnotations;
 using KFC_WebAPI.RequestModels;
+using ManagerLayer.PasswordManagement;
+using ServiceLayer.Services;
+using ManagerLayer.UserManagement;
+using DataAccessLayer.Requests;
+using System.Data.Entity.Infrastructure;
 
 namespace KFC_WebAPI.Controllers
 {
+    public class UserDeleteRequest
+    {
+        [Required]
+        public string token { get; set; }
+    }
+
     public class UsersController : ApiController
     {
         [HttpPost]
@@ -82,6 +94,29 @@ namespace KFC_WebAPI.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("api/users/{token}")]
+        public string GetEmail(string token)
+        {
+            UserManagementManager umm = new UserManagementManager();
+            SessionService ss = new SessionService();
+            Session session = new Session();
+            User user;
+            string email;
+
+            using (var _db = new DatabaseContext())
+            {
+                session = ss.GetSession(_db,token);
+                Console.WriteLine(session);
+            }
+
+            var id = session.UserId;
+            user = umm.GetUser(id);
+            email = user.Email;
+
+            return email;
+        }
+
         [HttpPost]
         [Route("api/users/login")]
         public IHttpActionResult Login([FromBody] LoginRequest request)
@@ -89,8 +124,8 @@ namespace KFC_WebAPI.Controllers
             LoginManager loginM = new LoginManager();
             if (loginM.LoginCheckUserExists(request) == false)
             {
-                //404
-                return Content(HttpStatusCode.NotFound, "Invalid Username");
+                //400
+                return Content(HttpStatusCode.BadRequest, "Invalid Username/Password");
             }
             else
             {
@@ -108,10 +143,110 @@ namespace KFC_WebAPI.Controllers
                     else
                     {
                         //400
-                        return Content(HttpStatusCode.BadRequest, "Invalid Password");
+                        return Content(HttpStatusCode.BadRequest, "Invalid Username/Password");
                     }
                 }
             }
         }
+
+        [HttpPost]
+        [Route("api/users/updatepassword")]
+        public IHttpActionResult UpdatePassword([FromBody] UpdatePasswordRequest request)
+        {
+            try
+            {
+                PasswordManager pm = new PasswordManager();
+                int result = pm.UpdatePasswordController(request);
+                if (result == 1)
+                {
+                    return Content(HttpStatusCode.OK, "Password has been updated");
+                }
+                else if (result == -1)
+                {
+                    return Content(HttpStatusCode.BadRequest, "New password matches old password");
+                }
+                else if (result == -2)
+                {
+                    return Content(HttpStatusCode.BadRequest, "Password has been pwned, please use a different password");
+                }
+                else if (result == -3)
+                {
+                    return Content(HttpStatusCode.BadRequest, "New password does not meet minimum password requirements");
+                }
+                else if (result == -4)
+                {
+                    return Content(HttpStatusCode.BadRequest, "Current password inputted does not match current password");
+                }
+                else if (result == -5)
+                {
+                    return Content(HttpStatusCode.Unauthorized, "Session invalid");
+                }
+                else
+                {
+                    return Content(HttpStatusCode.BadRequest, "Service Unavailable");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
+            }
+        }
+
+
+        [HttpPost]
+        [Route("api/users/deleteuser")]
+        public async Task<IHttpActionResult> Delete([FromBody] UserDeleteRequest request)
+        {
+            using (var _db = new DatabaseContext())
+            {
+                IAuthorizationManager authorizationManager = new AuthorizationManager();
+                Session session = authorizationManager.ValidateAndUpdateSession(_db, request.token);
+                if (session == null)
+                {
+                    return Unauthorized();
+                }
+                UserManager um = new UserManager();
+                User user = await um.DeleteUser(_db, session.UserId);
+                if(user != null)
+                {
+                    return Ok();
+                }
+                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
+            }
+        }
+
+        [HttpPost]
+        [Route("api/Logout")]
+        public IHttpActionResult Logout([FromBody] LogoutRequest request)
+        {
+            SessionService serv = new SessionService();
+            using (var _db = new DatabaseContext())
+            {
+                IAuthorizationManager authorizationManager = new AuthorizationManager();
+
+
+
+                try
+                {
+                    var response = authorizationManager.DeleteSession(_db, request.token);
+                    _db.SaveChanges();
+
+                    if (response != null)
+                    {
+
+                        return Ok("User has logged out");
+                    }
+
+                }
+                catch (DbUpdateException)
+                {
+                    return Content(HttpStatusCode.InternalServerError, "There was an error on the server and the request could not be completed");
+                }
+                return Content(HttpStatusCode.ExpectationFailed, "Session has not been found.");
+
+            }
+
+        }
+
     }
 }

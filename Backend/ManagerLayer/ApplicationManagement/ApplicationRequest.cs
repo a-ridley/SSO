@@ -15,5 +15,7 @@ namespace ManagerLayer.ApplicationManagement
         public string LaunchUrl { set; get; }
         public string Email { set; get; }
         public string DeleteUrl { set; get; }
+        public bool UnderMaintenance { set; get; }
+        public long ClickCount { get; set; }
     }
 }

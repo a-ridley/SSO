@@ -11,6 +11,8 @@ namespace DataAccessLayer.Models
         public Application()
         {
             Id = Guid.NewGuid();
+            UnderMaintenance = false;
+            ClickCount = 0;
         }
 
         [Key]
@@ -35,6 +37,11 @@ namespace DataAccessLayer.Models
 
         [Required]
         public string SharedSecretKey { get; set; }
+
+        [Required]
+        public bool UnderMaintenance { get; set; }
+
+        public long ClickCount { get; set; }
     }
 
     

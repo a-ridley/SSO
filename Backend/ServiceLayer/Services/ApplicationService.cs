@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using DataAccessLayer.Repositories;
@@ -60,9 +61,49 @@ namespace ServiceLayer.Services
         /// </summary>
         /// <param name="_db">database</param>
         /// <returns>All applications registered with the SSO</returns>
+        public static List<Application> GetAllApplicationsList(DatabaseContext _db)
+        {
+            return ApplicationRepository.GetAllApplicationsList(_db);
+        }
+
+        /// <summary>
+        /// Call the application repository to return all applications registered with the SSO
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All applications registered with the SSO</returns>
         public static IEnumerable GetAllApplications(DatabaseContext _db)
         {
             return ApplicationRepository.GetAllApplications(_db);
+        }
+
+        /// <summary>
+        /// Call the application repository to return all sorted applications registered with the SSO
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All sorted applications registered with the SSO</returns>
+        public static IEnumerable SortAllApplicationsAlphaAscending(DatabaseContext _db)
+        {
+            return ApplicationRepository.SortAllApplicationsAlphaAscending(_db);
+        }
+
+        /// <summary>
+        /// Call the application repository to return all sorted applications by number of clicks
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All sorted applications registered with the SSO</returns>
+        public static IEnumerable SortAllApplicationsNumOfClicks(DatabaseContext _db)
+        {
+            return ApplicationRepository.SortAllApplicationsNumOfClicks(_db);
+        }
+
+        /// <summary>
+        /// Call the application repository to return all sorted applications registered with the SSO
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All sorted applications registered with the SSO</returns>
+        public static IEnumerable SortAllApplicationsAlphaDescending(DatabaseContext _db)
+        {
+            return ApplicationRepository.SortAllApplicationsAlphaDescending(_db);
         }
 
         /// <summary>
@@ -75,5 +116,6 @@ namespace ServiceLayer.Services
         {
             return ApplicationRepository.UpdateApplication(_db, app);
         }
+
     }
 }

@@ -4,6 +4,7 @@ using DataAccessLayer.Models;
 using System.Linq;
 using System.Data.Entity;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace DataAccessLayer.Repositories
 {
@@ -102,7 +103,7 @@ namespace DataAccessLayer.Repositories
         }
 
         /// <summary>
-        /// Get all applications
+        /// Get all applications as List<Application>
         /// </summary>
         /// <param name="_db">database</param>
         /// <returns>All application registered with the SSO</returns>
@@ -115,9 +116,110 @@ namespace DataAccessLayer.Repositories
                     Id = app.Id,
                     LaunchUrl = app.LaunchUrl,
                     Title = app.Title,
+                    Email = app.Email,
                     LogoUrl = app.LogoUrl,
-                    Description = app.Description
+                    Description = app.Description,
+                    UnderMaintenance = app.UnderMaintenance,
+                    ClickCount = app.ClickCount
                 }).ToList();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get all applications sorted in alphabetical ascending order
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All sorted application registered with the SSO</returns>
+        public static IEnumerable SortAllApplicationsAlphaAscending(DatabaseContext _db)
+        {
+            try
+            {
+                return _db.Applications.OrderBy(app => app.Title).Select(app => new
+                {
+                    Id = app.Id,
+                    LaunchUrl = app.LaunchUrl,
+                    Title = app.Title,
+                    Email = app.Email,
+                    LogoUrl = app.LogoUrl,
+                    Description = app.Description,
+                    UnderMaintenance = app.UnderMaintenance,
+                    ClickCount = app.ClickCount
+                }).ToList();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get all applications sorted in alphabetical ascending order
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All sorted application registered with the SSO</returns>
+        public static IEnumerable SortAllApplicationsAlphaDescending(DatabaseContext _db)
+        {
+            try
+            {
+                return _db.Applications.OrderByDescending(app => app.Title).Select(app => new
+                {
+                    Id = app.Id,
+                    LaunchUrl = app.LaunchUrl,
+                    Title = app.Title,
+                    Email = app.Email,
+                    LogoUrl = app.LogoUrl,
+                    Description = app.Description,
+                    UnderMaintenance = app.UnderMaintenance,
+                    ClickCount = app.ClickCount
+                }).ToList();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get all applications sorted by number of clicks
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All sorted application registered with the SSO</returns>
+        public static IEnumerable SortAllApplicationsNumOfClicks(DatabaseContext _db)
+        {
+            try
+            {
+                return _db.Applications.OrderByDescending(app => app.ClickCount).Select(app => new
+                {
+                    Id = app.Id,
+                    LaunchUrl = app.LaunchUrl,
+                    Title = app.Title,
+                    Email = app.Email,
+                    LogoUrl = app.LogoUrl,
+                    Description = app.Description,
+                    UnderMaintenance = app.UnderMaintenance,
+                    ClickCount = app.ClickCount
+                }).ToList();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get all applications as List<Application>
+        /// </summary>
+        /// <param name="_db">database</param>
+        /// <returns>All application registered with the SSO</returns>
+        public static List<Application> GetAllApplicationsList(DatabaseContext _db)
+        {
+            try
+            {
+                return _db.Applications.ToList();
             }
             catch (Exception)
             {

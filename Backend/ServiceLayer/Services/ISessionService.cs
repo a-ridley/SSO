@@ -1,4 +1,6 @@
 ﻿using DataAccessLayer.Models;
+using System.Collections.Generic;
+using System;
 
 namespace ServiceLayer.Services
 {
@@ -8,5 +10,6 @@ namespace ServiceLayer.Services
         Session GetSession(string token);
         Session UpdateSession(Session session);
         Session DeleteSession(string token);
+        List<Session> GetSessions(Guid userId);
     }
 }

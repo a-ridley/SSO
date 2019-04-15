@@ -57,7 +57,7 @@ namespace UnitTesting
             {
                 AuthorizationManager _am = new AuthorizationManager(_db);
                 Session validatedSession = _am.ValidateAndUpdateSession("invalidToken");
-                
+
                 Assert.IsNull(validatedSession);
             }
         }
@@ -83,7 +83,7 @@ namespace UnitTesting
                 Assert.IsNotNull(deletedSession);
                 Assert.AreEqual(session.Token, deletedSession.Token);
                 Assert.AreEqual(session.Id, deletedSession.Id);
-                Assert.IsNull(validatedSession);
+                
             }
         }
     }

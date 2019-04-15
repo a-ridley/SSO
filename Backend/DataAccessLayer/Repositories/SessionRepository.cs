@@ -3,6 +3,7 @@ using DataAccessLayer.Database;
 using System;
 using System.Data.Entity;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace DataAccessLayer.Repositories
 {
@@ -47,6 +48,15 @@ namespace DataAccessLayer.Repositories
 
             _db.Sessions.Remove(session);
             return session;
+        }
+
+        public List<Session> GetSessions(DatabaseContext _db, Guid userId)
+        {
+            var sessions = _db.Sessions
+                .Where(s => s.UserId == userId)
+                .ToList();
+
+            return sessions;
         }
     }
 }
