@@ -15,6 +15,7 @@ namespace UnitTesting
         TestingUtils tu;
         PasswordManager pm;
         SessionService ss;
+        UserService us;
 
         public PasswordResetManagerUT()
         {
@@ -22,6 +23,7 @@ namespace UnitTesting
             tu = new TestingUtils();
             pm = new PasswordManager();
             ss = new SessionService();
+            us = new UserService();
         }
 
         [TestMethod]
@@ -217,11 +219,15 @@ namespace UnitTesting
             var newPasswordHashed = pm.HashPassword(newPassword, newUser.PasswordSalt);
             //Act
             var response = pm.UpdatePassword(newUser, newPasswordHashed);
-            var actual = newUser.PasswordHash;
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsTrue(response);
-            Assert.AreEqual(newPasswordHashed, actual);
+            
+            using(_db = tu.CreateDataBaseContext())
+            {
+                var actual = us.GetUser(_db, newUser.Email).PasswordHash;
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsTrue(response);
+                Assert.AreEqual(newPasswordHashed, actual);
+            }
         }
 
         [TestMethod]
