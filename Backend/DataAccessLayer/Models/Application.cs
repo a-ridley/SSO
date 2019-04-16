@@ -42,6 +42,9 @@ namespace DataAccessLayer.Models
         public bool UnderMaintenance { get; set; }
 
         public long ClickCount { get; set; }
+
+        [Required, DataType(DataType.Url)]
+        public string HealthCheckUrl { get; set; }
     }
 
     

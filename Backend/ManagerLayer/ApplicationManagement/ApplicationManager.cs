@@ -47,6 +47,7 @@ namespace ManagerLayer.ApplicationManagement
 
             Uri launchUrl = null;
             Uri deleteUrl = null;
+            Uri healthCheckUrl = null;
 
             // Validate request values
             if (request.Title == null || !IsValidStringLength(request.Title, titleLength))
@@ -65,14 +66,19 @@ namespace ManagerLayer.ApplicationManagement
             {
                 throw new InvalidUrlException("Invalid User Deletion Url Format");
             }
+            else if (request.HealthCheckUrl == null || !IsValidUrl(request.HealthCheckUrl, ref healthCheckUrl) || !IsValidStringLength(request.HealthCheckUrl, urlLength))
+            {
+                throw new InvalidUrlException("Invalid Health Check Url Format");
+            }
 
             // Create application from request data
             Application app = new Application
             {
                 Title = request.Title,
-                LaunchUrl = request.LaunchUrl,
+                LaunchUrl = launchUrl.ToString(),
                 Email = request.Email,
-                UserDeletionUrl = request.DeleteUrl,
+                UserDeletionUrl = deleteUrl.ToString(),
+                HealthCheckUrl = healthCheckUrl.ToString(),
                 SharedSecretKey = _tokenService.GenerateToken()
             };
 
@@ -605,7 +611,7 @@ namespace ManagerLayer.ApplicationManagement
             string generateKeySubjectString = "KFC SSO: New API Key";
             string userFullName = receiverEmail;
             string template = "Hi, \r\n \r\n" +
-                                             "You recently requested a new API Key for you KFC application.\r\n \r\n" +
+                                             "You recently requested a new API Key for your KFC SSO application.\r\n \r\n" +
                                              "Below is a new single-use API Key to publish your application into the portal.\r\n {0} \r\n \r\n" +
                                              "If you did not make this request, please contact us by responding to this email.\r\n \r\n" +
                                              "Thanks, \r\nKFC Team";

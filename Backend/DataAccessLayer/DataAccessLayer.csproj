@@ -89,6 +89,10 @@
     <Compile Include="Migrations\201904081702539_update-applications-add-click-count.Designer.cs">
       <DependentUpon>201904081702539_update-applications-add-click-count.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201904160246563_update-applications-add-HealthCheckUrl.cs" />
+    <Compile Include="Migrations\201904160246563_update-applications-add-HealthCheckUrl.Designer.cs">
+      <DependentUpon>201904160246563_update-applications-add-HealthCheckUrl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApiKey.cs" />
     <Compile Include="Models\Application.cs" />
@@ -155,6 +159,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201904081702539_update-applications-add-click-count.resx">
       <DependentUpon>201904081702539_update-applications-add-click-count.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904160246563_update-applications-add-HealthCheckUrl.resx">
+      <DependentUpon>201904160246563_update-applications-add-HealthCheckUrl.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />

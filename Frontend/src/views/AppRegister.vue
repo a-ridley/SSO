@@ -30,6 +30,14 @@
             v-if="!key"
             /><br />
         <v-text-field
+            name="healthCheckUrl"
+            id="healthCheckUrl"
+            type="healthCheckUrl"
+            v-model="healthCheckUrl"
+            label="Health Check Url" 
+            v-if="!key"
+            /><br />
+        <v-text-field
             name="deleteUrl"
             id="deleteUrl"
             type="deleteUrl"
@@ -70,6 +78,27 @@
         <v-btn id="btnRegister" color="success" v-if="!key" v-on:click="register">Register</v-btn>
 
         </v-form>
+
+        <v-dialog
+          v-model="loading"
+          hide-overlay
+          persistent
+          width="300"
+        >
+          <v-card
+            color="primary"
+            dark
+          >
+            <v-card-text>
+              Loading
+              <v-progress-linear
+                indeterminate
+                color="white"
+                class="mb-0"
+              ></v-progress-linear>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
         
     </div>
 </template>
@@ -89,25 +118,29 @@ export default {
       email: '',
       launchUrl: '',
       deleteUrl: '',
-      error: ''
+      healthCheckUrl: '',
+      error: '',
+      loading: false
     }
   },
   methods: {
     register: function () {
       
       this.error = "";
-      if (this.title.length == 0 || this.email.length == 0 || this.launchUrl.length == 0 || this.deleteUrl.length == 0) {
+      if (this.title.length == 0 || this.email.length == 0 || this.launchUrl.length == 0 || this.deleteUrl.length == 0 || this.healthCheckUrl.length == 0) {
         this.error = "Fields Cannot Be Left Blank.";
       }
 
       if (this.error) return;
 
       const url = `${apiURL}/applications/create`
+      this.loading = true;
       axios.post(url, {
         title: document.getElementById('title').value,
         launchUrl: document.getElementById('launchUrl').value,
         email: document.getElementById('email').value,
         deleteUrl: document.getElementById('deleteUrl').value,
+        healthCheckUrl: document.getElementById('healthCheckUrl').value,
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
@@ -121,6 +154,9 @@ export default {
         })
         .catch(err => {
             this.error = err.response.data.Message;
+        })
+        .finally(() => {
+          this.loading = false;
         })
     }
   }

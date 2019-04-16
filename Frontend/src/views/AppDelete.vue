@@ -42,6 +42,27 @@
 
         </v-form>
 
+        <v-dialog
+          v-model="loading"
+          hide-overlay
+          persistent
+          width="300"
+        >
+          <v-card
+            color="primary"
+            dark
+          >
+            <v-card-text>
+              Loading
+              <v-progress-linear
+                indeterminate
+                color="white"
+                class="mb-0"
+              ></v-progress-linear>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
+
     </div>
 </template>
 
@@ -55,7 +76,8 @@ export default {
       validation: null,
       title: '',
       email: '',
-      error: ''
+      error: '',
+      loading: false
     }
   },
   methods: {
@@ -69,6 +91,7 @@ export default {
       if (this.error) return;
 
       const url = `${apiURL}/applications/delete`
+      this.loading = true;
       axios.post(url, {
         title: document.getElementById('title').value,
         email: document.getElementById('email').value,
@@ -82,6 +105,9 @@ export default {
         })
         .catch(err => {
             this.error = err.response.data.Message
+        })
+        .finally(() => {
+          this.loading = false;
         })
     }
   }
