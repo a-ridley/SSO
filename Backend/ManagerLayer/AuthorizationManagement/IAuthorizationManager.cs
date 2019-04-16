@@ -6,8 +6,8 @@ namespace ManagerLayer
     public interface IAuthorizationManager
     {
         string GenerateSessionToken();
-        Session CreateSession(DatabaseContext _db, User user);
-        Session ValidateAndUpdateSession(DatabaseContext _db, string token);
-        Session DeleteSession(DatabaseContext _db, string token);
+        Session CreateSession(User user);
+        Session ValidateAndUpdateSession(string token);
+        Session DeleteSession(string token);
     }
 }

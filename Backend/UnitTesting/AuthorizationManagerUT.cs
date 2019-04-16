@@ -1,9 +1,7 @@
-﻿using System;
-using DataAccessLayer.Database;
+﻿using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using ManagerLayer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ServiceLayer.Exceptions;
 
 namespace UnitTesting
 {
@@ -12,17 +10,16 @@ namespace UnitTesting
     {
         TestingUtils _tu;
         DatabaseContext _db;
-        AuthorizationManager _am;
 
         public AuthorizationManagerUT()
         {
             _tu = new TestingUtils();
-            _am = new AuthorizationManager();
         }
 
         [TestMethod]
         public void GenerateSession()
         {
+            AuthorizationManager _am = new AuthorizationManager(null);
             string sessionToken1 = _am.GenerateSessionToken();
             string sessionToken2 = _am.GenerateSessionToken();
 
@@ -39,11 +36,12 @@ namespace UnitTesting
             // Act
             using (var _db = new DatabaseContext())
             {
-                Session session = _am.CreateSession(_db, user);
+                AuthorizationManager _am = new AuthorizationManager(_db);
+                Session session = _am.CreateSession(user);
 
                 _db.SaveChanges();
 
-                Session validatedSession = _am.ValidateAndUpdateSession(_db, session.Token);
+                Session validatedSession = _am.ValidateAndUpdateSession(session.Token);
 
                 // Assert 
                 Assert.IsNotNull(validatedSession);
@@ -57,9 +55,9 @@ namespace UnitTesting
         {
             using (var _db = new DatabaseContext())
             {
-                Session validatedSession = _am.ValidateAndUpdateSession(_db, "invalidToken");
+                AuthorizationManager _am = new AuthorizationManager(_db);
+                Session validatedSession = _am.ValidateAndUpdateSession("invalidToken");
 
-                // Assert
                 Assert.IsNull(validatedSession);
             }
         }
@@ -74,12 +72,13 @@ namespace UnitTesting
             // Act
             using (var _db = new DatabaseContext())
             {
-                Session deletedSession = _am.DeleteSession(_db, session.Token);
+                AuthorizationManager _am = new AuthorizationManager(_db);
+                Session deletedSession = _am.DeleteSession(session.Token);
 
                 _db.SaveChanges();
-                
-                Session validatedSession = _am.ValidateAndUpdateSession(_db, session.Token);
-              
+
+                Session validatedSession = _am.ValidateAndUpdateSession(session.Token);
+
                 // Assert 
                 Assert.IsNotNull(deletedSession);
                 Assert.AreEqual(session.Token, deletedSession.Token);

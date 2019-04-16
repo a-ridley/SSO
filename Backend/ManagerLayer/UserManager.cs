@@ -14,8 +14,15 @@ namespace ManagerLayer
 {
     public class UserManager
     {
+        PasswordService _passwordService;
+        UserService _userService;
+        public UserManager(DatabaseContext _db)
+        {
+            this._passwordService = new PasswordService();
+            this._userService = new UserService(_db);
+        }
+
         public User CreateUser(
-            DatabaseContext _db,
             string email,
             string password,
             DateTime dob,
@@ -36,8 +43,6 @@ namespace ManagerLayer
             {
                 throw new InvalidDobException("Date of birth less than 18 years ago");
             }
-
-            IPasswordService _passwordService = new PasswordService();
 
             if (!_passwordService.CheckPasswordLength(password))
             {
@@ -75,8 +80,7 @@ namespace ManagerLayer
                 CreatedAt = DateTime.UtcNow
             };
 
-            IUserService _userService = new UserService();
-            return _userService.CreateUser(_db, user);
+            return _userService.CreateUser(user);
         }
 
 
@@ -93,20 +97,19 @@ namespace ManagerLayer
             //var user = _userService.Login(email, password);
         }
 
-        public User GetUser(DatabaseContext _db, Guid userId)
+        public User GetUser(Guid userId)
         {
-            IUserService _userService = new UserService();
-            return _userService.GetUser(_db, userId);
+            return _userService.GetUser(userId);
         }
 
 
         public async Task<User> DeleteUser(DatabaseContext _db, Guid userId)
         {
             UserDeleteService uds = new UserDeleteService();
-            IUserService _userService = new UserService();
-            User deletingUser = _userService.GetUser(_db, userId);
-            ISessionService _sessionService = new SessionService();
-            var sessions = _sessionService.GetSessions(_db, userId);
+            IUserService _userService = new UserService(_db);
+            User deletingUser = _userService.GetUser(userId);
+            ISessionService _sessionService = new SessionService(_db);
+            var sessions = _sessionService.GetSessions(userId);
             var applications = ApplicationService.GetAllApplicationsList(_db);
             //var appList = applications.OfType<Application>().ToList();
             var responseList = new List<HttpResponseMessage>();
@@ -117,11 +120,11 @@ namespace ManagerLayer
             }
             if (responseList.All(response => response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound))
             {
-                User deletedUser = _userService.DeleteUser(_db, userId);
+                User deletedUser = _userService.DeleteUser(userId);
                 if(deletedUser != null){
                     foreach(Session sess in sessions)
                     {
-                        _sessionService.DeleteSession(_db, sess.Token);
+                        _sessionService.DeleteSession(sess.Token);
                     }
                 }
                 _db.SaveChanges(); //foreign key error

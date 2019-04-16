@@ -11,13 +11,10 @@ namespace UnitTesting
     public class UserManagerUT
     {
         TestingUtils _tu;
-        DatabaseContext _db;
-        UserManager _um;
 
         public UserManagerUT()
         {
             _tu = new TestingUtils();
-            _um = new UserManager();
         }
 
         [TestMethod]
@@ -40,7 +37,8 @@ namespace UnitTesting
             // Act
             using (var _db = new DatabaseContext())
             {
-                var response = _um.CreateUser(_db,
+                UserManager _um = new UserManager(_db);
+                var response = _um.CreateUser(
                     email,
                     password,
                     dob,
@@ -54,7 +52,7 @@ namespace UnitTesting
                     securityQ3,
                     securityQ3Answer);
 
-                var result = _um.GetUser(_db, response.Id);
+                var result = _um.GetUser(response.Id);
 
                 // Assert 
                 Assert.IsNotNull(response);
@@ -85,7 +83,8 @@ namespace UnitTesting
             {
                 try
                 {
-                    var response = _um.CreateUser(_db,
+                    UserManager _um = new UserManager(_db);
+                    var response = _um.CreateUser(
                         email,
                         password,
                         dob,
@@ -126,7 +125,8 @@ namespace UnitTesting
             {
                 try
                 {
-                    var response = _um.CreateUser(_db,
+                    UserManager _um = new UserManager(_db);
+                    var response = _um.CreateUser(
                         email,
                         password,
                         dob,
@@ -168,7 +168,8 @@ namespace UnitTesting
             {
                 try
                 {
-                    var response = _um.CreateUser(_db,
+                    UserManager _um = new UserManager(_db);
+                    var response = _um.CreateUser(
                         email,
                         password,
                         dob,
@@ -211,7 +212,8 @@ namespace UnitTesting
             {
                 try
                 {
-                    var response = _um.CreateUser(_db,
+                    UserManager _um = new UserManager(_db);
+                    var response = _um.CreateUser(
                         email,
                         password,
                         dob,
@@ -254,7 +256,8 @@ namespace UnitTesting
             {
                 try
                 {
-                    var response = _um.CreateUser(_db,
+                    UserManager _um = new UserManager(_db);
+                    var response = _um.CreateUser(
                         email,
                         password,
                         dob,

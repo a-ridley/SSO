@@ -10,34 +10,34 @@ namespace ServiceLayer.Services
     {
         private ISessionRepository _SessionRepo;
 
-        public SessionService()
+        public SessionService(DatabaseContext _db)
         {
-            _SessionRepo = new SessionRepository();
+            _SessionRepo = new SessionRepository(_db);
         }
 
-        public Session CreateSession(DatabaseContext _db, Session session)
+        public Session CreateSession(Session session)
         {
-            return _SessionRepo.CreateSession(_db, session);
+            return _SessionRepo.CreateSession(session);
         }
 
-        public Session GetSession(DatabaseContext _db, string token)
+        public Session GetSession(string token)
         {
-            return _SessionRepo.GetSession(_db, token);
+            return _SessionRepo.GetSession(token);
         }
 
-        public List<Session> GetSessions(DatabaseContext _db, Guid userId)
+        public List<Session> GetSessions(Guid userId)
         {
-            return _SessionRepo.GetSessions(_db, userId);
+            return _SessionRepo.GetSessions(userId);
         }
 
-        public Session UpdateSession(DatabaseContext _db, Session session)
+        public Session UpdateSession(Session session)
         {
-            return _SessionRepo.UpdateSession(_db, session);
+            return _SessionRepo.UpdateSession(session);
         }
 
-        public Session DeleteSession(DatabaseContext _db, string token)
+        public Session DeleteSession(string token)
         {
-            return _SessionRepo.DeleteSession(_db, token);
+            return _SessionRepo.DeleteSession(token);
         }
     }
 }

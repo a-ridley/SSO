@@ -229,7 +229,7 @@ export default {
           this.$router.push('dashboard');
         }
       }).catch(err => {
-        switch(err.response.status) {
+        switch((err.response || {}).status) {
           case 401:
             this.error = err.response.data;
             break;
@@ -242,6 +242,7 @@ export default {
           case 412:
             this.error = "Please fill out all of the registration fields and try again.";
             break;
+          default:
           case 500:
             this.error = "An unexpected server error occurred. Please try again momentarily.";
         }

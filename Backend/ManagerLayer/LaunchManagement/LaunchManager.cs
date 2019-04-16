@@ -37,7 +37,15 @@ namespace ManagerLayer.LaunchManagement
 
     public class LaunchManager : ILaunchManager
     {
-        public LaunchResponse SignLaunch(DatabaseContext _db, Session session, Guid appId)
+        DatabaseContext _db;
+        UserService userService;
+        public LaunchManager(DatabaseContext _db)
+        {
+            this._db = _db;
+            userService = new UserService(_db);
+        }
+
+        public LaunchResponse SignLaunch(Session session, Guid appId)
         {
             Application app = ApplicationService.GetApplication(_db, appId);
 
@@ -46,8 +54,7 @@ namespace ManagerLayer.LaunchManagement
                 throw new ArgumentException();
             }
 
-            IUserService userService = new UserService();
-            User user = userService.GetUser(_db, session.UserId);
+            User user = userService.GetUser(session.UserId);
 
             LaunchPayload launchPayload = new LaunchPayload
             {
