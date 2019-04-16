@@ -31,10 +31,31 @@
 
         <br />
 
-        <v-btn color="success" v-on:click="login">Login</v-btn>
+        <v-btn id="login" color="success" v-on:click="login">Login</v-btn>
 
-        <v-btn color="success" v-on:click="goToResetPassword">Reset Password</v-btn>
+        <v-btn id="reset" color="success" v-on:click="goToResetPassword">Reset Password</v-btn>
         </v-form>
+
+    <v-dialog
+      v-model="loading"
+      hide-overlay
+      persistent
+      width="300"
+    >
+      <v-card
+        color="primary"
+        dark
+      >
+        <v-card-text>
+          Loading
+          <v-progress-linear
+            indeterminate
+            color="white"
+            class="mb-0"
+          ></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
 
     </div>
 </template>
@@ -50,12 +71,14 @@
             return {
                 email: "",
                 password: "",
-                error: ""
+                error: "",
+                loading: false
             }
         },
         methods: {
             login() {
                const url = `${apiURL}/users/login`
+              this.loading = true;
                axios.post(url,
                {
                     email: this.$data.email,
@@ -78,6 +101,9 @@
                     else{
                         this.error = e.response.data
                     }
+            })
+            .finally(() => {
+                this.loading = false;
             })
         },
         goToResetPassword(){

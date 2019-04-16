@@ -30,7 +30,7 @@
       {{message}}
       </v-alert>
 
-<v-btn color="success" v-on:click="submitEmail">Send Email</v-btn>
+<v-btn id="sendEmail" color="success" v-on:click="submitEmail">Send Email</v-btn>
   </div>
 </template>
 

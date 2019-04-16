@@ -45,7 +45,7 @@
             label="Confirm New Password"/>
       <br />
         <br/>
-        <v-btn color="success" v-on:click="submitPasswords">Update Password</v-btn>
+        <v-btn id="submit" color="success" v-on:click="submitPasswords">Update Password</v-btn>
     </div>
   </div>
 </template>
@@ -66,9 +66,6 @@ export default {
     }
   },
   methods: {
-    redirectToHome: function () {
-      this.$router.push( "/home" )
-    },
     submitPasswords: function () {
       if(this.newPassword == null || this.confirmNewPassword == null || this.oldPassword == null){
         this.errorMessage = 'Password fields cannot be empty'
@@ -95,7 +92,7 @@ export default {
             'Access-Control-Allow-Credentials': true
           }
         })
-          .then(response => {this.message = response.data}, setTimeout(() => this.redirectToHome(), 3000))
+          .then(response => {this.message = response.data})
           .catch(e => { this.errorMessage = e.response.data })
       }
     }
