@@ -12,16 +12,16 @@ namespace Program
     {
         static void Main(string[] args)
         {
-            var tu = new TestingUtils();
-            var newUser = tu.CreateUserObject();
-            Console.WriteLine(newUser.Email);
-            using (var _db = new DatabaseContext())
-            {
-                var us = new UserService();
-                us.CreateUser(_db, newUser);
-                _db.SaveChanges();
-            }
-            Console.ReadKey();
+            //var tu = new TestingUtils();
+            //var newUser = tu.CreateUserObject();
+            //Console.WriteLine(newUser.Email);
+            //using (var _db = new DatabaseContext())
+            //{
+            //    var us = new UserService(_db);
+            //    us.CreateUser( newUser);
+            //    _db.SaveChanges();
+            //}
+            //Console.ReadKey();
         }
     }
 }
