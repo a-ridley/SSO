@@ -33,7 +33,7 @@
 
         <v-btn id="login" color="success" v-on:click="login">Login</v-btn>
 
-        <v-btn id ="reset" color="success" v-on:click="goToResetPassword">Reset Password</v-btn>
+        <v-btn id="reset" color="success" v-on:click="goToResetPassword">Reset Password</v-btn>
         </v-form>
 
     <v-dialog

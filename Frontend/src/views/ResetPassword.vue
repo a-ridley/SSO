@@ -58,7 +58,7 @@
             type="text"
             label="Answer for Question 3"/>
       <br />
-      <v-btn color="success" v-on:click="submitAnswers">Submit Answers</v-btn>
+      <v-btn id="submitAnswers" color="success" v-on:click="submitAnswers">Submit Answers</v-btn>
     </div>
 
     <br/>
@@ -80,7 +80,7 @@
             type="text"
             label="Cofirm New Password"/>
       <br />
-      <v-btn color="success" v-on:click="submitNewPassword">Submit New Password</v-btn>
+      <v-btn id="submitPassword" color="success" v-on:click="submitNewPassword">Submit New Password</v-btn>
     </div>
   </div>
 </template>
