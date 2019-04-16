@@ -3,7 +3,6 @@ using ServiceLayer.Services;
 using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using System;
-using System.Data.Entity.Validation;
 
 namespace UnitTesting
 {
@@ -271,8 +270,5 @@ namespace UnitTesting
                 Assert.IsNull(result);
             }
         }
-
-
-
     }
 }

@@ -1,23 +1,29 @@
 using DataAccessLayer.Database;
+using DataAccessLayer.Requests;
 using ManagerLayer.PasswordManagement;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ServiceLayer.Services;
 using System;
 using System.Collections.Generic;
 
 namespace UnitTesting
 {
     [TestClass]
-    public class PasswordManagerUT
+    public class PasswordResetManagerUT
     {
         DatabaseContext _db;
         TestingUtils tu;
         PasswordManager pm;
+        SessionService ss;
+        UserService us;
 
-        public PasswordManagerUT()
+        public PasswordResetManagerUT()
         {
             _db = new DatabaseContext();
             tu = new TestingUtils();
             pm = new PasswordManager();
+            ss = new SessionService();
+            us = new UserService();
         }
 
         [TestMethod]
@@ -113,7 +119,7 @@ namespace UnitTesting
             tu.CreateUserInDb(newUser);
             var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
             //Act
-            var response = pm.GetAttemptsPerID(newlyAddedPasswordReset.ResetToken);
+            var response = pm.GetAttemptsPerToken(newlyAddedPasswordReset.ResetToken);
             //Assert
             Assert.IsNotNull(response);
         }
@@ -192,8 +198,10 @@ namespace UnitTesting
         {
             //Arrange
             string password = "password";
-            var user = tu.CreateUserObject();
-            string resetToken = tu.CreatePasswordResetObject(user).ResetToken;
+            var newUser = tu.CreateUserObject();
+            tu.CreateUserInDb(newUser);
+            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+            string resetToken = newlyAddedPasswordReset.ResetToken;
             //Act
             var response = pm.SaltAndHashPassword(resetToken, password);
             //Assert
@@ -202,36 +210,42 @@ namespace UnitTesting
         }
 
         [TestMethod]
-        public void UpdatePasswordLoggedIn_Pass()
+        public void UpdatePassword__Pass()
         {
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            string newPassword = "asdf";
+            string newPassword = "qwertyswag123";
+            var newPasswordHashed = pm.HashPassword(newPassword, newUser.PasswordSalt);
             //Act
-            var response = pm.UpdatePassword(newUser, newPassword);
-            var actual = newUser.PasswordHash;
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsTrue(response);
-            Assert.AreEqual(actual, newPassword);
+            var response = pm.UpdatePassword(newUser, newPasswordHashed);
+            
+            using(_db = tu.CreateDataBaseContext())
+            {
+                var actual = us.GetUser(_db, newUser.Email).PasswordHash;
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsTrue(response);
+                Assert.AreEqual(newPasswordHashed, actual);
+            }
         }
 
         [TestMethod]
-        public void UpdatePasswordNotLoggedIn_Pass()
+        public void ResetPassword_Pass()
         {
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
             var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
             string newPassword = "asdf";
+            string newPasswordHashed = pm.HashPassword(newPassword, newUser.PasswordSalt);
             //Act
-            var response = pm.UpdatePassword(newlyAddedPasswordReset.ResetToken, newPassword);
+            var response = pm.ResetPassword(newlyAddedPasswordReset.ResetToken, newPasswordHashed);
             var actual = _db.Users.Find(newUser.Id).PasswordHash;
             //Assert
             Assert.IsNotNull(response);
             Assert.IsTrue(response);
-            Assert.AreEqual(actual, newPassword);
+            Assert.AreEqual(actual, newPasswordHashed);
         }
 
         [TestMethod]
@@ -297,8 +311,6 @@ namespace UnitTesting
             Assert.IsNotNull(response);
             Assert.IsTrue(response);
         }
-
-
 
         [TestMethod]
         public void CreatePasswordReset_Fail()
@@ -413,7 +425,7 @@ namespace UnitTesting
         }
 
         [TestMethod]
-        public void UpdatePasswordNotLoggedIn_Fail()
+        public void ResetPassword_Fail_InvalidToken()
         {
             //Arrange
             var newUser = tu.CreateUserObject();
@@ -421,7 +433,7 @@ namespace UnitTesting
             string resetToken = "fakeResetRoken";
             string newPassword = "asdf";
             //Act
-            var response = pm.UpdatePassword(resetToken, newPassword);
+            var response = pm.ResetPassword(resetToken, newPassword);
             var actual = _db.Users.Find(newUser.Id).PasswordHash;
             //Assert
             Assert.IsNotNull(response);
@@ -494,6 +506,329 @@ namespace UnitTesting
             //Assert
             Assert.IsNotNull(response);
             Assert.IsFalse(response);
+        }
+
+        [TestMethod]
+        public void SendResetEmail_Pass()
+        {
+            //Arrage
+            var email = "winnmoo@gmail.com";
+            string url = "kfc-sso.com/resetpassword/";
+            int expected = 1;
+            //Act
+            int actual = pm.SendResetEmail(email, url);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void SendResetEmail_Fail()
+        {
+            //Arrange
+            string email = null;
+            string url = "kfc-sso.com/resetpassword/";
+            int expected = 0;
+            //Act
+            int actual = pm.SendResetEmail(email, url);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void CheckSecurityAnswersController_Pass()
+        {
+            //Arrange
+            var expected = 1;
+            var newUser = tu.CreateUserObject();
+            string secA1 = "Pizza";
+            string secA2 = "Cyan";
+            string secA3 = "Hiking";
+            newUser.SecurityQ1Answer = secA1;
+            newUser.SecurityQ2Answer = secA2;
+            newUser.SecurityQ3Answer = secA3;
+            tu.CreateUserInDb(newUser);
+
+            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+
+            SecurityAnswersRequest request = new SecurityAnswersRequest();
+            request.securityA1 = secA1;
+            request.securityA2 = secA2;
+            request.securityA3 = secA3;
+
+            //Act
+            var actual = pm.CheckSecurityAnswersController(newlyAddedPasswordReset.ResetToken, request);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void CheckSecurityAnswersController_Fail_InvalidToken()
+        {
+            //Arrange
+            var expected = -2;
+            var newUser = tu.CreateUserObject();
+            string secA1 = "Pizza";
+            string secA2 = "Cyan";
+            string secA3 = "Hiking";
+            newUser.SecurityQ1Answer = secA1;
+            newUser.SecurityQ2Answer = secA2;
+            newUser.SecurityQ3Answer = secA3;
+            tu.CreateUserInDb(newUser);
+
+            var newlyAddedPasswordReset = "asdf";
+
+            SecurityAnswersRequest request = new SecurityAnswersRequest();
+            request.securityA1 = secA1;
+            request.securityA2 = secA2;
+            request.securityA3 = secA3;
+
+            //Act
+            var actual = pm.CheckSecurityAnswersController(newlyAddedPasswordReset, request);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void CheckSecurityAnswersController_Fail_WrongAnswers()
+        {
+            //Arrange
+            var expected = -1;
+            var newUser = tu.CreateUserObject();
+            string secA1 = "Pizza";
+            string secA2 = "Cyan";
+            string secA3 = "Hiking";
+            newUser.SecurityQ1Answer = secA1;
+            newUser.SecurityQ2Answer = secA2;
+            newUser.SecurityQ3Answer = "photography";
+            tu.CreateUserInDb(newUser);
+
+            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+
+            SecurityAnswersRequest request = new SecurityAnswersRequest();
+            request.securityA1 = secA1;
+            request.securityA2 = secA2;
+            request.securityA3 = secA3;
+
+            //Act
+            var actual = pm.CheckSecurityAnswersController(newlyAddedPasswordReset.ResetToken, request);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void ResetPasswordController_Pass()
+        {
+            //Arrange
+            var expected = 1;
+            var newUser = tu.CreateUserObject();
+            tu.CreateUserInDb(newUser);
+            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+            newlyAddedPasswordReset.AllowPasswordReset = true;
+            pm.UpdatePasswordReset(newlyAddedPasswordReset);
+
+            var newPassword = "qweruianvkdasd123";
+            //Act
+            var actual = pm.ResetPasswordController(newlyAddedPasswordReset.ResetToken, newPassword);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void ResetPasswordController_Fail_PasswordLength()
+        {
+            //Arrange
+            var expected = -4;
+            var newlyAddedPasswordReset = "asdf";
+            var newPassword = "shortpass";
+            //Act
+            var actual = pm.ResetPasswordController(newlyAddedPasswordReset, newPassword);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void ResetPasswordController_Fail_InvalidToken()
+        {
+            //Arrange
+            var expected = -3;
+            var newlyAddedPasswordReset = "asdf";
+            var newPassword = "qweruianvkdasd123";
+            //Act
+            var actual = pm.ResetPasswordController(newlyAddedPasswordReset, newPassword);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void ResetPasswordController_Fail_ResetNotAllowed()
+        {
+            //Arrange
+            var expected = -2;
+            var newUser = tu.CreateUserObject();
+            tu.CreateUserInDb(newUser);
+            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+
+            var newPassword = "qweruianvkdasd123";
+            //Act
+            var actual = pm.ResetPasswordController(newlyAddedPasswordReset.ResetToken, newPassword);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void ResetPasswordController_Fail_PasswordPwned()
+        {
+            //Arrange
+            var expected = -1;
+            var newUser = tu.CreateUserObject();
+            tu.CreateUserInDb(newUser);
+            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+            newlyAddedPasswordReset.AllowPasswordReset = true;
+            pm.UpdatePasswordReset(newlyAddedPasswordReset);
+
+            var newPassword = "passwordpassword";
+            //Act
+            var actual = pm.ResetPasswordController(newlyAddedPasswordReset.ResetToken, newPassword);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void UpdatePasswordController_Pass()
+        {
+            // Arrange
+            var expected = 1;
+            var newUser = tu.CreateUserObject();
+
+            var oldPassword = "qwertyswag123"; //These three lines of code change the password of the user using the password salt
+            var oldPasswordHashed = pm.HashPassword(oldPassword, newUser.PasswordSalt); //so that the password hash is known
+            newUser.PasswordHash = oldPasswordHashed;
+
+            tu.CreateUserInDb(newUser);
+
+            var newSession = tu.CreateSessionInDb(newUser);
+
+            UpdatePasswordRequest request = new UpdatePasswordRequest();
+            request.sessionToken = newSession.Token;
+            request.oldPassword = oldPassword;
+            request.newPassword = "123qwertyswag";
+
+            //Act
+            var actual = pm.UpdatePasswordController(request);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void UpdatePasswordController_Fail_SamePassword()
+        {
+            // Arrange
+            var expected = -1;
+            var newUser = tu.CreateUserObject();
+            var oldPassword = "qwertyswag123";
+            var oldPasswordHashed = pm.HashPassword(oldPassword, newUser.PasswordSalt);
+            newUser.PasswordHash = oldPasswordHashed;
+            tu.CreateUserInDb(newUser);
+
+            var newSession = tu.CreateSessionInDb(newUser);
+
+            UpdatePasswordRequest request = new UpdatePasswordRequest();
+            request.sessionToken = newSession.Token;
+            request.oldPassword = oldPassword;
+            request.newPassword = "qwertyswag123";
+
+            //Act
+            var actual = pm.UpdatePasswordController(request);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void UpdatePasswordController_Fail_PwnedPassword()
+        {
+            // Arrange
+            var expected = -2;
+            var newUser = tu.CreateUserObject();
+            var oldPassword = "qwertyswag123";
+            var oldPasswordHashed = pm.HashPassword(oldPassword, newUser.PasswordSalt);
+            newUser.PasswordHash = oldPasswordHashed;
+            tu.CreateUserInDb(newUser);
+
+            var newSession = tu.CreateSessionInDb(newUser);
+
+            UpdatePasswordRequest request = new UpdatePasswordRequest();
+            request.sessionToken = newSession.Token;
+            request.oldPassword = oldPassword;
+            request.newPassword = "passwordpassword";
+
+            //Act
+            var actual = pm.UpdatePasswordController(request);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void UpdatePasswordController_Fail_PasswordLength()
+        {
+            // Arrange
+            var expected = -3;
+            var newUser = tu.CreateUserObject();
+            var oldPassword = "qwertyswag123";
+            var oldPasswordHashed = pm.HashPassword(oldPassword, newUser.PasswordSalt);
+            newUser.PasswordHash = oldPasswordHashed;
+            tu.CreateUserInDb(newUser);
+
+            var newSession = tu.CreateSessionInDb(newUser);
+
+            UpdatePasswordRequest request = new UpdatePasswordRequest();
+            request.sessionToken = newSession.Token;
+            request.oldPassword = oldPassword;
+            request.newPassword = "eucildjeo";
+
+            //Act
+            var actual = pm.UpdatePasswordController(request);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void UpdatePasswordController_Fail_InvalidPassword()
+        {
+            // Arrange
+            var expected = -4;
+            var newUser = tu.CreateUserObject();
+            tu.CreateUserInDb(newUser);
+
+            var newSession = tu.CreateSessionInDb(newUser);
+
+            UpdatePasswordRequest request = new UpdatePasswordRequest();
+            request.sessionToken = newSession.Token;
+            request.oldPassword = "qwertyswag123";
+            request.newPassword = "eucildjeo";
+
+            //Act
+            var actual = pm.UpdatePasswordController(request);
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void UpdatePasswordController_Fail_InvalidSession()
+        {
+            // Arrange
+            var expected = -5;
+            var newUser = tu.CreateUserObject();
+            tu.CreateUserInDb(newUser);
+
+            UpdatePasswordRequest request = new UpdatePasswordRequest();
+            request.sessionToken = "asdf";
+            request.oldPassword = "qwertyswag123";
+            request.newPassword = "eucildjeo";
+
+            //Act
+            var actual = pm.UpdatePasswordController(request);
+            //Assert
+            Assert.AreEqual(expected, actual);
         }
     }
 }
