@@ -57,7 +57,7 @@ let router = new VueRouter({
     {
       path: '/login',
       name: 'login',
-      component: Login
+      component: Login,
     },
     {
       path: '/dashboard',
@@ -111,6 +111,7 @@ router.beforeEach((to, from, next) => {
       alert('Please login');
     }
   }
+
   next();
 })
 
