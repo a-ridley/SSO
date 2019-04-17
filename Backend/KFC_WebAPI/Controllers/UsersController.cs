@@ -251,7 +251,7 @@ namespace KFC_WebAPI.Controllers
                 {
                     return Content(HttpStatusCode.Unauthorized, "Signature not valid!");
                 }
-                UserManager um = new UserManager();
+                UserManager um = new UserManager(_db);
                 User deletedUser = await um.DeleteUser(_db, request.ssoUserId);
                 if(deletedUser != null)
                 {
