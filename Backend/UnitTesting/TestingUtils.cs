@@ -216,7 +216,8 @@ namespace UnitTesting
                 UserDeletionUrl = "https://kfc.com/delete",
                 LogoUrl = "https://kfc.com/logo.png",
                 Description = "A KFC app",
-                SharedSecretKey = Guid.NewGuid().ToString("N")
+                SharedSecretKey = Guid.NewGuid().ToString("N"),
+                HealthCheckUrl = "https://kfc.come/health",
             };
             return app;
         }
@@ -241,7 +242,7 @@ namespace UnitTesting
 
         public ApiKey CreateApiKeyObject()
         {
-            Application app = CreateApplicationObject();
+            Application app = CreateApplicationInDb();
             ApiKey apiKey = new ApiKey
             {
                 Key = Guid.NewGuid().ToString("N"),

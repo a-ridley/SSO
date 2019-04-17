@@ -37,7 +37,7 @@ namespace ManagerLayer.LaunchManagement
 
     public class LaunchManager : ILaunchManager
     {
-        IApplicationService _applicationService = new ApplicationService();
+        IApplicationService _applicationService;
 
         DatabaseContext _db;
         UserService userService;
@@ -45,11 +45,12 @@ namespace ManagerLayer.LaunchManagement
         {
             this._db = _db;
             userService = new UserService(_db);
+            _applicationService = new ApplicationService(_db);
         }
 
         public LaunchResponse SignLaunch(Session session, Guid appId)
         {
-            Application app = _applicationService.GetApplication(_db, appId);
+            Application app = _applicationService.GetApplication(appId);
 
             if (app == null)
             {

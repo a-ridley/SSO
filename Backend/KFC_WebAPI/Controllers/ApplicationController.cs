@@ -14,8 +14,7 @@ namespace KFC_WebAPI.Controllers
 {
     public class ApplicationController : ApiController
     {
-        private ApplicationManager manager = new ApplicationManager();
-        IApplicationService _applicationService = new ApplicationService();
+        //private ApplicationManager manager = new ApplicationManager(_db);
 
         /// <summary>
         /// Get all individual applications registered with the SSO
@@ -27,7 +26,8 @@ namespace KFC_WebAPI.Controllers
         {
             using (var _db = new DatabaseContext())
             {
-                var applications = _applicationService.GetAllApplications(_db);
+                IApplicationService _applicationService = new ApplicationService(_db);
+                var applications = _applicationService.GetAllApplications();
                 return Content((HttpStatusCode) 200, applications);
             }
         }
@@ -42,7 +42,8 @@ namespace KFC_WebAPI.Controllers
         {
             using (var _db = new DatabaseContext())
             {
-                var applications = _applicationService.SortAllApplicationsAlphaAscending(_db);
+                IApplicationService _applicationService = new ApplicationService(_db);
+                var applications = _applicationService.SortAllApplicationsAlphaAscending();
                 return Content((HttpStatusCode)200, applications);
             }
         }
@@ -57,7 +58,8 @@ namespace KFC_WebAPI.Controllers
         {
             using (var _db = new DatabaseContext())
             {
-                var applications = _applicationService.SortAllApplicationsAlphaDescending(_db);
+                IApplicationService _applicationService = new ApplicationService(_db);
+                var applications = _applicationService.SortAllApplicationsAlphaDescending();
                 return Content((HttpStatusCode)200, applications);
             }
         }
@@ -72,7 +74,8 @@ namespace KFC_WebAPI.Controllers
         {
             using (var _db = new DatabaseContext())
             {
-                var applications = _applicationService.SortAllApplicationsNumOfClicks(_db);
+                IApplicationService _applicationService = new ApplicationService(_db);
+                var applications = _applicationService.SortAllApplicationsNumOfClicks();
                 return Content((HttpStatusCode)200, applications);
             }
         }
@@ -98,8 +101,13 @@ namespace KFC_WebAPI.Controllers
 
             try
             {
-                // Validate request and register application
-                responseContent = manager.ValidateRegistration(request);
+                using (var _db = new DatabaseContext())
+                {
+                    IApplicationManager manager = new ApplicationManager(_db);
+                    // Validate request and register application
+                    responseContent = manager.ValidateRegistration(request);
+                }
+                    
                 responseContent.Code = HttpStatusCode.OK;
             }
             catch(Exception ex)
@@ -149,8 +157,13 @@ namespace KFC_WebAPI.Controllers
 
             try
             {
-                // Validate request inputs and publish application
-                responseContent = manager.ValidatePublish(request);
+                using (var _db = new DatabaseContext())
+                {
+                    IApplicationManager manager = new ApplicationManager(_db);
+                    // Validate request inputs and publish application
+                    responseContent = manager.ValidatePublish(request);
+                }
+
                 responseContent.Code = HttpStatusCode.OK;
             }
             catch(Exception ex)
@@ -200,8 +213,12 @@ namespace KFC_WebAPI.Controllers
 
             try
             {
-                // Validate request inputs and generate a new api key
-                responseContent = manager.ValidateKeyGeneration(request);
+                using (var _db = new DatabaseContext())
+                {
+                    IApplicationManager manager = new ApplicationManager(_db);
+                    // Validate request inputs and generate a new api key
+                    responseContent = manager.ValidateKeyGeneration(request);
+                }
                 responseContent.Code = HttpStatusCode.OK;
             }
             catch(Exception ex)
@@ -250,8 +267,13 @@ namespace KFC_WebAPI.Controllers
 
             try
             {
-                // Validate request inputs and delete application from portal
-                responseContent = manager.ValidateDeletion(request);
+                using (var _db = new DatabaseContext())
+                {
+                    IApplicationManager manager = new ApplicationManager(_db);
+                    // Validate request inputs and delete application from portal
+                    responseContent = manager.ValidateDeletion(request);
+                }
+
                 responseContent.Code = HttpStatusCode.OK;
             }
             catch(Exception ex)
@@ -288,10 +310,14 @@ namespace KFC_WebAPI.Controllers
         [Route("api/applications/update")]
         public HttpResponseMessage UpdateApplication([FromBody] ApplicationRequest request)
         {
-            HttpResponseContent responseContent = manager.ValidateUpdate(request);
-            HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent.Message);
+            using (var _db = new DatabaseContext())
+            {
+                IApplicationManager manager = new ApplicationManager(_db);
+                HttpResponseContent responseContent = manager.ValidateUpdate(request);
+                HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent.Message);
 
-            return response;
+                return response;
+            }
         }
     }
 }

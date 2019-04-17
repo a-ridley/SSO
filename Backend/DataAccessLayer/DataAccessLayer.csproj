@@ -93,6 +93,14 @@
     <Compile Include="Migrations\201904160246563_update-applications-add-HealthCheckUrl.Designer.cs">
       <DependentUpon>201904160246563_update-applications-add-HealthCheckUrl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201904161956235_delete-applications-apikeys.cs" />
+    <Compile Include="Migrations\201904161956235_delete-applications-apikeys.Designer.cs">
+      <DependentUpon>201904161956235_delete-applications-apikeys.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904162002023_create-updated-tables-applications-apiKeys.cs" />
+    <Compile Include="Migrations\201904162002023_create-updated-tables-applications-apiKeys.Designer.cs">
+      <DependentUpon>201904162002023_create-updated-tables-applications-apiKeys.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApiKey.cs" />
     <Compile Include="Models\Application.cs" />
@@ -162,6 +170,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201904160246563_update-applications-add-HealthCheckUrl.resx">
       <DependentUpon>201904160246563_update-applications-add-HealthCheckUrl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904161956235_delete-applications-apikeys.resx">
+      <DependentUpon>201904161956235_delete-applications-apikeys.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904162002023_create-updated-tables-applications-apiKeys.resx">
+      <DependentUpon>201904162002023_create-updated-tables-applications-apiKeys.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />

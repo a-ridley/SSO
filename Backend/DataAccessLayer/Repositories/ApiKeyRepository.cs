@@ -3,20 +3,22 @@ using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using System.Linq;
 using System.Data.Entity;
+using System.Collections.Generic;
 
 namespace DataAccessLayer.Repositories
 {
     public class ApiKeyRepository: IApiKeyRepository
     {
-        /// <summary>
-        /// Create a new Api Key record
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="key">api key</param>
-        /// <returns>created api key</returns>
-        public ApiKey CreateNewKey(DatabaseContext _db, ApiKey key)
+        DatabaseContext _db;
+
+        public ApiKeyRepository(DatabaseContext _db)
         {
-            var apiKey = GetKey(_db, key.Key);
+            this._db = _db;
+        }
+
+        public ApiKey CreateNewKey(ApiKey key)
+        {
+            var apiKey = GetKey(key.Key);
             if (apiKey != null)
             {
                 return null;
@@ -26,15 +28,9 @@ namespace DataAccessLayer.Repositories
 
         }
 
-        /// <summary>
-        /// Delete an Api Key record
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="id">api key id</param>
-        /// <returns>deleted api key</returns>
-        public ApiKey DeleteKey(DatabaseContext _db, Guid id)
+        public ApiKey DeleteKey(Guid id)
         {
-            var apiKey = GetKey(_db, id);
+            var apiKey = GetKey(id);
             if (apiKey == null)
             {
                 return null;
@@ -42,41 +38,15 @@ namespace DataAccessLayer.Repositories
             _db.Entry(apiKey).State = EntityState.Deleted;
             return apiKey;
         }
-
-        /// <summary>
-        /// Retrieve an Api Key record by id field
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="id">api key id</param>
-        /// <returns>The retrieved api key</returns>
-        public ApiKey GetKey(DatabaseContext _db, Guid id)
+        
+        public ApiKey GetKey(Guid id)
         {
             var response = _db.Keys.Find(id);
             return response;
         }
 
-        /// <summary>
-        /// Retrieve an Api Key record by application id and isUsed
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="appId">application id</param>
-        /// <param name="isUsed">whether the key has been used or not</param>
-        /// <returns></returns>
-        public ApiKey GetKey(DatabaseContext _db, Guid applicationId, bool isUsed)
-        {
-            var apiKey = _db.Keys
-                .Where(k => k.ApplicationId == applicationId && k.IsUsed == false)
-                .FirstOrDefault<ApiKey>();
-            return apiKey;
-        }
 
-        /// <summary>
-        /// Retrieve an Api Key record by key field
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="key">key value of api key</param>
-        /// <returns></returns>
-        public ApiKey GetKey(DatabaseContext _db, string key)
+        public ApiKey GetKey(string key)
         {
             var apiKey = _db.Keys
                 .Where(k => k.Key == key)
@@ -84,15 +54,16 @@ namespace DataAccessLayer.Repositories
             return apiKey;
         }
 
-        /// <summary>
-        /// Update an Api Key record
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="key">api key</param>
-        /// <returns></returns>
-        public ApiKey UpdateKey(DatabaseContext _db, ApiKey key)
+        public List<ApiKey> GetAllKeys(Guid appId)
         {
-            var result = GetKey(_db, key.Id);
+            return _db.Keys
+            .Where(x => x.ApplicationId == appId)
+            .ToList();
+        }
+
+        public ApiKey UpdateKey(ApiKey key)
+        {
+            var result = GetKey(key.Id);
             if (result == null)
             {
                 return null;

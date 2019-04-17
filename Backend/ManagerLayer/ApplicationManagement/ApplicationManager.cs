@@ -4,20 +4,23 @@ using MimeKit;
 using ServiceLayer.Exceptions;
 using ServiceLayer.Services;
 using System;
-using System.Collections.Generic;
 using System.Data.Entity.Validation;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
 
 namespace ManagerLayer.ApplicationManagement
 {
-    public class ApplicationManager
+    public class ApplicationManager: IApplicationManager
     {
-        public ApplicationManager()
+        private DatabaseContext _db;
+
+        public ApplicationManager(DatabaseContext _db)
         {
-            _applicationService = new ApplicationService();
-            _apiKeyService = new ApiKeyService();
+            this._db = _db;
+            _applicationService = new ApplicationService(_db);
+            _apiKeyService = new ApiKeyService(_db);
             _emailService = new EmailService();
             _tokenService = new TokenService();
         }
@@ -89,34 +92,19 @@ namespace ManagerLayer.ApplicationManagement
                 Key = _tokenService.GenerateToken(),
                 ApplicationId = app.Id
             };
+            
+            // Add the api key to the application
+            app.ApiKeys.Add(apiKey);
 
-            using (var _db = new DatabaseContext())
+            // Create an Application entry
+            var appResponse = _applicationService.CreateApplication(app);
+            if (appResponse == null) // Application was not created
             {
-                // Create an Application entry
-                var appResponse = _applicationService.CreateApplication(_db, app);
-                if (appResponse == null) // Application was not created
-                {
-                    throw new ArgumentException("Application Already Exists.");
-                }
-
-                // Create an ApiKey entry
-                var keyResponse = _apiKeyService.CreateKey(_db, apiKey);
-
-                // Keep generating a new key until a unique one is made.
-                while (keyResponse == null)
-                {
-                    apiKey.Key = _tokenService.GenerateToken();
-                    keyResponse = _apiKeyService.CreateKey(_db, apiKey);
-                }
-
-                // Changes to data store
-                List<object> responses = new List<object>();
-                responses.Add(appResponse);
-                responses.Add(keyResponse);
-
-                // Save data store changes
-                SaveChanges(_db, responses);
+                throw new ArgumentException("Application Already Exists.");
             }
+            
+            // Save data store changes
+            SaveChanges(appResponse);
 
             string message;
 
@@ -169,62 +157,73 @@ namespace ManagerLayer.ApplicationManagement
                 throw new InvalidImageException("Invalid Logo Dimensions: Can be no more than " + xDimension + "x" + yDimension + " pixels.");
             }
 
-            using (var _db = new DatabaseContext())
+            // Attempt to find api key
+            var apiKey = _apiKeyService.GetKey(request.Key);
+            // Key does not exist
+            if (apiKey == null)
             {
-                // Attempt to find api key
-                var apiKey = _apiKeyService.GetKey(_db, request.Key);
-
-                // Key must exist and be unused.
-                if (apiKey == null || apiKey.IsUsed == true)
-                {
-                    throw new InvalidApiKeyException("Invalid API Key");
-                }
-
-                // Attempt to get application based on ApplicationId from api key
-                var app = _applicationService.GetApplication(_db, apiKey.ApplicationId);
-
-                // Published application title is used to authenticate the app.
-                if (app == null || !request.Title.Equals(app.Title))
-                {
-                    throw new InvalidApiKeyException("Invalid API Key");
-                }
-
-                // Update values of application record
-                app.Description = request.Description;
-                app.LogoUrl = request.LogoUrl;
-                app.UnderMaintenance = request.UnderMaintenance;
-                var appResponse = _applicationService.UpdateApplication(_db, app);
-
-                // Update values of api key record
-                apiKey.IsUsed = true;
-                var keyResponse = _apiKeyService.UpdateKey(_db, apiKey);
-
-                // Data store changes
-                List<object> responses = new List<object>();
-                responses.Add(appResponse);
-                responses.Add(keyResponse);
-
-                // Attempt to save data store changes
-                SaveChanges(_db, responses);
-
-                string message;
-
-                // Email successful publish confirmation
-                try
-                {
-                    SendAppPublishEmail(app.Email, app);
-                    message = "Successful Publish to the KFC SSO portal!  An email has been sent confirming your publish.";
-                }
-                catch
-                {
-                    message = "Successful Publish to the KFC SSO portal!  A confirmation email was unable to send.";
-                }
-
-                // Return successful publish response
-                response = new HttpResponseContent(message);
-                return response;
+                throw new InvalidApiKeyException("Invalid API Key: Key Not Found");
+            }
+            // Key is found, but used
+            else if (apiKey.IsUsed)
+            {
+                throw new InvalidApiKeyException("Invalid API Key: Key Has Already Been Used");
             }
 
+            // Attempt to find application that api key belongs to
+            var app = _applicationService.GetApplication(apiKey.ApplicationId);
+            // App does not exist, or does not match the api key
+            if(app == null || app.Title != request.Title)
+            {
+                throw new InvalidApiKeyException("Invalid API Key: Key and Application Do Not Match");
+            }
+
+            // Update values of application
+            app.Description = request.Description;
+            app.LogoUrl = request.LogoUrl;
+            app.UnderMaintenance = request.UnderMaintenance;
+            
+            // Iterate through applications's api keys
+            for (int i = 0; i < app.ApiKeys.Count; i++)
+            {
+                // Found api key belongs to application's collection of api keys
+                if (app.ApiKeys.ElementAt(i).Id.Equals(apiKey.Id))
+                {
+                    // Invalidate api key
+                    app.ApiKeys.ElementAt(i).IsUsed = true;
+
+                    // Update values of application record
+                    var appResponse = _applicationService.UpdateApplication(app);
+                    // Application was not found
+                    if (appResponse == null)
+                    {
+                        throw new ArgumentException("Application Could Not Be Updated");
+                    }
+                    
+                    // Save data store changes
+                    SaveChanges(appResponse);
+
+                    string message;
+
+                    // Email successful publish confirmation
+                    try
+                    {
+                        SendAppPublishEmail(app.Email, app);
+                        message = "Successful Publish to the KFC SSO portal!  An email has been sent confirming your publish.";
+                    }
+                    catch
+                    {
+                        message = "Successful Publish to the KFC SSO portal!  A confirmation email was unable to send.";
+                    }
+
+                    // Return successful publish response
+                    response = new HttpResponseContent(message);
+                    return response;
+                }
+            }
+
+            // Key does not exist
+            throw new InvalidApiKeyException("Invalid API Key: Key Not Found2");
         }
 
         /// <summary>
@@ -246,65 +245,59 @@ namespace ManagerLayer.ApplicationManagement
                 throw new InvalidEmailException("Invalid Email Format");
             }
 
-            using (var _db = new DatabaseContext())
+            // Attempt to find application
+            var app = _applicationService.GetApplication(request.Title, request.Email);
+            if (app == null)
             {
-                // Attempt to find application
-                var app = _applicationService.GetApplication(_db, request.Title, request.Email);
-                if (app == null)
-                {
-                    throw new ArgumentException("Application Does Not Exist");
-                }
-
-                // Create a new ApiKey
-                ApiKey apiKey = new ApiKey
-                {
-                    Key = _tokenService.GenerateToken(),
-                    ApplicationId = app.Id
-                };
-
-                // Invalidate old unused api key
-                var keyOld = _apiKeyService.GetKey(_db, app.Id, false);
-                if(keyOld != null)
-                {
-                    keyOld.IsUsed = true;
-                    keyOld = _apiKeyService.UpdateKey(_db, keyOld);
-                }
-
-                // Attempt to create an apiKey entry
-                var keyResponse = _apiKeyService.CreateKey(_db, apiKey);
-
-                // Keep generating a new key until a unique one is made.
-                while (keyResponse == null)
-                {
-                    apiKey.Key = _tokenService.GenerateToken();
-                    keyResponse = _apiKeyService.CreateKey(_db, apiKey);
-                }
-
-                // Data store changes
-                List<object> responses = new List<object>();
-                responses.Add(keyResponse);
-                responses.Add(keyOld);
-
-                // Save data store changes
-                SaveChanges(_db, responses);
-
-                string message;
-
-                // Email the new api key
-                try
-                {
-                    SendNewApiKeyEmail(app.Email, apiKey.Key);
-                    message = "Successful Key Generation!  An email has been sent containing your new API Key.";
-                }
-                catch
-                {
-                    message = "Successful Key Generation!  Please save the following information.  An email containing this information was unable to send.";
-                }
-
-                // Return successful key generation response
-                response = new HttpResponseContent(message, apiKey.Key);
-                return response;
+                throw new ArgumentException("Application Does Not Exist");
             }
+
+            // Create a new ApiKey
+            ApiKey apiKey = new ApiKey
+            {
+                Key = _tokenService.GenerateToken(),
+                ApplicationId = app.Id
+            };
+            
+            // Invalidate old api keys
+            for (int i = 0; i < app.ApiKeys.Count; i++)
+            {
+                if (!app.ApiKeys.ElementAt(i).IsUsed)
+                {
+                    app.ApiKeys.ElementAt(i).IsUsed = true;
+                }
+            }
+
+            // Add new api key to application
+            app.ApiKeys.Add(apiKey);
+
+            // Update the application with the changed keys
+            var appResponse = _applicationService.UpdateApplication(app);
+            // Application was not found
+            if (appResponse == null)
+            {
+                throw new ArgumentException("Application Could Not Be Updated");
+            }
+
+            // Save data store changes
+            SaveChanges(appResponse);
+
+            string message;
+
+            // Email the new api key
+            try
+            {
+                SendNewApiKeyEmail(app.Email, apiKey.Key);
+                message = "Successful Key Generation!  An email has been sent containing your new API Key.";
+            }
+            catch
+            {
+                message = "Successful Key Generation!  Please save the following information.  An email containing this information was unable to send.";
+            }
+
+            // Return successful key generation response
+            response = new HttpResponseContent(message, apiKey.Key);
+            return response;
 
         }
 
@@ -327,46 +320,39 @@ namespace ManagerLayer.ApplicationManagement
                 throw new InvalidEmailException("Invalid Email Format");
             }
 
-            using (var _db = new DatabaseContext())
+            // Attempt to find application
+            var app = _applicationService.GetApplication(request.Title, request.Email);
+            if (app == null)
             {
-                // Attempt to find application
-                var app = _applicationService.GetApplication(_db, request.Title, request.Email);
-                if (app == null)
-                {
-                    throw new ArgumentException("Application Does Not Exist");
-                }
-
-                // Attempt to delete application
-                var appResponse = _applicationService.DeleteApplication(_db, app.Id);
-                if (appResponse == null)
-                {
-                    throw new ArgumentException("Application Does Not Exist");
-                }
-
-                // Data store changes
-                List<object> responses = new List<object>();
-                responses.Add(appResponse);
-
-                // Save data store changes
-                SaveChanges(_db, responses);
-
-                string message;
-
-                // Email application deletion confirmation
-                try
-                {
-                    SendAppDeleteEmail(app.Email, app.Title);
-                    message = "Application Deleted.  An email has been sent confirming your deletion.";
-                }
-                catch
-                {
-                    message = "Application Deleted.  A confirmation email was unable to send.";
-                }
-
-                // Return successful deletion response
-                response = new HttpResponseContent(message);
-                return response;
+                throw new ArgumentException("Application Does Not Exist");
             }
+
+            // Attempt to delete application
+            var appResponse = _applicationService.DeleteApplication(app.Id);
+            if (appResponse == null)
+            {
+                throw new ArgumentException("Application Could Not Be Deleted");
+            }
+            
+            // Save data store changes
+            SaveChanges(appResponse);
+
+            string message;
+
+            // Email application deletion confirmation
+            try
+            {
+                SendAppDeleteEmail(app.Email, app.Title);
+                message = "Application Deleted.  An email has been sent confirming your deletion.";
+            }
+            catch
+            {
+                message = "Application Deleted.  A confirmation email was unable to send.";
+            }
+
+            // Return successful deletion response
+            response = new HttpResponseContent(message);
+            return response;
         }
 
 
@@ -375,45 +361,40 @@ namespace ManagerLayer.ApplicationManagement
             // Http status code and message
             HttpResponseContent response;
 
-            using (var _db = new DatabaseContext())
+            // Attempt to find application
+            var app = _applicationService.GetApplication(request.Title, request.Email);
+            if (app == null)
             {
-                // Attempt to find application
-                var app = _applicationService.GetApplication(_db, request.Title, request.Email);
-                if (app == null)
-                {
-                    response = new HttpResponseContent("Invalid Application");
-                    response.Code = HttpStatusCode.BadRequest;
-                    return response;
-                }
-
-                // Update click count of application record
-
-                app.ClickCount = request.ClickCount;
-                var appResponse = _applicationService.UpdateApplication(_db, app);
-
-                List<object> responses = new List<object>();
-                responses.Add(appResponse);
-
-                // Attempt to save database changes
-                try
-                {
-                    SaveChanges(_db, responses);
-                }
-                catch
-                {
-                    // Error response
-                    response = new HttpResponseContent("Unable to save database changes");
-                    response.Code = HttpStatusCode.InternalServerError;
-                    return response;
-                }
-
-                // Successful publish
-                response = new HttpResponseContent("Updated application from SSO");
-                response.Code = HttpStatusCode.OK;
+                response = new HttpResponseContent("Invalid Application");
+                response.Code = HttpStatusCode.BadRequest;
                 return response;
             }
+
+            // Update click count of application record
+
+            app.ClickCount = request.ClickCount;
+            var appResponse = _applicationService.UpdateApplication(app);
+            
+            // Attempt to save database changes
+            try
+            {
+                SaveChanges(appResponse);
+            }
+            catch
+            {
+                // Error response
+                response = new HttpResponseContent("Unable to save database changes");
+                response.Code = HttpStatusCode.InternalServerError;
+                return response;
+            }
+
+            // Successful publish
+            response = new HttpResponseContent("Updated application from SSO");
+            response.Code = HttpStatusCode.OK;
+            return response;
         }
 
+        #region InputValidation
         /// <summary>
         /// Validates a string length
         /// </summary>
@@ -518,14 +499,13 @@ namespace ManagerLayer.ApplicationManagement
             }
             return true;
         }
+        #endregion
 
         /// <summary>
-        /// Save the changes made to the database tables
+        /// Saves the changes made to the data store
         /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="responses">changes made</param>
-        /// <returns>Whether the changes were saved</returns>
-        public void SaveChanges(DatabaseContext _db, List<object> responses)
+        /// <param name="change"></param>
+        public void SaveChanges(object change)
         {
             try
             {
@@ -536,10 +516,7 @@ namespace ManagerLayer.ApplicationManagement
             {
                 // Catch error
                 // Detach item attempted to be changed from the db context - rollback
-                foreach(object response in responses)
-                {
-                    _db.Entry(response).State = System.Data.Entity.EntityState.Detached;
-                }
+                _db.Entry(change).State = System.Data.Entity.EntityState.Detached;
 
                 // Error
                 throw new DbEntityValidationException("Cannot Save Database Changes");

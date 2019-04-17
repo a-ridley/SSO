@@ -1,4 +1,5 @@
 ﻿using System;
+using DataAccessLayer.Database;
 using ManagerLayer.ApplicationManagement;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -8,10 +9,12 @@ namespace UnitTesting
     public class ApplicationManagerUT
     {
         ApplicationManager am;
+        DatabaseContext _db;
 
         public ApplicationManagerUT()
         {
-            am = new ApplicationManager();
+            _db = new DatabaseContext();
+            am = new ApplicationManager(_db);
         }
 
         [TestMethod]

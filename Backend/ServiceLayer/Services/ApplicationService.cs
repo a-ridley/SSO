@@ -10,118 +10,73 @@ namespace ServiceLayer.Services
 {
     public class ApplicationService: IApplicationService
     {
-        // Repository
         IApplicationRepository _applicationRepository;
+        IApiKeyRepository _apiKeyRepository;
 
-        public ApplicationService()
+        DatabaseContext _db;
+
+        public ApplicationService(DatabaseContext _db)
         {
-            _applicationRepository = new ApplicationRepository();
+            this._db = _db;
+            _applicationRepository = new ApplicationRepository(_db);
+            _apiKeyRepository = new ApiKeyRepository(_db);
         }
 
-        /// <summary>
-        /// Call the application repository to create a new application record
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="app">application</param>
-        /// <returns>The application created</returns>
-        public Application CreateApplication(DatabaseContext _db, Application app)
+        public Application CreateApplication(Application app)
         {
-            return _applicationRepository.CreateNewApplication(_db, app);
+            return _applicationRepository.CreateNewApplication(app);
         }
 
-        /// <summary>
-        /// Call the application repository to delete an application record
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="url">application url</param>
-        /// <returns>The deleted application</returns>
-        public Application DeleteApplication(DatabaseContext _db, Guid id)
+        public Application DeleteApplication(Guid id)
         {
-            return _applicationRepository.DeleteApplication(_db, id);
+            // Delete children api keys first
+            List<ApiKey> keys = _apiKeyRepository.GetAllKeys(id);
+            foreach(ApiKey key in keys)
+            {
+                _apiKeyRepository.DeleteKey(key.Id);
+            }
+
+            return _applicationRepository.DeleteApplication(id);
         }
 
-        /// <summary>
-        /// Call the application repository to retrieve an application record by id
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="url">application</param>
-        /// <returns>The retrieved application</returns>
-        public Application GetApplication(DatabaseContext _db, Guid id)
+        public Application GetApplication(Guid id)
         {
-            return _applicationRepository.GetApplication(_db, id);
+            return _applicationRepository.GetApplication(id);
         }
 
-        /// <summary>
-        /// Call the application repository to retrieve an application record by title and email
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="title">application title</param>
-        /// <param name="email">email</param>
-        /// <returns></returns>
-        public Application GetApplication(DatabaseContext _db, string title, string email)
+        public Application GetApplication(string title, string email)
         {
-            return _applicationRepository.GetApplication(_db, title, email);
+            return _applicationRepository.GetApplication(title, email);
         }
 
-        /// <summary>
-        /// Call the application repository to return all applications registered with the SSO
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <returns>All applications registered with the SSO</returns>
-        public List<Application> GetAllApplicationsList(DatabaseContext _db)
+        public List<Application> GetAllApplicationsList()
         {
-            return _applicationRepository.GetAllApplicationsList(_db);
+            return _applicationRepository.GetAllApplicationsList();
+        }
+       
+        public IEnumerable GetAllApplications()
+        {
+            return _applicationRepository.GetAllApplications();
+        }
+        
+        public IEnumerable SortAllApplicationsAlphaAscending()
+        {
+            return _applicationRepository.SortAllApplicationsAlphaAscending();
         }
 
-        /// <summary>
-        /// Call the application repository to return all applications registered with the SSO
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <returns>All applications registered with the SSO</returns>
-        public IEnumerable GetAllApplications(DatabaseContext _db)
+        public IEnumerable SortAllApplicationsNumOfClicks()
         {
-            return _applicationRepository.GetAllApplications(_db);
+            return _applicationRepository.SortAllApplicationsNumOfClicks();
         }
 
-        /// <summary>
-        /// Call the application repository to return all sorted applications registered with the SSO
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <returns>All sorted applications registered with the SSO</returns>
-        public IEnumerable SortAllApplicationsAlphaAscending(DatabaseContext _db)
+        public IEnumerable SortAllApplicationsAlphaDescending()
         {
-            return _applicationRepository.SortAllApplicationsAlphaAscending(_db);
+            return _applicationRepository.SortAllApplicationsAlphaDescending();
         }
 
-        /// <summary>
-        /// Call the application repository to return all sorted applications by number of clicks
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <returns>All sorted applications registered with the SSO</returns>
-        public IEnumerable SortAllApplicationsNumOfClicks(DatabaseContext _db)
+        public Application UpdateApplication(Application app)
         {
-            return _applicationRepository.SortAllApplicationsNumOfClicks(_db);
-        }
-
-        /// <summary>
-        /// Call the application repository to return all sorted applications registered with the SSO
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <returns>All sorted applications registered with the SSO</returns>
-        public IEnumerable SortAllApplicationsAlphaDescending(DatabaseContext _db)
-        {
-            return _applicationRepository.SortAllApplicationsAlphaDescending(_db);
-        }
-
-        /// <summary>
-        /// Call the application repository to update an application record
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="app">application</param>
-        /// <returns>The updated application</returns>
-        public Application UpdateApplication(DatabaseContext _db, Application app)
-        {
-            return _applicationRepository.UpdateApplication(_db, app);
+            return _applicationRepository.UpdateApplication(app);
         }
 
     }
