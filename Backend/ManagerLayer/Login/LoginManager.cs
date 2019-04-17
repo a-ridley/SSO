@@ -14,9 +14,7 @@ namespace ManagerLayer.Login
 {
     public class LoginManager
     {
-        IUserService _userService = new UserService();
         IPasswordService _passwordService = new PasswordService();
-        ISessionService _sessionService = new SessionService();
         UserRepository userRepo = new UserRepository();
 
         private User user;
@@ -24,14 +22,15 @@ namespace ManagerLayer.Login
 
         public LoginManager()
         {
-
+            
         }
 
         public bool LoginCheckUserExists(LoginRequest request)
         {
             using (var _db = new DatabaseContext())
             {
-                user = _userService.GetUser(_db, request.email);
+                IUserService _userService = new UserService(_db);
+                user = _userService.GetUser(request.email);
                 if (user != null)
                 {
                     return true;
@@ -48,7 +47,8 @@ namespace ManagerLayer.Login
         {
             using (var _db = new DatabaseContext())
             {
-                user = _userService.GetUser(_db, request.email);
+                IUserService _userService = new UserService(_db);
+                user = _userService.GetUser(request.email);
                 if (user.Disabled)
                 {
                     return true;
@@ -65,7 +65,8 @@ namespace ManagerLayer.Login
             bool result;
             using (var _db = new DatabaseContext())
             {
-                user = _userService.GetUser(_db, request.email);
+                IUserService _userService = new UserService(_db);
+                user = _userService.GetUser(request.email);
                 string hashedPassword = _passwordService.HashPassword(request.password, user.PasswordSalt);
                 if (userRepo.ValidatePassword(user, hashedPassword))
                 {
@@ -98,7 +99,8 @@ namespace ManagerLayer.Login
         {
             using (var _db = new DatabaseContext())
             {
-                user = _userService.GetUser(_db, request.email);
+                IUserService _userService = new UserService(_db);
+                user = _userService.GetUser(request.email);
                 string generateToken = _tokenService.GenerateToken();
                 Session session = new Session
                 {
@@ -106,7 +108,8 @@ namespace ManagerLayer.Login
                     UserId = user.Id
                 };
 
-                var response = _sessionService.CreateSession(_db, session);
+                ISessionService _sessionService = new SessionService(_db);
+                var response = _sessionService.CreateSession(session);
                 try
                 {
                     _db.SaveChanges();

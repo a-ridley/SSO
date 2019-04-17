@@ -11,29 +11,24 @@ namespace UnitTesting
     [TestClass]
     public class UserServiceUT
     {
-        User newUser;
         TestingUtils tu;
-        UserService us;
-        DatabaseContext _db;
-        UserManagementManager _umm;
 
         public UserServiceUT()
         {
-            us = new UserService();
             tu = new TestingUtils();
-            _umm = new UserManagementManager();
         }
 
         [TestMethod]
         public void Create_User_Success()
         {
             // Arrange
-            newUser = tu.CreateUserObject();
-            var expected = newUser;
-            using (_db = tu.CreateDataBaseContext())
+            User newUser = tu.CreateUserObject();
+            User expected = newUser;
+            using (var _db = tu.CreateDataBaseContext())
             {
                 // Act
-                var response = us.CreateUser(_db, newUser);
+                UserService _us = new UserService(_db);
+                User response = _us.CreateUser(newUser);
                 _db.SaveChanges();
 
                 //Assert
@@ -46,13 +41,14 @@ namespace UnitTesting
         public void Create_User_RetrieveNew_Success()
         {
             // Arrange
-            newUser = tu.CreateUserObject();
-            var expected = newUser;
+            User newUser = tu.CreateUserObject();
+            User expected = newUser;
 
-            using (_db = tu.CreateDataBaseContext())
+            using (var _db = tu.CreateDataBaseContext())
             {
                 // Act
-                User response = us.CreateUser(_db, newUser);
+                UserService _us = new UserService(_db);
+                User response = _us.CreateUser(newUser);
                 _db.SaveChanges();
 
                 //Assert
@@ -67,22 +63,23 @@ namespace UnitTesting
         public void Create_User_Fail_ExceptionThrown()
         {
             // Arrange
-            newUser = new User
+            User newUser = new User
             {
                 Email = Guid.NewGuid() + "@" + Guid.NewGuid() + ".com",
                 DateOfBirth = DateTime.UtcNow,
                 City = "Los Angeles",
                 State = "California",
                 Country = "United States",
-                
+
                 // missing required fields
             };
             var expected = newUser;
 
-            using (_db = tu.CreateDataBaseContext())
+            using (var _db = tu.CreateDataBaseContext())
             {
                 // ACT
-                var response = us.CreateUser(_db, newUser);
+                UserService _us = new UserService(_db);
+                var response = _us.CreateUser(newUser);
                 try
                 {
                     _db.SaveChanges();
@@ -107,14 +104,15 @@ namespace UnitTesting
         public void Delete_User_Success()
         {
             // Arrange
-            newUser = tu.CreateUserInDb();
+            User newUser = tu.CreateUserInDb();
 
             var expectedResponse = newUser;
 
-            using (_db = tu.CreateDataBaseContext())
+            using (var _db = tu.CreateDataBaseContext())
             {
                 // Act
-                var response = us.DeleteUser(_db, newUser.Id);
+                UserService _us = new UserService(_db);
+                var response = _us.DeleteUser(newUser.Id);
                 _db.SaveChanges();
                 var result = _db.Users.Find(expectedResponse.Id);
 
@@ -133,10 +131,11 @@ namespace UnitTesting
 
             var expectedResponse = nonExistingId;
 
-            using (_db = new DatabaseContext())
+            using (var _db = new DatabaseContext())
             {
                 // Act
-                var response = us.DeleteUser(_db, nonExistingId);
+                UserService _us = new UserService(_db);
+                var response = _us.DeleteUser(nonExistingId);
                 // will return null if user does not exist
                 _db.SaveChanges();
                 var result = _db.Users.Find(expectedResponse);
@@ -151,15 +150,16 @@ namespace UnitTesting
         public void Update_User_Success()
         {
             // Arrange
-            newUser = tu.CreateUserInDb();
+            User newUser = tu.CreateUserInDb();
             newUser.City = "Long Beach";
             var expectedResponse = newUser;
             var expectedResult = newUser;
 
             // ACT
-            using (_db = tu.CreateDataBaseContext())
+            using (var _db = tu.CreateDataBaseContext())
             {
-                var response = us.UpdateUser(_db, newUser);
+                UserService _us = new UserService(_db);
+                var response = _us.UpdateUser(newUser);
                 _db.SaveChanges();
                 var result = _db.Users.Find(expectedResult.Id);
 
@@ -176,15 +176,16 @@ namespace UnitTesting
         public void Update_User_NonExisting_why()
         {
             // Arrange
-            newUser = tu.CreateUserObject();
+            User newUser = tu.CreateUserObject();
             newUser.City = "Long Beach";
             var expectedResponse = newUser;
             var expectedResult = newUser;
 
             // ACT
-            using (_db = tu.CreateDataBaseContext())
+            using (var _db = tu.CreateDataBaseContext())
             {
-                var response = us.UpdateUser(_db, newUser);
+                UserService _us = new UserService(_db);
+                var response = _us.UpdateUser(newUser);
                 try
                 {
                     _db.SaveChanges();
@@ -207,15 +208,16 @@ namespace UnitTesting
         public void Update_User_OnRequiredValue()
         {
             // Arrange
-            newUser = tu.CreateUserInDb();
+            User newUser = tu.CreateUserInDb();
             var expectedResult = newUser;
             newUser.PasswordHash = null;
             var expectedResponse = newUser;
 
             // ACT
-            using (_db = tu.CreateDataBaseContext())
+            using (var _db = tu.CreateDataBaseContext())
             {
-                var response = us.UpdateUser(_db, newUser);
+                UserService _us = new UserService(_db);
+                var response = _us.UpdateUser(newUser);
                 try
                 {
                     _db.SaveChanges();
@@ -241,14 +243,14 @@ namespace UnitTesting
         public void Get_User_Success()
         {
             // Arrange 
-
-            newUser = tu.CreateUserInDb();
+            User newUser = tu.CreateUserInDb();
             var expectedResult = newUser;
 
             // ACT
-            using (_db = tu.CreateDataBaseContext())
+            using (var _db = tu.CreateDataBaseContext())
             {
-                var result = us.GetUser(_db, expectedResult.Id);
+                UserService _us = new UserService(_db);
+                var result = _us.GetUser(expectedResult.Id);
 
                 // Assert
                 Assert.IsNotNull(result);
@@ -264,76 +266,15 @@ namespace UnitTesting
             User expectedResult = null;
 
             // Act
-            using (_db = tu.CreateDataBaseContext())
+            using (var _db = tu.CreateDataBaseContext())
             {
-                var result = us.GetUser(_db, nonExistingUser);
+                UserService _us = new UserService(_db);
+                var result = _us.GetUser(nonExistingUser);
 
                 // Assert
                 Assert.IsNull(result);
                 Assert.AreEqual(expectedResult, result);
             }
-        }
-
-        [TestMethod]
-        public void Disable_User_Success()
-        {
-            // Arrange
-            newUser = tu.CreateUserInDb();
-            var expectedResponse = newUser;
-            var expectedResult = true;
-
-            // ACT
-            var response = _umm.DisableUser(newUser);
-            var result = _umm.GetUser(newUser.Id);
-
-            // Assert
-            Assert.IsTrue(response == 1);
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult, result.Disabled);
-        }
-
-        [TestMethod]
-        public void Enable_User_Success()
-        {
-            // Arrange
-            newUser = tu.CreateUserInDb();
-            var expectedResponse = newUser;
-            var expectedResult = false;
-
-            // ACT
-            var response = _umm.EnableUser(newUser);
-            var result = _umm.GetUser(newUser.Id);
-
-            // Assert
-            Assert.IsTrue(response == 1);
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult, result.Disabled);
-        }
-
-        [TestMethod]
-        public void Toggle_User_Success()
-        {
-            // Arrange
-            User newUser;
-            using (var _db = tu.CreateDataBaseContext())
-            {
-                newUser = tu.CreateUserObject();
-                _db.Users.Add(newUser);
-                _db.SaveChanges();
-            }
-            var expectedResponse = newUser;
-            var expectedResult = newUser.Disabled;
-
-            // ACT
-            var response = _umm.ToggleUser(newUser, null);
-
-            var result = _umm.GetUser(newUser.Id);
-
-            // Assert
-            Assert.IsNotNull(response);
-            Assert.IsTrue(response == 1);
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResponse.Id, result.Id);
         }
     }
 }

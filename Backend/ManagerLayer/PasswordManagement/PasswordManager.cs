@@ -16,20 +16,16 @@ namespace ManagerLayer.PasswordManagement
         private const double TimeToExpire = 5;
 
         private IResetService _resetService;
-        private IUserService _userService;
         private IPasswordService _passwordService;
         private IEmailService _emailService;
         private ITokenService _tokenService;
-        private ISessionService _sessionService;
 
         public PasswordManager()
         {
             _resetService = new ResetService();
-            _userService = new UserService();
             _emailService = new EmailService();
             _tokenService = new TokenService();
             _passwordService = new PasswordService();
-            _sessionService = new SessionService();
         }
 
         private DatabaseContext CreateDbContext()
@@ -211,9 +207,10 @@ namespace ManagerLayer.PasswordManagement
         {
             using (var _db = CreateDbContext())
             {
-                if (_userService.ExistingUser(_db, email))
+                UserService _userService = new UserService(_db);
+                if(_userService.ExistingUser(email))
                 {
-                    Guid userID = _userService.GetUser(_db, email).Id;
+                    Guid userID = _userService.GetUser(email).Id;
 
                     if (PasswordResetsMadeInPast24HoursByUser(userID) < 3)
                     {
@@ -321,7 +318,8 @@ namespace ManagerLayer.PasswordManagement
 
             using (var _db = CreateDbContext())
             {
-                User retrievedUser = _userService.GetUser(_db, userID);
+                UserService _userService = new UserService(_db);
+                User retrievedUser = _userService.GetUser(userID);
                 var securityQ1 = retrievedUser.SecurityQ1;
                 var securityQ2 = retrievedUser.SecurityQ2;
                 var securityQ3 = retrievedUser.SecurityQ3;
@@ -340,7 +338,8 @@ namespace ManagerLayer.PasswordManagement
             var userID = retrievedPasswordReset.UserID;
             using (var _db = CreateDbContext())
             {
-                User retrievedUser = _userService.GetUser(_db, userID);
+                UserService _userService = new UserService(_db);
+                User retrievedUser = _userService.GetUser(userID);
                 var securityA1 = retrievedUser.SecurityQ1Answer;
                 var securityA2 = retrievedUser.SecurityQ2Answer;
                 var securityA3 = retrievedUser.SecurityQ3Answer;
@@ -450,11 +449,13 @@ namespace ManagerLayer.PasswordManagement
         {
             using (var _db = CreateDbContext())
             {
-                AuthorizationManager am = new AuthorizationManager();
-                if (am.ValidateAndUpdateSession(_db, request.sessionToken) != null)
+                var _userService = new UserService(_db);
+                var _sessionService = new SessionService(_db);
+                AuthorizationManager am = new AuthorizationManager(_db);
+                if (am.ValidateAndUpdateSession(request.sessionToken) != null)
                 {
-                    var session = _sessionService.GetSession(_db, request.sessionToken);
-                    var user = _userService.GetUser(_db, session.UserId);
+                    var session = _sessionService.GetSession(request.sessionToken);
+                    var user = _userService.GetUser(session.UserId);
                     string oldPasswordHashed = HashPassword(request.oldPassword, user.PasswordSalt);
                     if (oldPasswordHashed == user.PasswordHash)
                     {

@@ -80,6 +80,7 @@
     <Compile Include="ApiKeyServiceUT.cs" />
     <Compile Include="ApplicationManagerUT.cs" />
     <Compile Include="UsersControllerUT.cs" />
+    <Compile Include="UserManagementManagerUT.cs" />
     <Compile Include="UserServiceUT.cs" />
   </ItemGroup>
   <ItemGroup>

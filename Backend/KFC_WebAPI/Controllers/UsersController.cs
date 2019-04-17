@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ManagerLayer;
 using ServiceLayer.Exceptions;
 using System.ComponentModel.DataAnnotations;
+using KFC_WebAPI.RequestModels;
 using ManagerLayer.PasswordManagement;
 using ServiceLayer.Services;
 using ManagerLayer.UserManagement;
@@ -17,34 +18,6 @@ using System.Data.Entity.Infrastructure;
 
 namespace KFC_WebAPI.Controllers
 {
-    public class UserRegistrationRequest
-    {
-        [Required]
-        public string email { get; set; }
-        [Required]
-        public string password { get; set; }
-        [Required]
-        public DateTime dob { get; set; }
-        [Required]
-        public string city { get; set; }
-        [Required]
-        public string state { get; set; }
-        [Required]
-        public string country { get; set; }
-        [Required]
-        public string securityQ1 { get; set; }
-        [Required]
-        public string securityQ1Answer { get; set; }
-        [Required]
-        public string securityQ2 { get; set; }
-        [Required]
-        public string securityQ2Answer { get; set; }
-        [Required]
-        public string securityQ3 { get; set; }
-        [Required]
-        public string securityQ3Answer { get; set; }
-    }
-
     public class UserDeleteRequest
     {
         [Required]
@@ -67,9 +40,8 @@ namespace KFC_WebAPI.Controllers
                 User user;
                 try
                 {
-                    UserManager userManager = new UserManager();
+                    UserManager userManager = new UserManager(_db);
                     user = userManager.CreateUser(
-                        _db,
                         request.email,
                         request.password,
                         request.dob,
@@ -102,8 +74,8 @@ namespace KFC_WebAPI.Controllers
                     return Content((HttpStatusCode)401, "This software is intended for persons over 18 years of age.");
                 }
 
-                AuthorizationManager authorizationManager = new AuthorizationManager();
-                Session session = authorizationManager.CreateSession(_db, user);
+                AuthorizationManager authorizationManager = new AuthorizationManager(_db);
+                Session session = authorizationManager.CreateSession(user);
                 try
                 {
                     _db.SaveChanges();
@@ -127,14 +99,14 @@ namespace KFC_WebAPI.Controllers
         public string GetEmail(string token)
         {
             UserManagementManager umm = new UserManagementManager();
-            SessionService ss = new SessionService();
             Session session = new Session();
             User user;
             string email;
 
             using (var _db = new DatabaseContext())
             {
-                session = ss.GetSession(_db,token);
+                SessionService ss = new SessionService(_db);
+                session = ss.GetSession(token);
                 Console.WriteLine(session);
             }
 
@@ -227,13 +199,13 @@ namespace KFC_WebAPI.Controllers
         {
             using (var _db = new DatabaseContext())
             {
-                IAuthorizationManager authorizationManager = new AuthorizationManager();
-                Session session = authorizationManager.ValidateAndUpdateSession(_db, request.token);
+                IAuthorizationManager authorizationManager = new AuthorizationManager(_db);
+                Session session = authorizationManager.ValidateAndUpdateSession(request.token);
                 if (session == null)
                 {
                     return Unauthorized();
                 }
-                UserManager um = new UserManager();
+                UserManager um = new UserManager(_db);
                 User user = await um.DeleteUser(_db, session.UserId);
                 if(user != null)
                 {
@@ -247,16 +219,16 @@ namespace KFC_WebAPI.Controllers
         [Route("api/Logout")]
         public IHttpActionResult Logout([FromBody] LogoutRequest request)
         {
-            SessionService serv = new SessionService();
             using (var _db = new DatabaseContext())
             {
-                IAuthorizationManager authorizationManager = new AuthorizationManager();
+                SessionService serv = new SessionService(_db);
+                IAuthorizationManager authorizationManager = new AuthorizationManager(_db);
 
 
 
                 try
                 {
-                    var response = authorizationManager.DeleteSession(_db, request.token);
+                    var response = authorizationManager.DeleteSession(request.token);
                     _db.SaveChanges();
 
                     if (response != null)
