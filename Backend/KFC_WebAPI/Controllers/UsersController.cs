@@ -244,9 +244,10 @@ namespace KFC_WebAPI.Controllers
         {
             using (var _db = new DatabaseContext())
             {
+                IApplicationService _applicationService = new ApplicationService(_db);
                 HttpClient client = new HttpClient();
                 ITokenService _tokenService = new TokenService();
-                Application app = ApplicationService.GetApplication(_db,Guid.Parse(request.appId));
+                Application app = _applicationService.GetApplication(Guid.Parse(request.appId));
                 if (!(_tokenService.GenerateSignature(request.PreSignatureString(), app) == request.signature))
                 {
                     return Content(HttpStatusCode.Unauthorized, "Signature not valid!");
