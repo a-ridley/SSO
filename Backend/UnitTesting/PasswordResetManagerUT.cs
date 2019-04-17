@@ -14,16 +14,12 @@ namespace UnitTesting
         DatabaseContext _db;
         TestingUtils tu;
         PasswordManager pm;
-        SessionService ss;
-        UserService us;
 
         public PasswordResetManagerUT()
         {
             _db = new DatabaseContext();
             tu = new TestingUtils();
             pm = new PasswordManager();
-            ss = new SessionService();
-            us = new UserService();
         }
 
         [TestMethod]
@@ -222,7 +218,8 @@ namespace UnitTesting
             
             using(_db = tu.CreateDataBaseContext())
             {
-                var actual = us.GetUser(_db, newUser.Email).PasswordHash;
+                var us = new UserService(_db);
+                var actual = us.GetUser(newUser.Email).PasswordHash;
                 //Assert
                 Assert.IsNotNull(response);
                 Assert.IsTrue(response);
