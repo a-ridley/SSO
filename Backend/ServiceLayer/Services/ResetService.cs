@@ -9,34 +9,34 @@ namespace ServiceLayer.Services
     {
         private ResetRepository _resetRepo;
 
-        public ResetService()
+        public ResetService(DatabaseContext _db)
         {
-            _resetRepo = new ResetRepository();
+            _resetRepo = new ResetRepository(_db);
         }
 
-        public PasswordReset CreatePasswordReset(DatabaseContext _db, PasswordReset passwordReset)
+        public PasswordReset CreatePasswordReset(PasswordReset passwordReset)
         {
-            return _resetRepo.CreateReset(_db, passwordReset);
+            return _resetRepo.CreateReset(passwordReset);
         }
 
-        public PasswordReset DeletePasswordReset(DatabaseContext _db, string resetToken)
+        public PasswordReset DeletePasswordReset(string resetToken)
         {
-            return _resetRepo.DeleteReset(_db, resetToken);
+            return _resetRepo.DeleteReset(resetToken);
         }
 
-        public PasswordReset GetPasswordReset(DatabaseContext _db, string resetToken)
+        public PasswordReset GetPasswordReset(string resetToken)
         {
-            return _resetRepo.GetReset(_db, resetToken);
+            return _resetRepo.GetReset(resetToken);
         }
 
-        public PasswordReset UpdatePasswordReset(DatabaseContext _db, PasswordReset passwordResetID)
+        public PasswordReset UpdatePasswordReset(PasswordReset passwordResetID)
         {
-            return _resetRepo.UpdateReset(_db, passwordResetID);
+            return _resetRepo.UpdateReset(passwordResetID);
         }
 
-        public bool ExistingReset(DatabaseContext _db, string resetToken)
+        public bool ExistingReset(string resetToken)
         {
-            var result = GetPasswordReset(_db, resetToken);
+            var result = GetPasswordReset(resetToken);
             if (result != null)
             {
                 return true;
