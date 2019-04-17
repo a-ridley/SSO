@@ -77,10 +77,12 @@ namespace KFC_WebAPI.Controllers
                         request.securityQ2Answer,
                         request.securityQ3,
                         request.securityQ3Answer);
-                } catch (ArgumentException)
+                }
+                catch (ArgumentException)
                 {
                     return Conflict();
-                } catch (FormatException)
+                }
+                catch (FormatException)
                 {
                     return Content((HttpStatusCode)406, "Invalid email address.");
                 }
@@ -184,9 +186,9 @@ namespace KFC_WebAPI.Controllers
         [Route("api/users/updatepassword")]
         public IHttpActionResult UpdatePassword([FromBody] UpdatePasswordRequest request)
         {
-            try
+            using (var _db = new DatabaseContext())
             {
-                PasswordManager pm = new PasswordManager();
+                PasswordManager pm = new PasswordManager(_db);
                 int result = pm.UpdatePasswordController(request);
                 if (result == 1)
                 {
@@ -217,10 +219,6 @@ namespace KFC_WebAPI.Controllers
                     return Content(HttpStatusCode.BadRequest, "Service Unavailable");
                 }
             }
-            catch (Exception ex)
-            {
-                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
-            }
         }
 
 
@@ -238,7 +236,7 @@ namespace KFC_WebAPI.Controllers
                 }
                 UserManager um = new UserManager(_db);
                 User user = await um.DeleteUser(_db, session.UserId);
-                if(user != null)
+                if (user != null)
                 {
                     return Ok();
                 }
