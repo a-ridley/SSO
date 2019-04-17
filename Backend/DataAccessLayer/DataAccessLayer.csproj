@@ -109,10 +109,10 @@
     <Compile Include="Repositories\SessionRepository.cs" />
     <Compile Include="Repositories\UserManagementRepository.cs" />
     <Compile Include="Repositories\UserRepository.cs" />
-    <Compile Include="Requests\NewPasswordRequest.cs" />
-    <Compile Include="Requests\SecurityAnswersRequest.cs" />
-    <Compile Include="Requests\SendResetEmailRequest.cs" />
-    <Compile Include="Requests\UpdatePasswordRequest.cs" />
+    <Compile Include="RequestModels\NewPasswordRequest.cs" />
+    <Compile Include="RequestModels\SecurityAnswersRequest.cs" />
+    <Compile Include="RequestModels\SendResetEmailRequest.cs" />
+    <Compile Include="RequestModels\UpdatePasswordRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System.Web.Http;
+using DataAccessLayer.Database;
 using DataAccessLayer.Requests;
 using ManagerLayer.PasswordManagement;
 namespace WebAPI.Controllers
@@ -13,9 +12,9 @@ namespace WebAPI.Controllers
         [Route("api/reset/send")]
         public IHttpActionResult SendResetEmail([FromBody] SendResetEmailRequest request)
         {
-            try
+            using (var _db = new DatabaseContext())
             {
-                PasswordManager pm = new PasswordManager();
+                PasswordManager pm = new PasswordManager(_db);
                 int response = pm.SendResetEmail(request.email, request.url);
                 if (response == -1)
                 {
@@ -34,10 +33,6 @@ namespace WebAPI.Controllers
                     return Content(HttpStatusCode.BadRequest, "Service Unavailable");
                 }
             }
-            catch (Exception ex)
-            {
-                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
-            }
         }
 
         //After the user clicks the link in the email, this action gets called and takes the resetToken that's appended to the URL that was sent to the user
@@ -45,18 +40,14 @@ namespace WebAPI.Controllers
         [Route("api/reset/{resetToken}")]
         public IHttpActionResult Get(string resetToken)
         {
-            try
+            using (var _db = new DatabaseContext())
             {
-                PasswordManager pm = new PasswordManager();
+                PasswordManager pm = new PasswordManager(_db);
                 if (pm.CheckPasswordResetValid(resetToken))
                 {
                     return Content(HttpStatusCode.OK, pm.GetSecurityQuestions(resetToken));
                 }
                 return Content(HttpStatusCode.Unauthorized, "Reset link is no longer valid");
-            }
-            catch (Exception ex)
-            {
-                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
             }
         }
 
@@ -64,9 +55,9 @@ namespace WebAPI.Controllers
         [Route("api/reset/{resetToken}/checkanswers")]
         public IHttpActionResult CheckAnswers(string resetToken, [FromBody] SecurityAnswersRequest request)
         {
-            try
+            using (var _db = new DatabaseContext())
             {
-                PasswordManager pm = new PasswordManager();
+                PasswordManager pm = new PasswordManager(_db);
                 int response = pm.CheckSecurityAnswersController(resetToken, request);
                 if (response == 1)
                 {
@@ -82,19 +73,15 @@ namespace WebAPI.Controllers
                 }
                 else { return Content(HttpStatusCode.BadRequest, "Service Unavailable"); }
             }
-            catch (Exception ex)
-            {
-                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
-            }
         }
 
         [HttpPost]
         [Route("api/reset/{resetToken}/resetpassword")]
         public IHttpActionResult ResetPassword(string resetToken, [FromBody] NewPasswordRequest request)
         {
-            try
+            using (var _db = new DatabaseContext())
             {
-                PasswordManager pm = new PasswordManager();
+                PasswordManager pm = new PasswordManager(_db);
                 int response = pm.ResetPasswordController(resetToken, request.NewPassword);
                 if (response == 1)
                 {
@@ -120,10 +107,6 @@ namespace WebAPI.Controllers
                 {
                     return Content(HttpStatusCode.BadRequest, "Service Unavailable");
                 }
-            }
-            catch (Exception ex)
-            {
-                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
             }
         }
     }
