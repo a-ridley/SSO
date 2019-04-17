@@ -9,7 +9,6 @@ namespace UnitTesting
     public class AuthorizationManagerUT
     {
         TestingUtils _tu;
-        DatabaseContext _db;
 
         public AuthorizationManagerUT()
         {
