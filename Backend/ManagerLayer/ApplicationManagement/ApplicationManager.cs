@@ -1,6 +1,6 @@
 ﻿using DataAccessLayer.Database;
 using DataAccessLayer.Models;
-using DataAccessLayer.Requests;
+using DataAccessLayer.RequestModels;
 using MimeKit;
 using ServiceLayer.Exceptions;
 using ServiceLayer.Services;
