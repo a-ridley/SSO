@@ -61,7 +61,7 @@ namespace UnitTesting
             using (var _db = new DatabaseContext())
             {
                 UserManager um = new UserManager(_db);
-                User u = um.CreateUser("cf2080@icloud.com","qwertyuiop136_!2019",new DateTime(1996,12,15),"Long Beach", "CA",
+                User u = um.CreateUser(Guid.NewGuid() + "@" + Guid.NewGuid() + ".com","qwertyuiop136_!2019",new DateTime(1996,12,15),"Long Beach", "CA",
                     "USA", "securityQ1?", "q1", "securityQ2?", "q2", "securityQ3?", "q3");
 
                 _db.SaveChanges();
@@ -208,12 +208,13 @@ namespace UnitTesting
 
         public Application CreateApplicationObject()
         {
+            var title = Guid.NewGuid();
             Application app = new Application
             {
-                Title = "KFC App",
-                LaunchUrl = "https://kfc.com",
-                Email = "kfc@email.com",
-                UserDeletionUrl = "https://kfc.com/delete",
+                Title = Guid.NewGuid() + " App",
+                LaunchUrl = "https://" + title + ".com",
+                Email = title + "@email.com",
+                UserDeletionUrl = "https://" + title + ".com/delete",
                 LogoUrl = "https://kfc.com/logo.png",
                 Description = "A KFC app",
                 SharedSecretKey = Guid.NewGuid().ToString("N"),

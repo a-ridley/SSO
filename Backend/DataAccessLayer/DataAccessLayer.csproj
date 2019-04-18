@@ -105,7 +105,7 @@
     <Compile Include="Models\ApiKey.cs" />
     <Compile Include="Models\Application.cs" />
     <Compile Include="Models\LogoutRequest.cs" />
-    <Compile Include="Models\LoginRequest.cs" />
+    <Compile Include="Requests\LoginRequest.cs" />
     <Compile Include="Models\Session.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -123,12 +123,12 @@
     <Compile Include="Repositories\SessionRepository.cs" />
     <Compile Include="Repositories\UserManagementRepository.cs" />
     <Compile Include="Repositories\UserRepository.cs" />
-    <Compile Include="Requests\ApplicationRequest.cs" />
-    <Compile Include="Requests\HttpResponseContent.cs" />
-    <Compile Include="Requests\NewPasswordRequest.cs" />
-    <Compile Include="Requests\SecurityAnswersRequest.cs" />
-    <Compile Include="Requests\SendResetEmailRequest.cs" />
-    <Compile Include="Requests\UpdatePasswordRequest.cs" />
+    <Compile Include="RequestModels\ApplicationRequest.cs" />
+    <Compile Include="RequestModels\HttpResponseContent.cs" />
+    <Compile Include="RequestModels\NewPasswordRequest.cs" />
+    <Compile Include="RequestModels\SecurityAnswersRequest.cs" />
+    <Compile Include="RequestModels\SendResetEmailRequest.cs" />
+    <Compile Include="RequestModels\UpdatePasswordRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

@@ -47,7 +47,7 @@
         dark
       >
         <v-card-text>
-          Loading
+          Signing in...
           <v-progress-linear
             indeterminate
             color="white"
@@ -91,7 +91,7 @@
                    store.getEmail()
                    this.$router.push('/dashboard')
                 })
-               .catch(e => {console.log(e);
+               .catch(e => {
                     if(e.response.status === 400){
                         this.error = "Invalid Username/Password"
                     }
