@@ -32,6 +32,10 @@
             {{error}}
         </v-alert>
 
+        <div v-if="message" id="responseMessage">
+            <h3>{{ message }}</h3>
+            <br />
+        </div>
         <div v-if="key" id="keyMessage">
             <h3>Your New API Key:</h3>
             <p>{{ key }}</p>
@@ -43,6 +47,27 @@
 
         </v-form>
 
+        <v-dialog
+          v-model="loading"
+          hide-overlay
+          persistent
+          width="300"
+        >
+          <v-card
+            color="primary"
+            dark
+          >
+            <v-card-text>
+              Loading
+              <v-progress-linear
+                indeterminate
+                color="white"
+                class="mb-0"
+              ></v-progress-linear>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
+
     </div>
 </template>
 
@@ -53,10 +78,12 @@ import { apiURL } from '@/const.js'
 export default {
   data () {
     return {
+      message: null,
       key: null,
       title: '',
       email: '',
-      error: ''
+      error: '',
+      loading: false
     }
   },
   methods: {
@@ -70,6 +97,7 @@ export default {
       if (this.error) return;
 
       const url = `${apiURL}/applications/generatekey`
+      this.loading = true;
       axios.post(url, {
         title: document.getElementById('title').value,
         email: document.getElementById('email').value,
@@ -79,10 +107,14 @@ export default {
         }
       })
         .then(response => {
-            this.key = response.data; // Retrieve api key from response
+            this.message = response.data.Message;
+            this.key = response.data.Key; // Retrieve api key from response
         })
         .catch(err => {
-            this.error = err.response.data
+            this.error = err.response.data.Message
+        })
+        .finally(() => {
+          this.loading = false;
         })
     }
   }

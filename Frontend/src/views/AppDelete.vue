@@ -33,8 +33,7 @@
         </v-alert>
 
         <div v-if="validation" id="deleteMessage">
-            <h3>Successful Deletion!</h3>
-            <p>{{ validation }}</p>
+            <h3>{{ validation }}</h3>
         </div>
 
         <br />
@@ -42,6 +41,27 @@
         <v-btn id="btnDelete" color="success" v-if="!validation" v-on:click="deleteApp">Delete</v-btn>
 
         </v-form>
+
+        <v-dialog
+          v-model="loading"
+          hide-overlay
+          persistent
+          width="300"
+        >
+          <v-card
+            color="primary"
+            dark
+          >
+            <v-card-text>
+              Loading
+              <v-progress-linear
+                indeterminate
+                color="white"
+                class="mb-0"
+              ></v-progress-linear>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
 
     </div>
 </template>
@@ -56,7 +76,8 @@ export default {
       validation: null,
       title: '',
       email: '',
-      error: ''
+      error: '',
+      loading: false
     }
   },
   methods: {
@@ -70,6 +91,7 @@ export default {
       if (this.error) return;
 
       const url = `${apiURL}/applications/delete`
+      this.loading = true;
       axios.post(url, {
         title: document.getElementById('title').value,
         email: document.getElementById('email').value,
@@ -79,10 +101,13 @@ export default {
         }
       })
         .then(response => {
-            this.validation = response.data; // Retrieve deletion validation
+            this.validation = response.data.Message; // Retrieve deletion validation
         })
         .catch(err => {
-            this.error = err.response.data
+            this.error = err.response.data.Message
+        })
+        .finally(() => {
+          this.loading = false;
         })
     }
   }

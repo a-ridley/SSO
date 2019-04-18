@@ -9,15 +9,25 @@ namespace ManagerLayer.ApplicationManagement
 {
     public class HttpResponseContent
     {
-        public HttpResponseContent(HttpStatusCode code, string message)
+        public HttpResponseContent()
         {
-            Code = code;
+
+        }
+
+        public HttpResponseContent(string message)
+        {
             Message = message;
         }
 
-        public HttpResponseContent(HttpStatusCode code, string key, string secretKey, Guid appId)
+        public HttpResponseContent(string message, string key)
         {
-            Code = code;
+            Key = key;
+            Message = message;
+        }
+
+        public HttpResponseContent(string message, string key, string secretKey, Guid appId)
+        {
+            Message = message;
             Key = key;
             SharedSecretKey = secretKey;
             AppId = appId;

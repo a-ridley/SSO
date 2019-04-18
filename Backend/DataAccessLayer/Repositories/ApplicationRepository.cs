@@ -8,106 +8,58 @@ using System.Collections.Generic;
 
 namespace DataAccessLayer.Repositories
 {
-    public static class ApplicationRepository
+    public class ApplicationRepository: IApplicationRepository
     {
-        /// <summary>
-        /// Create a new application record
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="app">application</param>
-        /// <returns>Created application</returns>
-        public static Application CreateNewApplication(DatabaseContext _db, Application app)
+        DatabaseContext _db;
+
+        public ApplicationRepository(DatabaseContext _db)
         {
-            try
-            {
-                var result = GetApplication(_db, app.Title, app.Email);
-                if (result != null)
-                {
-                    return null;
-                }
-                _db.Entry(app).State = EntityState.Added;
-                return app;
-            }
-            catch(Exception)
+            this._db = _db;
+        }
+
+        public Application CreateNewApplication(Application app)
+        {
+            var result = GetApplication(app.Title, app.Email);
+            if (result != null)
             {
                 return null;
             }
-            
+            _db.Entry(app).State = EntityState.Added;
+            return app;
+
         }
 
-        /// <summary>
-        /// Delete an application record
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="id">application id</param>
-        /// <returns>The deleted application record</returns>
-        public static Application DeleteApplication(DatabaseContext _db, Guid id)
+        public Application DeleteApplication(Guid id)
         {
-            try
-            {
-                var app = GetApplication(_db, id);
-                if (app == null)
-                {
-                    return null;
-                }
-                _db.Entry(app).State = EntityState.Deleted;
-                return app;
-            }
-            catch (Exception)
+            var app = GetApplication(id);
+            if (app == null)
             {
                 return null;
             }
-            
+
+            _db.Entry(app).State = EntityState.Deleted;
+            return app;
+
         }
 
-        /// <summary>
-        /// Retrieve an application record by id field
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="id">application id</param>
-        /// <returns>The retrieved application</returns>
-        public static Application GetApplication(DatabaseContext _db, Guid id)
+        public Application GetApplication(Guid id)
         {
-            try
-            {
-                var response = _db.Applications.Find(id);
-                return response;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            var response = _db.Applications.Include(x => x.ApiKeys)
+                .Where(a => a.Id == id)
+                .FirstOrDefault<Application>();
+            return response;
         }
 
-        /// <summary>
-        /// Retrieve an application record by title and email
-        /// </summary>
-        /// <param name="_db">databasee</param>
-        /// <param name="title">application title</param>
-        /// <param name="email">application email</param>
-        /// <returns></returns>
-        public static Application GetApplication(DatabaseContext _db, string title, string email)
+        public Application GetApplication(string title, string email)
         {
-            try
-            {
-                var app = _db.Applications
+            var app = _db.Applications.Include(x => x.ApiKeys)
                 .Where(a => a.Title == title && a.Email == email)
                 .FirstOrDefault<Application>();
 
-                return app;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            return app;
         }
 
-        /// <summary>
-        /// Get all applications as List<Application>
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <returns>All application registered with the SSO</returns>
-        public static IEnumerable GetAllApplications(DatabaseContext _db)
+        public IEnumerable GetAllApplications()
         {
             try
             {
@@ -129,12 +81,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        /// <summary>
-        /// Get all applications sorted in alphabetical ascending order
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <returns>All sorted application registered with the SSO</returns>
-        public static IEnumerable SortAllApplicationsAlphaAscending(DatabaseContext _db)
+        public IEnumerable SortAllApplicationsAlphaAscending()
         {
             try
             {
@@ -156,12 +103,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        /// <summary>
-        /// Get all applications sorted in alphabetical ascending order
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <returns>All sorted application registered with the SSO</returns>
-        public static IEnumerable SortAllApplicationsAlphaDescending(DatabaseContext _db)
+        public IEnumerable SortAllApplicationsAlphaDescending()
         {
             try
             {
@@ -183,12 +125,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        /// <summary>
-        /// Get all applications sorted by number of clicks
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <returns>All sorted application registered with the SSO</returns>
-        public static IEnumerable SortAllApplicationsNumOfClicks(DatabaseContext _db)
+        public IEnumerable SortAllApplicationsNumOfClicks()
         {
             try
             {
@@ -210,12 +147,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        /// <summary>
-        /// Get all applications as List<Application>
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <returns>All application registered with the SSO</returns>
-        public static List<Application> GetAllApplicationsList(DatabaseContext _db)
+        public List<Application> GetAllApplicationsList()
         {
             try
             {
@@ -227,29 +159,15 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        /// <summary>
-        /// Update an application record
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="app">application</param>
-        /// <returns>The updated application</returns>
-        public static Application UpdateApplication(DatabaseContext _db, Application app)
+        public Application UpdateApplication(Application app)
         {
-
-            try
-            {
-                var result = GetApplication(_db, app.Id);
-                if (result == null)
-                {
-                    return null;
-                }
-                _db.Entry(app).State = EntityState.Modified;
-                return result;
-            }
-            catch (Exception)
+            var result = GetApplication(app.Id);
+            if (result == null)
             {
                 return null;
             }
+            _db.Entry(app).State = EntityState.Modified;
+            return result;
         }
 
     }

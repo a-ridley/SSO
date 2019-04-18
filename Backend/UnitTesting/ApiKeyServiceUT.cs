@@ -4,6 +4,7 @@ using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.Entity.Validation;
+using System.Data.Entity.Infrastructure;
 
 namespace UnitTesting
 {
@@ -55,21 +56,24 @@ namespace UnitTesting
 
             using (_db = tu.CreateDataBaseContext())
             {
+                IApiKeyService _apiKeyService = new ApiKeyService(_db);
+                IApplicationService _applicationService = new ApplicationService(_db);
+
                 // Act
-                var response = ApiKeyService.CreateKey(_db, newKey);
+                var response = _apiKeyService.CreateKey(newKey);
                 _db.SaveChanges();
 
                 // Assert
                 Assert.IsNotNull(response);
                 Assert.AreEqual(response.Id, expected.Id);
 
-                ApiKeyService.DeleteKey(_db, newKey.Id);
+                _applicationService.DeleteApplication(newKey.ApplicationId);
                 _db.SaveChanges();
             }
         }
 
         [TestMethod]
-        public void CreateKey_Fail_ExistingKeyShouldReturnNull()
+        public void CreateKey_Fail_ExistingKeyShouldReturnException()
         {
             // Arrange
             newKey = tu.CreateApiKeyObject();
@@ -77,31 +81,46 @@ namespace UnitTesting
 
             using (_db = tu.CreateDataBaseContext())
             {
+                IApiKeyService _apiKeyService = new ApiKeyService(_db);
+                IApplicationService _applicationService = new ApplicationService(_db);
+
                 // Act
-                var response = ApiKeyService.CreateKey(_db, newKey);
+                var response = _apiKeyService.CreateKey(newKey);
                 _db.SaveChanges();
 
-                var actual = ApiKeyService.CreateKey(_db, newKey);
+                var actual = _apiKeyService.CreateKey(newKey);
 
                 // Assert
-                Assert.IsNull(actual);
                 Assert.AreNotEqual(expected, actual);
+                Assert.IsNotNull(response);
+                Assert.IsNull(actual);
 
-                ApiKeyService.DeleteKey(_db, newKey.Id);
+                _applicationService.DeleteApplication(newKey.ApplicationId);
                 _db.SaveChanges();
             }
         }
 
         [TestMethod]
-        public void CreateKey_Fail_NullValuesShouldReturnNull()
+        public void CreateKey_Fail_NullValuesShouldReturnNullReferenceException()
         {
+            bool expected = true;
+
             using (_db = tu.CreateDataBaseContext())
             {
-                // Act
-                var result = ApiKeyService.CreateKey(_db, null);
+                IApiKeyService _apiKeyService = new ApiKeyService(_db);
+
+                try
+                {
+                    // Act
+                    var result = _apiKeyService.CreateKey(null);
+                }
+                catch (NullReferenceException)
+                {
+                    expected = false;
+                }
 
                 // Assert
-                Assert.IsNull(result);
+                Assert.IsFalse(expected);
             }
         }
 
@@ -113,13 +132,16 @@ namespace UnitTesting
 
             using (_db = tu.CreateDataBaseContext())
             {
+                IApiKeyService _apiKeyService = new ApiKeyService(_db);
+
+
                 // Act
-                newKey = ApiKeyService.CreateKey(_db, newKey);
+                newKey = _apiKeyService.CreateKey(newKey);
                 var expected = newKey;
 
                 _db.SaveChanges();
 
-                var response = ApiKeyService.DeleteKey(_db, newKey.Id);
+                var response = _apiKeyService.DeleteKey(newKey.Id);
                 _db.SaveChanges();
                 var result = _db.Keys.Find(expected.Id);
 
@@ -140,8 +162,10 @@ namespace UnitTesting
 
             using (_db = new DatabaseContext())
             {
+                IApiKeyService _apiKeyService = new ApiKeyService(_db);
+
                 // Act
-                var response = ApiKeyService.DeleteKey(_db, nonExistingId);
+                var response = _apiKeyService.DeleteKey(nonExistingId);
                 _db.SaveChanges();
                 var result = _db.Keys.Find(expected);
 
@@ -161,11 +185,13 @@ namespace UnitTesting
             // Act
             using (_db = tu.CreateDataBaseContext())
             {
-                newKey = ApiKeyService.CreateKey(_db, newKey);
+                IApiKeyService _apiKeyService = new ApiKeyService(_db);
+
+                newKey = _apiKeyService.CreateKey(newKey);
                 _db.SaveChanges();
 
                 newKey.Key = "A new Key";
-                var response = ApiKeyService.UpdateKey(_db, newKey);
+                var response = _apiKeyService.UpdateKey(newKey);
                 _db.SaveChanges();
 
                 var result = _db.Keys.Find(newKey.Id);
@@ -176,7 +202,7 @@ namespace UnitTesting
                 Assert.AreEqual(result.Id, newKey.Id);
                 Assert.AreNotEqual(expected, result.Key);
 
-                ApiKeyService.DeleteKey(_db, newKey.Id);
+                _apiKeyService.DeleteKey(newKey.Id);
                 _db.SaveChanges();
             }
         }
@@ -191,7 +217,9 @@ namespace UnitTesting
             // Act
             using (_db = tu.CreateDataBaseContext())
             {
-                var response = ApiKeyService.UpdateKey(_db, newKey);
+                IApiKeyService _apiKeyService = new ApiKeyService(_db);
+
+                var response = _apiKeyService.UpdateKey(newKey);
                 try
                 {
                     _db.SaveChanges();
@@ -215,13 +243,24 @@ namespace UnitTesting
         [TestMethod]
         public void UpdateKey_Fail_NullValuesShouldReturnNull()
         {
+            bool expected = true;
+
             using (_db = tu.CreateDataBaseContext())
             {
-                // Act
-                var result = ApiKeyService.UpdateKey(_db, null);
+                IApiKeyService _apiKeyService = new ApiKeyService(_db);
+
+                try
+                {
+                    // Act
+                    var result = _apiKeyService.UpdateKey(null);
+                }
+                catch (NullReferenceException)
+                {
+                    expected = false;
+                }
 
                 // Assert
-                Assert.IsNull(result);
+                Assert.IsFalse(expected);
             }
         }
 
@@ -235,15 +274,17 @@ namespace UnitTesting
             // Act
             using (_db = tu.CreateDataBaseContext())
             {
-                newKey = ApiKeyService.CreateKey(_db, newKey);
+                IApiKeyService _apiKeyService = new ApiKeyService(_db);
+
+                newKey = _apiKeyService.CreateKey(newKey);
                 _db.SaveChanges();
-                var result = ApiKeyService.GetKey(_db, newKey.Id);
+                var result = _apiKeyService.GetKey(newKey.Id);
 
                 // Assert
                 Assert.IsNotNull(result);
                 Assert.AreEqual(expected.Id, result.Id);
 
-                ApiKeyService.DeleteKey(_db, newKey.Id);
+                _apiKeyService.DeleteKey(newKey.Id);
                 _db.SaveChanges();
             }
         }
@@ -258,7 +299,9 @@ namespace UnitTesting
             // Act
             using (_db = tu.CreateDataBaseContext())
             {
-                var result = ApiKeyService.GetKey(_db, nonExistingKey);
+                IApiKeyService _apiKeyService = new ApiKeyService(_db);
+
+                var result = _apiKeyService.GetKey(nonExistingKey);
 
                 // Assert
                 Assert.IsNull(result);
@@ -276,15 +319,17 @@ namespace UnitTesting
             // Act
             using (_db = tu.CreateDataBaseContext())
             {
-                newKey = ApiKeyService.CreateKey(_db, newKey);
+                IApiKeyService _apiKeyService = new ApiKeyService(_db);
+
+                newKey = _apiKeyService.CreateKey(newKey);
                 _db.SaveChanges();
-                var result = ApiKeyService.GetKey(_db, newKey.Key);
+                var result = _apiKeyService.GetKey(newKey.Key);
 
                 // Assert
                 Assert.IsNotNull(result);
                 Assert.AreEqual(expected.Key, result.Key);
 
-                ApiKeyService.DeleteKey(_db, newKey.Id);
+                _apiKeyService.DeleteKey(newKey.Id);
                 _db.SaveChanges();
             }
         }
@@ -299,7 +344,9 @@ namespace UnitTesting
             // Act
             using (_db = tu.CreateDataBaseContext())
             {
-                var result = ApiKeyService.GetKey(_db, nonExistingKey);
+                IApiKeyService _apiKeyService = new ApiKeyService(_db);
+
+                var result = _apiKeyService.GetKey(nonExistingKey);
 
                 // Assert
                 Assert.IsNull(result);
@@ -312,52 +359,13 @@ namespace UnitTesting
         {
             using (_db = tu.CreateDataBaseContext())
             {
+                IApiKeyService _apiKeyService = new ApiKeyService(_db);
+
                 // Act
-                var result = ApiKeyService.GetKey(_db, null);
+                var result = _apiKeyService.GetKey(null);
 
                 // Assert
                 Assert.IsNull(result);
-            }
-        }
-
-        [TestMethod]
-        public void GetApiKeyByAppIdIsUsed_Pass_ReturnKey()
-        {
-            // Arrange
-            newKey = tu.CreateApiKeyObject();
-            var expected = newKey;
-
-            // Act
-            using (_db = tu.CreateDataBaseContext())
-            {
-                newKey = ApiKeyService.CreateKey(_db, newKey);
-                _db.SaveChanges();
-                var result = ApiKeyService.GetKey(_db, newKey.ApplicationId, false);
-
-                // Assert
-                Assert.IsNotNull(result);
-                Assert.AreEqual(expected.Key, result.Key);
-
-                ApiKeyService.DeleteKey(_db, newKey.Id);
-                _db.SaveChanges();
-            }
-        }
-
-        [TestMethod]
-        public void GetApiKeyByAppIdIsUsed_Fail_NonExistingKeyShouldReturnNull()
-        {
-            // Arrange
-            Guid id = Guid.NewGuid();
-            ApiKey expected = null;
-
-            // Act
-            using (_db = tu.CreateDataBaseContext())
-            {
-                var result = ApiKeyService.GetKey(_db, id, false);
-
-                // Assert
-                Assert.IsNull(result);
-                Assert.AreEqual(expected, result);
             }
         }
     }

@@ -17,5 +17,6 @@ namespace ManagerLayer.ApplicationManagement
         public string DeleteUrl { set; get; }
         public bool UnderMaintenance { set; get; }
         public long ClickCount { get; set; }
+        public string HealthCheckUrl { set; get; }
     }
 }
