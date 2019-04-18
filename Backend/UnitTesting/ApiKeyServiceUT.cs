@@ -73,7 +73,7 @@ namespace UnitTesting
         }
 
         [TestMethod]
-        public void CreateKey_Fail_ExistingKeyShouldReturnException()
+        public void CreateKey_Fail_ExistingKeyShouldReturnNull()
         {
             // Arrange
             newKey = tu.CreateApiKeyObject();

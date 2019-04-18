@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ManagerLayer.ApplicationManagement
+namespace DataAccessLayer.RequestModels
 {
     public class ApplicationRequest
     {

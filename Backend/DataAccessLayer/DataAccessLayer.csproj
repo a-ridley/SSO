@@ -123,6 +123,8 @@
     <Compile Include="Repositories\SessionRepository.cs" />
     <Compile Include="Repositories\UserManagementRepository.cs" />
     <Compile Include="Repositories\UserRepository.cs" />
+    <Compile Include="RequestModels\ApplicationRequest.cs" />
+    <Compile Include="RequestModels\HttpResponseContent.cs" />
     <Compile Include="RequestModels\NewPasswordRequest.cs" />
     <Compile Include="RequestModels\SecurityAnswersRequest.cs" />
     <Compile Include="RequestModels\SendResetEmailRequest.cs" />
