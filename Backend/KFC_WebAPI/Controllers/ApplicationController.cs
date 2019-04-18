@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using DataAccessLayer.Database;
 using DataAccessLayer.Models;
+using DataAccessLayer.Requests;
 using ManagerLayer.ApplicationManagement;
 using ServiceLayer.Exceptions;
 using ServiceLayer.Services;

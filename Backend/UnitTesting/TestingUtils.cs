@@ -217,7 +217,7 @@ namespace UnitTesting
                 LogoUrl = "https://kfc.com/logo.png",
                 Description = "A KFC app",
                 SharedSecretKey = Guid.NewGuid().ToString("N"),
-                HealthCheckUrl = "https://kfc.come/health",
+                HealthCheckUrl = "https://kfc.com/health",
             };
             return app;
         }

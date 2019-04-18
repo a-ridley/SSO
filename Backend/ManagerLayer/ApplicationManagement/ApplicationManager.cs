@@ -1,5 +1,6 @@
 ﻿using DataAccessLayer.Database;
 using DataAccessLayer.Models;
+using DataAccessLayer.Requests;
 using MimeKit;
 using ServiceLayer.Exceptions;
 using ServiceLayer.Services;
@@ -223,7 +224,7 @@ namespace ManagerLayer.ApplicationManagement
             }
 
             // Key does not exist
-            throw new InvalidApiKeyException("Invalid API Key: Key Not Found2");
+            throw new InvalidApiKeyException("Invalid API Key: Key Not Found");
         }
 
         /// <summary>

@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ManagerLayer.ApplicationManagement
+namespace DataAccessLayer.Requests
 {
     public class HttpResponseContent
     {
