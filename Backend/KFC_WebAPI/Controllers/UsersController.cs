@@ -77,10 +77,12 @@ namespace KFC_WebAPI.Controllers
                         request.securityQ2Answer,
                         request.securityQ3,
                         request.securityQ3Answer);
-                } catch (ArgumentException)
+                }
+                catch (ArgumentException)
                 {
                     return Conflict();
-                } catch (FormatException)
+                }
+                catch (FormatException)
                 {
                     return Content((HttpStatusCode)406, "Invalid email address.");
                 }
@@ -126,16 +128,24 @@ namespace KFC_WebAPI.Controllers
             User user;
             string email;
 
-            using (var _db = new DatabaseContext())
+            try
             {
-                SessionService ss = new SessionService(_db);
-                session = ss.GetSession(token);
-                Console.WriteLine(session);
-            }
+                using (var _db = new DatabaseContext())
+                {
+                    SessionService ss = new SessionService(_db);
+                    session = ss.GetSession(token);
+                    Console.WriteLine(session);
+                }
 
-            var id = session.UserId;
-            user = umm.GetUser(id);
-            email = user.Email;
+                var id = session.UserId;
+                user = umm.GetUser(id);
+                email = user.Email;
+
+            }
+            catch(ArgumentNullException)
+            {
+                throw new ArgumentNullException("Session is null");
+            }
 
             return email;
         }
@@ -145,14 +155,14 @@ namespace KFC_WebAPI.Controllers
         public IHttpActionResult Login([FromBody] LoginRequest request)
         {
             LoginManager loginM = new LoginManager();
-            if (loginM.LoginCheckUserExists(request) == false)
+            if (loginM.LoginCheckUserExists(request.email) == false)
             {
                 //400
-                return Content(HttpStatusCode.BadRequest, "Invalid Username/Password");
+                return Content(HttpStatusCode.BadRequest, "Invalid Username");
             }
             else
             {
-                if (loginM.LoginCheckUserDisabled(request))
+                if (loginM.LoginCheckUserDisabled(request.email))
                 {
                     //401
                     return Content(HttpStatusCode.Unauthorized, "User is Disabled");
@@ -161,12 +171,12 @@ namespace KFC_WebAPI.Controllers
                 {
                     if (loginM.LoginCheckPassword(request))
                     {
-                        return Ok(loginM.LoginAuthorized(request));
+                        return Ok(loginM.LoginAuthorized(request.email));
                     }
                     else
                     {
                         //400
-                        return Content(HttpStatusCode.BadRequest, "Invalid Username/Password");
+                        return Content(HttpStatusCode.BadRequest, "Invalid Password");
                     }
                 }
             }
@@ -176,9 +186,9 @@ namespace KFC_WebAPI.Controllers
         [Route("api/users/updatepassword")]
         public IHttpActionResult UpdatePassword([FromBody] UpdatePasswordRequest request)
         {
-            try
+            using (var _db = new DatabaseContext())
             {
-                PasswordManager pm = new PasswordManager();
+                PasswordManager pm = new PasswordManager(_db);
                 int result = pm.UpdatePasswordController(request);
                 if (result == 1)
                 {
@@ -209,10 +219,6 @@ namespace KFC_WebAPI.Controllers
                     return Content(HttpStatusCode.BadRequest, "Service Unavailable");
                 }
             }
-            catch (Exception ex)
-            {
-                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
-            }
         }
 
 
@@ -230,7 +236,7 @@ namespace KFC_WebAPI.Controllers
                 }
                 UserManager um = new UserManager(_db);
                 User user = await um.DeleteUser(_db, session.UserId);
-                if(user != null)
+                if (user != null)
                 {
                     return Ok();
                 }
