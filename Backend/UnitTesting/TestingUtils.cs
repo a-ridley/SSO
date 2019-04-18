@@ -208,12 +208,13 @@ namespace UnitTesting
 
         public Application CreateApplicationObject()
         {
+            var title = Guid.NewGuid();
             Application app = new Application
             {
-                Title = "KFC App",
-                LaunchUrl = "https://kfc.com",
-                Email = "kfc@email.com",
-                UserDeletionUrl = "https://kfc.com/delete",
+                Title = Guid.NewGuid() + " App",
+                LaunchUrl = "https://" + title + ".com",
+                Email = title + "@email.com",
+                UserDeletionUrl = "https://" + title + ".com/delete",
                 LogoUrl = "https://kfc.com/logo.png",
                 Description = "A KFC app",
                 SharedSecretKey = Guid.NewGuid().ToString("N"),
