@@ -219,7 +219,7 @@ namespace UnitTesting
                 Description = "A KFC app",
                 SharedSecretKey = Guid.NewGuid().ToString("N"),
                 HealthCheckUrl = "https://kfc.com/health",
-                LogoutUrl = "https://kfc.com/logout",
+                LogoutUrl = "https://" + title + ".com/logout",
             };
             return app;
         }
