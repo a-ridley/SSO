@@ -18,5 +18,6 @@ namespace DataAccessLayer.RequestModels
         public bool UnderMaintenance { set; get; }
         public long ClickCount { get; set; }
         public string HealthCheckUrl { set; get; }
+        public string LogoutUrl { get; set; }
     }
 }
