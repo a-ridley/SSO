@@ -45,6 +45,14 @@
             label="User Deletion Url" 
             v-if="!key"
             /><br />
+        <v-text-field
+            name="logoutUrl"
+            id="logoutUrl"
+            type="logoutUrl"
+            v-model="logoutUrl"
+            label="Logout Url" 
+            v-if="!key"
+            /><br />
 
         
         <v-alert
@@ -119,6 +127,7 @@ export default {
       launchUrl: '',
       deleteUrl: '',
       healthCheckUrl: '',
+      logoutUrl: '',
       error: '',
       loading: false
     }
@@ -127,7 +136,7 @@ export default {
     register: function () {
       
       this.error = "";
-      if (this.title.length == 0 || this.email.length == 0 || this.launchUrl.length == 0 || this.deleteUrl.length == 0 || this.healthCheckUrl.length == 0) {
+      if (this.title.length == 0 || this.email.length == 0 || this.launchUrl.length == 0 || this.deleteUrl.length == 0 || this.healthCheckUrl.length == 0 || this.logoutUrl.length == 0) {
         this.error = "Fields Cannot Be Left Blank.";
       }
 
@@ -141,6 +150,7 @@ export default {
         email: document.getElementById('email').value,
         deleteUrl: document.getElementById('deleteUrl').value,
         healthCheckUrl: document.getElementById('healthCheckUrl').value,
+        logoutUrl: document.getElementById('logoutUrl').value,
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'

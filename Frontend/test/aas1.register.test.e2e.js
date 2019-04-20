@@ -11,6 +11,7 @@ const appEmail = 'app@email.com';
 const appLaunchUrl = 'https://app.com';
 const appDeleteUrl = 'https://app.com/delete';
 const appHealthCheckUrl = 'https://app.com/health';
+const appLogoutUrl = 'https://app.com/logout';
 let randomNum = (start, end) => Math.floor((Math.random() + start) * end);
 let randomEmail = () => `${randomNum(1, 99999999)}@${randomNum(1, 99999999)}.com`;
 const imgPath = 'AAS_Register_';
@@ -45,6 +46,7 @@ describe('app registration', () => {
             expect(await page.$('#email')).to.not.be.null
             expect(await page.$('#deleteUrl')).to.not.be.null
             expect(await page.$('#healthCheckUrl')).to.not.be.null
+            expect(await page.$('#logoutUrl')).to.not.be.null
         })
     })
 
@@ -78,6 +80,7 @@ describe('app registration', () => {
             await page.type('#email', 'invalid', {delay: TYPE_DELAY});
             await page.type('#healthCheckUrl', appHealthCheckUrl, {delay: TYPE_DELAY});
             await page.type('#deleteUrl', appDeleteUrl, {delay: TYPE_DELAY});
+            await page.type('#logoutUrl', appLogoutUrl, {delay: TYPE_DELAY});
 
             await page.click('#btnRegister')
             let error = await page.waitForSelector('#error');
@@ -92,6 +95,7 @@ describe('app registration', () => {
             await page.type('#email', randomEmail(), {delay: TYPE_DELAY});
             await page.type('#healthCheckUrl', appHealthCheckUrl, {delay: TYPE_DELAY});
             await page.type('#deleteUrl', appDeleteUrl, {delay: TYPE_DELAY});
+            await page.type('#logoutUrl', appLogoutUrl, {delay: TYPE_DELAY});
             
             await page.click('#btnRegister')
             let error = await page.waitForSelector('#error');
@@ -106,6 +110,7 @@ describe('app registration', () => {
             await page.type('#email', randomEmail(), {delay: TYPE_DELAY});
             await page.type('#healthCheckUrl', 'invalid', {delay: TYPE_DELAY});
             await page.type('#deleteUrl', appDeleteUrl, {delay: TYPE_DELAY});
+            await page.type('#logoutUrl', appLogoutUrl, {delay: TYPE_DELAY});
 
             await page.click('#btnRegister')
             let error = await page.waitForSelector('#error');
@@ -120,11 +125,27 @@ describe('app registration', () => {
             await page.type('#email', randomEmail(), {delay: TYPE_DELAY});
             await page.type('#healthCheckUrl', appHealthCheckUrl, {delay: TYPE_DELAY});
             await page.type('#deleteUrl', 'invalid', {delay: TYPE_DELAY});
+            await page.type('#logoutUrl', appLogoutUrl, {delay: TYPE_DELAY});
 
             await page.click('#btnRegister')
             let error = await page.waitForSelector('#error');
             await timeout(1000);
             await page.screenshot({path: (imgPath + 'InvalidUserDeletionUrl.png')});
+            expect(error).to.not.be.null
+        })
+
+        it('rejects submission with invalid logout url', async () => {
+            await page.type('#title', appTitle, {delay: TYPE_DELAY});
+            await page.type('#launchUrl', appLaunchUrl, {delay: TYPE_DELAY});
+            await page.type('#email', randomEmail(), {delay: TYPE_DELAY});
+            await page.type('#healthCheckUrl', appHealthCheckUrl, {delay: TYPE_DELAY});
+            await page.type('#deleteUrl', appDeleteUrl, {delay: TYPE_DELAY});
+            await page.type('#logoutUrl', 'invalid', {delay: TYPE_DELAY});
+
+            await page.click('#btnRegister')
+            let error = await page.waitForSelector('#error');
+            await timeout(1000);
+            await page.screenshot({path: (imgPath + 'InvalidLogoutUrl.png')});
             expect(error).to.not.be.null
         })
     })
@@ -147,6 +168,7 @@ describe('app registration', () => {
             await page.type('#email', appEmail, {delay: TYPE_DELAY});
             await page.type('#healthCheckUrl', appHealthCheckUrl, {delay: TYPE_DELAY});
             await page.type('#deleteUrl', appDeleteUrl, {delay: TYPE_DELAY});
+            await page.type('#logoutUrl', appLogoutUrl, {delay: TYPE_DELAY});
             
             await page.click('#btnRegister');
             let success = await page.waitForSelector('#responseMessage');
