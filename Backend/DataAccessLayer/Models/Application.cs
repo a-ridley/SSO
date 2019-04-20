@@ -48,6 +48,9 @@ namespace DataAccessLayer.Models
         [Required, DataType(DataType.Url)]
         public string HealthCheckUrl { get; set; }
 
+        [Required, DataType(DataType.Url)]
+        public string LogoutUrl { get; set; }
+
         public ICollection<ApiKey> ApiKeys { get; set; }
     }
 

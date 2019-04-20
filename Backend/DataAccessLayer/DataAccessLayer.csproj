@@ -101,6 +101,10 @@
     <Compile Include="Migrations\201904162002023_create-updated-tables-applications-apiKeys.Designer.cs">
       <DependentUpon>201904162002023_create-updated-tables-applications-apiKeys.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201904200642298_update-applications-add-LogoutUrl.cs" />
+    <Compile Include="Migrations\201904200642298_update-applications-add-LogoutUrl.Designer.cs">
+      <DependentUpon>201904200642298_update-applications-add-LogoutUrl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApiKey.cs" />
     <Compile Include="Models\Application.cs" />
@@ -178,6 +182,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201904162002023_create-updated-tables-applications-apiKeys.resx">
       <DependentUpon>201904162002023_create-updated-tables-applications-apiKeys.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904200642298_update-applications-add-LogoutUrl.resx">
+      <DependentUpon>201904200642298_update-applications-add-LogoutUrl.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />

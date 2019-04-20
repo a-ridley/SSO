@@ -13,7 +13,7 @@ using System.Net;
 
 namespace ManagerLayer.ApplicationManagement
 {
-    public class ApplicationManager: IApplicationManager
+    public class ApplicationManager : IApplicationManager
     {
         private DatabaseContext _db;
 
@@ -52,6 +52,7 @@ namespace ManagerLayer.ApplicationManagement
             Uri launchUrl = null;
             Uri deleteUrl = null;
             Uri healthCheckUrl = null;
+            Uri logoutUrl = null;
 
             // Validate request values
             if (request.Title == null || !IsValidStringLength(request.Title, titleLength))
@@ -74,6 +75,10 @@ namespace ManagerLayer.ApplicationManagement
             {
                 throw new InvalidUrlException("Invalid Health Check Url Format");
             }
+            else if (request.LogoutUrl == null || !IsValidUrl(request.LogoutUrl, ref logoutUrl) || !IsValidStringLength(request.LogoutUrl, urlLength))
+            {
+                throw new InvalidUrlException("Invalid Logout Url Format");
+            }
 
             // Create application from request data
             Application app = new Application
@@ -83,7 +88,8 @@ namespace ManagerLayer.ApplicationManagement
                 Email = request.Email,
                 UserDeletionUrl = deleteUrl.ToString(),
                 HealthCheckUrl = healthCheckUrl.ToString(),
-                SharedSecretKey = _tokenService.GenerateToken()
+                SharedSecretKey = _tokenService.GenerateToken(),
+                LogoutUrl = logoutUrl.ToString()
             };
 
             // Create a new api key for application
