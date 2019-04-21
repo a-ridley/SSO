@@ -115,12 +115,11 @@ namespace ManagerLayer
             var applications = _applicationService.GetAllApplicationsList();
             var responseList = new List<HttpResponseMessage>();
 
-            Parallel.ForEach(applications, app =>
+            foreach(Application app in applications)
             {
-                var request = await uds.SendDeleteRequest(app, userId, deletingUser.Email);
+                var request = await uds.SendDeleteRequest(app,userId, deletingUser.Email );
                 responseList.Add(request);
-            });
-
+            }
             if (responseList.All(response => response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound))
             {
                 User deletedUser = _userService.DeleteUser(userId);
