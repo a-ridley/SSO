@@ -10,6 +10,7 @@ namespace DataAccessLayer.Repositories
         Session CreateSession(Session session);
         Session UpdateSession(Session session);
         Session DeleteSession(string token);
+        List<Session> DeleteSessions(Guid userId);
         List<Session> GetSessions(Guid userId);
     }
 }

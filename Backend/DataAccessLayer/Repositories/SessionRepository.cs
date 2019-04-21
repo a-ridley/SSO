@@ -50,6 +50,20 @@ namespace DataAccessLayer.Repositories
             return session;
         }
 
+        public List<Session> DeleteSessions(Guid userId)
+        {
+            var sessions = _db.Sessions
+                .Where(s => s.UserId == userId)
+                .ToList();
+
+            if (sessions == null)
+                return null;
+
+            _db.Sessions.RemoveRange(sessions);
+            return sessions;
+                
+        }
+
         public List<Session> GetSessions(Guid userId)
         {
             var sessions = _db.Sessions

@@ -39,5 +39,10 @@ namespace ServiceLayer.Services
         {
             return _SessionRepo.DeleteSession(token);
         }
+
+        public List<Session> DeleteSessions(Guid userId)
+        {
+            return _SessionRepo.DeleteSessions(userId);
+        }
     }
 }

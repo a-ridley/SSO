@@ -10,6 +10,7 @@ namespace ServiceLayer.Services
         Session GetSession(string token);
         Session UpdateSession(Session session);
         Session DeleteSession(string token);
+        List<Session> DeleteSessions(Guid userId);
         List<Session> GetSessions(Guid userId);
     }
 }
