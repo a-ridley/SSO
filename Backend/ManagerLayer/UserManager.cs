@@ -113,8 +113,8 @@ namespace ManagerLayer
             ISessionService _sessionService = new SessionService(_db);
             var sessions = _sessionService.GetSessions(userId);
             var applications = _applicationService.GetAllApplicationsList();
-            //var appList = applications.OfType<Application>().ToList();
             var responseList = new List<HttpResponseMessage>();
+
             foreach(Application app in applications)
             {
                 var request = await uds.SendDeleteRequest(app,userId, deletingUser.Email );
@@ -124,12 +124,9 @@ namespace ManagerLayer
             {
                 User deletedUser = _userService.DeleteUser(userId);
                 if(deletedUser != null){
-                    foreach(Session sess in sessions)
-                    {
-                        _sessionService.DeleteSession(sess.Token);
-                    }
+                    _sessionService.DeleteSessions(deletedUser.Id);
                 }
-                _db.SaveChanges(); //foreign key error
+                _db.SaveChanges();
                 return deletedUser;
             }
             return null;

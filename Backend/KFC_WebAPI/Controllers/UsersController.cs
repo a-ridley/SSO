@@ -232,13 +232,13 @@ namespace KFC_WebAPI.Controllers
                 Session session = authorizationManager.ValidateAndUpdateSession(request.token);
                 if (session == null)
                 {
-                    return Unauthorized();
+                    return Content(HttpStatusCode.Unauthorized, "Session not valid!");
                 }
                 UserManager um = new UserManager(_db);
                 User user = await um.DeleteUser(_db, session.UserId);
                 if (user != null)
                 {
-                    return Ok();
+                    return Content(HttpStatusCode.OK, "Account has been deleted");
                 }
                 return Content(HttpStatusCode.BadRequest, "Service Unavailable");
             }
@@ -262,9 +262,9 @@ namespace KFC_WebAPI.Controllers
                 User deletedUser = await um.DeleteUser(_db, request.ssoUserId);
                 if(deletedUser != null)
                 {
-                    return Ok(deletedUser);
+                    return Content(HttpStatusCode.OK, "Account has been deleted");
                 }
-                return Content(HttpStatusCode.BadRequest, "Delete Failed");
+                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
             }
         }
 

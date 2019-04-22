@@ -24,9 +24,35 @@
     <br />
     <div class="">
         <br/>
-        <v-btn color="error" v-on:click="runDelete">Delete My Account</v-btn>
+        <v-btn color="error" @click.stop="dialog = true">Delete My Account</v-btn>
     </div>
+    <v-dialog
+      v-model="dialog"
+      width="300"
+    >
+      <v-card>
+        <v-card-title class="headline">Confirm Deletion</v-card-title>
 
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn
+            color="success"
+            @click="dialog = false"
+          >
+          Cancel
+          </v-btn>
+
+          <v-btn
+            color="error"
+            @click="dialog = false"
+            v-on:click="runDelete"
+          >
+          Delete
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-dialog
       v-model="loading"
       hide-overlay
@@ -61,7 +87,8 @@ export default {
           token: "",
           error: "",
           message: "",
-          loading: false
+          loading: false,
+          dialog: false
       }
   },
   methods: {
@@ -85,7 +112,7 @@ export default {
           this.message = response.data;
           localStorage.removeItem('token'),
           store.state.isLogin = false ,
-          setTimeout(() => this.redirectToHome(), 1000)
+          this.redirectToHome()
           
         })
         .catch(e => { this.error = "Failed to delete user, try again" })

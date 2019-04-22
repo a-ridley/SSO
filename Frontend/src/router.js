@@ -12,6 +12,7 @@ import SendResetLink from '@/views/SendResetLink.vue'
 import ResetPassword from '@/views/ResetPassword.vue'
 import Logout from '@/views/Logout.vue'
 import DeleteAccount from '@/views/DeleteAccount.vue'
+import AccountSettings from '@/views/AccountSettings.vue'
 
 Vue.use(VueRouter)
 
@@ -88,6 +89,11 @@ let router = new VueRouter({
       path: '/deleteaccount',
       name: 'deleteaccount',
       component: DeleteAccount
+    },
+    {
+      path: '/accountsettings',
+      name: 'accountsettings',
+      component: AccountSettings,
     },
     {
       path: '*',
