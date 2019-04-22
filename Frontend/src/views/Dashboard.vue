@@ -48,9 +48,9 @@
                 <img
                   v-if="app.LogoUrl === null"
                   src="@/assets/no-image-icon.png"
-                  @click="launchLoading = true; launch(app.Id, app)"
+                  @click="launch(app.Id, app)"
                 >
-                <img v-else :src="app.LogoUrl" @click="launchLoading = true; launch(app.Id)">
+                <img v-else :src="app.LogoUrl" @click="launch(app.Id, app)">
                 <div id="content" v-if="app.UnderMaintenance">
                   <!-- Launching to an app can be done by clicking the app title -->
                   <h3 class="headline mb-0" row wrap>
@@ -62,7 +62,7 @@
                   <h3
                     id="launchable"
                     class="headline mb-0"
-                    @click="launchLoading = true; launch(app.Id, app)"
+                    @click="launch(app.Id, app)"
                   >
                     <strong>{{ app.Title | truncate(maxTitleLength, textTail)}}</strong>
                   </h3>
@@ -92,8 +92,8 @@
 <script>
 import Vue from "vue";
 import Loading from "@/components/Dialogs/Loading.vue";
+import { signAndLaunch } from "@/services/oauth";
 import AppDetails from "@/components/Dialogs/AppDetails.vue";
-import { signLaunch, submitLaunch } from "@/services/request";
 import { filter } from "@/services/TextFormat";
 import { apiURL } from "@/const.js";
 import axios from "axios";
@@ -135,49 +135,13 @@ export default {
 
       this.updateClickCount(app);
 
-      signLaunch(appId)
-        .then(launchData => {
-          submitLaunch(launchData)
-            .then(launchResponse => {
-              this.launchLoading = false;
-              window.location.href = launchResponse.redirectURL;
-            })
-            .catch(err => {
-              let code = err.response.status;
-              this.launchLoading = false;
-              switch (code) {
-                case 500:
-                  this.error =
-                    "An unexpected server error occurred. Please try again momentarily.";
-                  break;
-                default:
-                  this.error =
-                    "An unexpected server error occurred. Please try again momentarily.";
-                  break;
-              }
-            })
-            .finally(() => {
-              if (this.launchLoading !== false) {
-                this.launchLoading = false;
-                this.error =
-                  "Communication with the application can not be established.";
-              }
-            });
-        })
-        .catch(err => {
-          let code = err.response.status;
-          this.launchLoading = false;
-          switch (code) {
-            case 500:
-              this.error =
-                "An unexpected server error occurred. Please try again momentarily.";
-              break;
-            default:
-              this.error =
-                "An unexpected server error occurred. Please try again momentarily.";
-              break;
-          }
-        });
+      this.launchLoading = true;
+
+      signAndLaunch(appId).catch(e => {
+        this.error = e.message;
+      }).finally(() => {
+        this.launchLoading = false;
+      });
     },
     filterApps: function(value) {
       if (value === this.sortBy[0]) this.sortByAscending();
