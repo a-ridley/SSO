@@ -64,8 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationManagement\ApplicationManager.cs" />
-    <Compile Include="ApplicationManagement\ApplicationRequest.cs" />
-    <Compile Include="ApplicationManagement\HttpResponseContent.cs" />
+    <Compile Include="ApplicationManagement\IApplicationManager.cs" />
     <Compile Include="AuthorizationManagement\IAuthorizationManager.cs" />
     <Compile Include="LaunchManagement\LaunchManager.cs" />
     <Compile Include="LaunchManagement\ILaunchManager.cs" />

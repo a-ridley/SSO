@@ -111,6 +111,7 @@ router.beforeEach((to, from, next) => {
       alert('Please login');
     }
   }
+
   next();
 })
 

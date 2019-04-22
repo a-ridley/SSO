@@ -89,11 +89,27 @@
     <Compile Include="Migrations\201904081702539_update-applications-add-click-count.Designer.cs">
       <DependentUpon>201904081702539_update-applications-add-click-count.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201904160246563_update-applications-add-HealthCheckUrl.cs" />
+    <Compile Include="Migrations\201904160246563_update-applications-add-HealthCheckUrl.Designer.cs">
+      <DependentUpon>201904160246563_update-applications-add-HealthCheckUrl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904161956235_delete-applications-apikeys.cs" />
+    <Compile Include="Migrations\201904161956235_delete-applications-apikeys.Designer.cs">
+      <DependentUpon>201904161956235_delete-applications-apikeys.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904162002023_create-updated-tables-applications-apiKeys.cs" />
+    <Compile Include="Migrations\201904162002023_create-updated-tables-applications-apiKeys.Designer.cs">
+      <DependentUpon>201904162002023_create-updated-tables-applications-apiKeys.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904200642298_update-applications-add-LogoutUrl.cs" />
+    <Compile Include="Migrations\201904200642298_update-applications-add-LogoutUrl.Designer.cs">
+      <DependentUpon>201904200642298_update-applications-add-LogoutUrl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApiKey.cs" />
     <Compile Include="Models\Application.cs" />
     <Compile Include="Models\LogoutRequest.cs" />
-    <Compile Include="Models\LoginRequest.cs" />
+    <Compile Include="Requests\LoginRequest.cs" />
     <Compile Include="Models\Session.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -104,15 +120,19 @@
       <DependentUpon>201903051936518_PasswordReset.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\PasswordReset.cs" />
+    <Compile Include="Repositories\IApiKeyRepository.cs" />
+    <Compile Include="Repositories\IApplicationRepository.cs" />
     <Compile Include="Repositories\ISessionRepository.cs" />
     <Compile Include="Repositories\ResetRepository.cs" />
     <Compile Include="Repositories\SessionRepository.cs" />
     <Compile Include="Repositories\UserManagementRepository.cs" />
     <Compile Include="Repositories\UserRepository.cs" />
-    <Compile Include="Requests\NewPasswordRequest.cs" />
-    <Compile Include="Requests\SecurityAnswersRequest.cs" />
-    <Compile Include="Requests\SendResetEmailRequest.cs" />
-    <Compile Include="Requests\UpdatePasswordRequest.cs" />
+    <Compile Include="RequestModels\ApplicationRequest.cs" />
+    <Compile Include="RequestModels\HttpResponseContent.cs" />
+    <Compile Include="RequestModels\NewPasswordRequest.cs" />
+    <Compile Include="RequestModels\SecurityAnswersRequest.cs" />
+    <Compile Include="RequestModels\SendResetEmailRequest.cs" />
+    <Compile Include="RequestModels\UpdatePasswordRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -153,6 +173,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201904081702539_update-applications-add-click-count.resx">
       <DependentUpon>201904081702539_update-applications-add-click-count.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904160246563_update-applications-add-HealthCheckUrl.resx">
+      <DependentUpon>201904160246563_update-applications-add-HealthCheckUrl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904161956235_delete-applications-apikeys.resx">
+      <DependentUpon>201904161956235_delete-applications-apikeys.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904162002023_create-updated-tables-applications-apiKeys.resx">
+      <DependentUpon>201904162002023_create-updated-tables-applications-apiKeys.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904200642298_update-applications-add-LogoutUrl.resx">
+      <DependentUpon>201904200642298_update-applications-add-LogoutUrl.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />

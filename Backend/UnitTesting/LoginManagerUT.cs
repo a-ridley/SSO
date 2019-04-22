@@ -3,6 +3,7 @@ using ManagerLayer.UserManagement;
 using ManagerLayer.Login;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DataAccessLayer.Models;
+using DataAccessLayer.Requests;
 
 namespace UnitTesting
 {
@@ -37,7 +38,7 @@ namespace UnitTesting
             using (var _db = tu.CreateDataBaseContext())
             {
                 // Act 
-                result = lm.LoginCheckUserExists(request);
+                result = lm.LoginCheckUserExists(request.email);
 
                 // Assert
                 Assert.AreEqual(true, result);
@@ -58,7 +59,7 @@ namespace UnitTesting
             using (var _db = tu.CreateDataBaseContext())
             {
                 // Act 
-                result = lm.LoginCheckUserExists(request);
+                result = lm.LoginCheckUserExists(request.email);
 
                 // Assert
                 Assert.AreNotEqual(true, result);
@@ -79,7 +80,7 @@ namespace UnitTesting
             using (var _db = tu.CreateDataBaseContext())
             {
                 // Act 
-                result = lm.LoginCheckUserExists(request);
+                result = lm.LoginCheckUserExists(request.email);
 
                 // Assert
                 Assert.AreEqual(false, result);
@@ -100,7 +101,7 @@ namespace UnitTesting
             using (var _db = tu.CreateDataBaseContext())
             {
                 // Act 
-                result = lm.LoginCheckUserExists(request);
+                result = lm.LoginCheckUserExists(request.email);
 
                 // Assert
                 Assert.AreEqual(false, result);
@@ -116,7 +117,7 @@ namespace UnitTesting
             //Arrange
             User newUser = tu.CreateUserInDbManager();
             bool result;
-            request.email = "cf2080@icloud.com";
+            request.email = newUser.Email;
             request.password = "qwertyuiop_!2019";
 
             using (var _db = tu.CreateDataBaseContext())
@@ -125,7 +126,7 @@ namespace UnitTesting
                 newUser.Disabled = true;
                 um.UpdateUser(newUser);
                 _db.SaveChanges();
-                result = lm.LoginCheckUserDisabled(request);
+                result = lm.LoginCheckUserDisabled(request.email);
 
                 // Assert
                 Assert.AreEqual(true, result);
@@ -140,13 +141,13 @@ namespace UnitTesting
             //Arrange
             User newUser = tu.CreateUserInDbManager();
             bool result;
-            request.email = "cf2080@icloud.com";
+            request.email = newUser.Email;
             request.password = "qwertyuiop_!2019";
 
             using (var _db = tu.CreateDataBaseContext())
             {
                 // Act 
-                result = lm.LoginCheckUserDisabled(request);
+                result = lm.LoginCheckUserDisabled(request.email);
 
                 // Assert
                 Assert.AreNotEqual(true, result);
@@ -161,13 +162,13 @@ namespace UnitTesting
             //Arrange
             User newUser = tu.CreateUserInDbManager();
             bool result;
-            request.email = "cf2080@icloud.com";
+            request.email = newUser.Email;
             request.password = "qwertyuiop_!2019";
 
             using (var _db = tu.CreateDataBaseContext())
             {
                 // Act 
-                result = lm.LoginCheckUserDisabled(request);
+                result = lm.LoginCheckUserDisabled(request.email);
 
                 // Assert
                 Assert.AreEqual(false, result);
@@ -182,7 +183,7 @@ namespace UnitTesting
             //Arrange
             User newUser = tu.CreateUserInDbManager();
             bool result;
-            request.email = "cf2080@icloud.com";
+            request.email = newUser.Email;
             request.password = "qwertyuiop_!2019";
 
             using (var _db = tu.CreateDataBaseContext())
@@ -191,7 +192,7 @@ namespace UnitTesting
                 newUser.Disabled = true;
                 um.UpdateUser(newUser);
                 _db.SaveChanges();
-                result = lm.LoginCheckUserDisabled(request);
+                result = lm.LoginCheckUserDisabled(request.email);
 
                 // Assert
                 Assert.AreNotEqual(false, result);
@@ -207,7 +208,7 @@ namespace UnitTesting
             //Arrange
             User newUser = tu.CreateUserInDbManager();
             bool result;
-            request.email = "cf2080@icloud.com";
+            request.email = newUser.Email;
             request.password = "qwertyuiop136_!2019";
 
             using (var _db = tu.CreateDataBaseContext())
@@ -228,7 +229,7 @@ namespace UnitTesting
             //Arrange
             User newUser = tu.CreateUserInDbManager();
             bool result;
-            request.email = "cf2080@icloud.com";
+            request.email = newUser.Email;
             request.password = "qwertyuiop136_!2019!";
 
             using (var _db = tu.CreateDataBaseContext())
@@ -249,7 +250,7 @@ namespace UnitTesting
             //Arrange
             User newUser = tu.CreateUserInDbManager();
             bool result;
-            request.email = "cf2080@icloud.com";
+            request.email = newUser.Email;
             request.password = "qwertyuiop136_!2019!";
 
             using (var _db = tu.CreateDataBaseContext())
@@ -270,7 +271,7 @@ namespace UnitTesting
             //Arrange
             User newUser = tu.CreateUserInDbManager();
             bool result;
-            request.email = "cf2080@icloud.com";
+            request.email = newUser.Email;
             request.password = "qwertyuiop136_!2019";
 
             using (var _db = tu.CreateDataBaseContext())
@@ -292,13 +293,13 @@ namespace UnitTesting
             //Arrange
             User newUser = tu.CreateUserInDbManager();
             string result;
-            request.email = "cf2080@icloud.com";
+            request.email = newUser.Email; 
             request.password = "qwertyuiop136_!2019";
 
             using (var _db = tu.CreateDataBaseContext())
             {
                 // Act 
-                result = lm.LoginAuthorized(request);
+                result = lm.LoginAuthorized(request.email);
 
                 // Assert
                 Assert.IsNotNull(result);

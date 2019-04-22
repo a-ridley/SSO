@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity.Validation;
+using DataAccessLayer.Requests;
 
 namespace ManagerLayer.Login
 {
@@ -25,12 +26,12 @@ namespace ManagerLayer.Login
             
         }
 
-        public bool LoginCheckUserExists(LoginRequest request)
+        public bool LoginCheckUserExists(string email)
         {
             using (var _db = new DatabaseContext())
             {
                 IUserService _userService = new UserService(_db);
-                user = _userService.GetUser(request.email);
+                user = _userService.GetUser(email);
                 if (user != null)
                 {
                     return true;
@@ -43,12 +44,12 @@ namespace ManagerLayer.Login
             }
         }
 
-        public bool LoginCheckUserDisabled(LoginRequest request)
+        public bool LoginCheckUserDisabled(string email)
         {
             using (var _db = new DatabaseContext())
             {
                 IUserService _userService = new UserService(_db);
-                user = _userService.GetUser(request.email);
+                user = _userService.GetUser(email);
                 if (user.Disabled)
                 {
                     return true;
@@ -95,12 +96,12 @@ namespace ManagerLayer.Login
             return result;
         }
 
-        public string LoginAuthorized(LoginRequest request)
+        public string LoginAuthorized(string email)
         {
             using (var _db = new DatabaseContext())
             {
                 IUserService _userService = new UserService(_db);
-                user = _userService.GetUser(request.email);
+                user = _userService.GetUser(email);
                 string generateToken = _tokenService.GenerateToken();
                 Session session = new Session
                 {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
@@ -13,6 +14,7 @@ namespace DataAccessLayer.Models
             Id = Guid.NewGuid();
             UnderMaintenance = false;
             ClickCount = 0;
+            ApiKeys = new List<ApiKey>();
         }
 
         [Key]
@@ -42,6 +44,14 @@ namespace DataAccessLayer.Models
         public bool UnderMaintenance { get; set; }
 
         public long ClickCount { get; set; }
+
+        [Required, DataType(DataType.Url)]
+        public string HealthCheckUrl { get; set; }
+
+        [Required, DataType(DataType.Url)]
+        public string LogoutUrl { get; set; }
+
+        public ICollection<ApiKey> ApiKeys { get; set; }
     }
 
     

@@ -14,12 +14,14 @@ namespace ManagerLayer
 {
     public class UserManager
     {
+        IApplicationService _applicationService;
         PasswordService _passwordService;
         UserService _userService;
         public UserManager(DatabaseContext _db)
         {
             this._passwordService = new PasswordService();
             this._userService = new UserService(_db);
+            _applicationService = new ApplicationService(_db);
         }
 
         public User CreateUser(
@@ -110,7 +112,7 @@ namespace ManagerLayer
             User deletingUser = _userService.GetUser(userId);
             ISessionService _sessionService = new SessionService(_db);
             var sessions = _sessionService.GetSessions(userId);
-            var applications = ApplicationService.GetAllApplicationsList(_db);
+            var applications = _applicationService.GetAllApplicationsList();
             //var appList = applications.OfType<Application>().ToList();
             var responseList = new List<HttpResponseMessage>();
             foreach(Application app in applications)

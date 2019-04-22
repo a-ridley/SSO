@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ManagerLayer.ApplicationManagement
+namespace DataAccessLayer.RequestModels
 {
     public class ApplicationRequest
     {
@@ -17,5 +17,7 @@ namespace ManagerLayer.ApplicationManagement
         public string DeleteUrl { set; get; }
         public bool UnderMaintenance { set; get; }
         public long ClickCount { get; set; }
+        public string HealthCheckUrl { set; get; }
+        public string LogoutUrl { get; set; }
     }
 }

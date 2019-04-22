@@ -13,17 +13,12 @@ namespace UnitTesting
     {
         DatabaseContext _db;
         TestingUtils tu;
-        PasswordManager pm;
         SessionService ss;
-        UserService us;
 
         public PasswordResetManagerUT()
         {
-            _db = new DatabaseContext();
             tu = new TestingUtils();
-            pm = new PasswordManager();
-            ss = new SessionService();
-            us = new UserService();
+            ss = new SessionService(_db);
         }
 
         [TestMethod]
@@ -33,9 +28,13 @@ namespace UnitTesting
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
             //Act
-            var response = pm.CreatePasswordReset(newUser.Id);
-            //Assert
-            Assert.IsNotNull(response);
+            using(_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var response = pm.CreatePasswordReset(newUser.Id);
+                //Assert
+                Assert.IsNotNull(response);
+            }
         }
 
         [TestMethod]
@@ -44,12 +43,17 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var expected = pm.CreatePasswordReset(newUser.Id);
-            //Act
-            var response = pm.GetPasswordReset(expected.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.AreEqual(expected.ResetToken, response.ResetToken);
+
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var expected = pm.CreatePasswordReset(newUser.Id);
+                //Act
+                var response = pm.GetPasswordReset(expected.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.AreEqual(expected.ResetToken, response.ResetToken);
+            }
         }
 
         [TestMethod]
@@ -58,14 +62,18 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var expected = pm.CreatePasswordReset(newUser.Id);
-            //Act
-            expected.ResetCount = 1;
-            var response = pm.UpdatePasswordReset(expected);
-            var actual = pm.GetPasswordReset(expected.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.AreEqual(expected.ResetToken, actual.ResetToken);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var expected = pm.CreatePasswordReset(newUser.Id);
+                //Act
+                expected.ResetCount = 1;
+                var response = pm.UpdatePasswordReset(expected);
+                var actual = pm.GetPasswordReset(expected.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.AreEqual(expected.ResetToken, actual.ResetToken);
+            }
         }
 
         [TestMethod]
@@ -74,13 +82,17 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var expected = pm.CreatePasswordReset(newUser.Id);
-            //Act
-            var response = pm.DeletePasswordReset(expected.ResetToken);
-            var result = pm.ExistingResetToken(expected.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsFalse(result);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var expected = pm.CreatePasswordReset(newUser.Id);
+                //Act
+                var response = pm.DeletePasswordReset(expected.ResetToken);
+                var result = pm.ExistingResetToken(expected.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsFalse(result);
+            }
         }
 
         [TestMethod]
@@ -89,12 +101,16 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var expected = pm.CreatePasswordReset(newUser.Id);
-            //Act
-            var response = pm.GetPasswordResetExpiration(expected.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.AreEqual(expected.ExpirationTime, response);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var expected = pm.CreatePasswordReset(newUser.Id);
+                //Act
+                var response = pm.GetPasswordResetExpiration(expected.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.AreEqual(expected.ExpirationTime, response);
+            }
         }
 
         [TestMethod]
@@ -103,12 +119,16 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            //Act
-            var response = pm.ExistingResetToken(newlyAddedPasswordReset.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsTrue(response);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                //Act
+                var response = pm.ExistingResetToken(newlyAddedPasswordReset.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsTrue(response);
+            }
         }
 
         [TestMethod]
@@ -117,11 +137,15 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            //Act
-            var response = pm.GetAttemptsPerToken(newlyAddedPasswordReset.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                //Act
+                var response = pm.GetAttemptsPerToken(newlyAddedPasswordReset.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+            }
         }
 
         [TestMethod]
@@ -130,11 +154,15 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            //Act
-            var response = pm.GetPasswordResetStatus(newlyAddedPasswordReset.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                //Act
+                var response = pm.GetPasswordResetStatus(newlyAddedPasswordReset.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+            }
         }
 
         [TestMethod]
@@ -143,14 +171,18 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            //Act
-            pm.LockPasswordReset(newlyAddedPasswordReset.ResetToken);
-            var response = pm.GetPasswordReset(newlyAddedPasswordReset.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsTrue(response.Disabled);
-            Assert.IsFalse(response.AllowPasswordReset);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                //Act
+                pm.LockPasswordReset(newlyAddedPasswordReset.ResetToken);
+                var response = pm.GetPasswordReset(newlyAddedPasswordReset.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsTrue(response.Disabled);
+                Assert.IsFalse(response.AllowPasswordReset);
+            }
         }
 
         [TestMethod]
@@ -159,12 +191,16 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            //Act
-            var response = pm.CheckPasswordResetValid(newlyAddedPasswordReset.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsTrue(response);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                //Act
+                var response = pm.CheckPasswordResetValid(newlyAddedPasswordReset.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsTrue(response);
+            }
         }
 
         [TestMethod]
@@ -173,12 +209,16 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            //Act
-            var response = pm.PasswordResetsMadeInPast24HoursByUser(newUser.Id);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.AreEqual(response, 1);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                //Act
+                var response = pm.PasswordResetsMadeInPast24HoursByUser(newUser.Id);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.AreEqual(response, 1);
+            }
         }
 
         [TestMethod]
@@ -187,10 +227,14 @@ namespace UnitTesting
             //Arrange
             string password = "password";
             //Act
-            var response = pm.CheckIsPasswordPwned(password);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsTrue(response);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var response = pm.CheckIsPasswordPwned(password);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsTrue(response);
+            }
         }
 
         [TestMethod]
@@ -200,13 +244,17 @@ namespace UnitTesting
             string password = "password";
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            string resetToken = newlyAddedPasswordReset.ResetToken;
-            //Act
-            var response = pm.SaltAndHashPassword(resetToken, password);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.AreNotEqual(response, password);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                string resetToken = newlyAddedPasswordReset.ResetToken;
+                //Act
+                var response = pm.SaltAndHashPassword(resetToken, password);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.AreNotEqual(response, password);
+            }
         }
 
         [TestMethod]
@@ -216,17 +264,22 @@ namespace UnitTesting
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
             string newPassword = "qwertyswag123";
-            var newPasswordHashed = pm.HashPassword(newPassword, newUser.PasswordSalt);
-            //Act
-            var response = pm.UpdatePassword(newUser, newPasswordHashed);
-            
-            using(_db = tu.CreateDataBaseContext())
+            using (_db = tu.CreateDataBaseContext())
             {
-                var actual = us.GetUser(_db, newUser.Email).PasswordHash;
-                //Assert
-                Assert.IsNotNull(response);
-                Assert.IsTrue(response);
-                Assert.AreEqual(newPasswordHashed, actual);
+                PasswordManager pm = new PasswordManager(_db);
+                var newPasswordHashed = pm.HashPassword(newPassword, newUser.PasswordSalt);
+                //Act
+                var response = pm.UpdatePassword(newUser, newPasswordHashed);
+
+                using (_db = tu.CreateDataBaseContext())
+                {
+                    UserService us = new UserService(_db);
+                    var actual = us.GetUser(newUser.Email).PasswordHash;
+                    //Assert
+                    Assert.IsNotNull(response);
+                    Assert.IsTrue(response);
+                    Assert.AreEqual(newPasswordHashed, actual);
+                }
             }
         }
 
@@ -236,16 +289,20 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            string newPassword = "asdf";
-            string newPasswordHashed = pm.HashPassword(newPassword, newUser.PasswordSalt);
-            //Act
-            var response = pm.ResetPassword(newlyAddedPasswordReset.ResetToken, newPasswordHashed);
-            var actual = _db.Users.Find(newUser.Id).PasswordHash;
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsTrue(response);
-            Assert.AreEqual(actual, newPasswordHashed);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                string newPassword = "asdf";
+                string newPasswordHashed = pm.HashPassword(newPassword, newUser.PasswordSalt);
+                //Act
+                var response = pm.ResetPassword(newlyAddedPasswordReset.ResetToken, newPasswordHashed);
+                var actual = _db.Users.Find(newUser.Id).PasswordHash;
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsTrue(response);
+                Assert.AreEqual(actual, newPasswordHashed);
+            }
         }
 
         [TestMethod]
@@ -260,14 +317,18 @@ namespace UnitTesting
             newUser.SecurityQ2 = secQ2;
             newUser.SecurityQ3 = secQ3;
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            //Act 
-            var response = pm.GetSecurityQuestions(newlyAddedPasswordReset.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.AreEqual(response[0], secQ1);
-            Assert.AreEqual(response[1], secQ2);
-            Assert.AreEqual(response[2], secQ3);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                //Act 
+                var response = pm.GetSecurityQuestions(newlyAddedPasswordReset.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.AreEqual(response[0], secQ1);
+                Assert.AreEqual(response[1], secQ2);
+                Assert.AreEqual(response[2], secQ3);
+            }
         }
 
         [TestMethod]
@@ -282,18 +343,22 @@ namespace UnitTesting
             newUser.SecurityQ2Answer = secA2;
             newUser.SecurityQ3Answer = secA3;
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            List<string> submittedAnswers = new List<string>
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                List<string> submittedAnswers = new List<string>
             {
                 "Pizza",
                 "Cyan",
                 "Hiking"
             };
-            //Act
-            var response = pm.CheckSecurityAnswers(newlyAddedPasswordReset.ResetToken, submittedAnswers);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsTrue(response);
+                //Act
+                var response = pm.CheckSecurityAnswers(newlyAddedPasswordReset.ResetToken, submittedAnswers);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsTrue(response);
+            }
         }
 
         [TestMethod]
@@ -302,14 +367,18 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            newlyAddedPasswordReset.AllowPasswordReset = true;
-            pm.UpdatePasswordReset(newlyAddedPasswordReset);
-            //Act
-            var response = pm.CheckIfPasswordResetAllowed(newlyAddedPasswordReset.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsTrue(response);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                newlyAddedPasswordReset.AllowPasswordReset = true;
+                pm.UpdatePasswordReset(newlyAddedPasswordReset);
+                //Act
+                var response = pm.CheckIfPasswordResetAllowed(newlyAddedPasswordReset.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsTrue(response);
+            }
         }
 
         [TestMethod]
@@ -320,9 +389,13 @@ namespace UnitTesting
             tu.CreateUserInDb(newUser);
             //Act
             var expectedResetToken = "asdf";
-            var actualResetToken = pm.CreatePasswordReset(newUser.Id);
-            //Assert
-            Assert.AreNotEqual(expectedResetToken, actualResetToken);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var actualResetToken = pm.CreatePasswordReset(newUser.Id);
+                //Assert
+                Assert.AreNotEqual(expectedResetToken, actualResetToken);
+            }
         }
 
         [TestMethod]
@@ -331,13 +404,17 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var expected = pm.CreatePasswordReset(newUser.Id);
-            var unexpected = pm.CreatePasswordReset(newUser.Id);
-            //Act
-            var response = pm.GetPasswordReset(unexpected.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.AreNotEqual(expected.ResetToken, response.ResetToken);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var expected = pm.CreatePasswordReset(newUser.Id);
+                var unexpected = pm.CreatePasswordReset(newUser.Id);
+                //Act
+                var response = pm.GetPasswordReset(unexpected.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.AreNotEqual(expected.ResetToken, response.ResetToken);
+            }
         }
 
         [TestMethod]
@@ -346,13 +423,17 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var expected = pm.CreatePasswordReset(newUser.Id);
-            //Act
-            var response = pm.UpdatePasswordReset(expected);
-            var actual = pm.GetPasswordReset(expected.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.AreEqual(expected.ResetToken, actual.ResetToken);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var expected = pm.CreatePasswordReset(newUser.Id);
+                //Act
+                var response = pm.UpdatePasswordReset(expected);
+                var actual = pm.GetPasswordReset(expected.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.AreEqual(expected.ResetToken, actual.ResetToken);
+            }
         }
 
         [TestMethod]
@@ -363,11 +444,15 @@ namespace UnitTesting
             tu.CreateUserInDb(newUser);
             string resetToken = "fakeResetToken";
             //Act
-            var response = pm.DeletePasswordReset(resetToken);
-            var result = pm.ExistingResetToken(resetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsFalse(result);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var response = pm.DeletePasswordReset(resetToken);
+                var result = pm.ExistingResetToken(resetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsFalse(result);
+            }
         }
 
         [TestMethod]
@@ -378,10 +463,14 @@ namespace UnitTesting
             tu.CreateUserInDb(newUser);
             string resetToken = "fakeResetToken";
             //Act
-            var response = pm.GetPasswordResetExpiration(resetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.AreEqual(DateTime.MinValue, response);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var response = pm.GetPasswordResetExpiration(resetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.AreEqual(DateTime.MinValue, response);
+            }
         }
 
         [TestMethod]
@@ -392,10 +481,14 @@ namespace UnitTesting
             tu.CreateUserInDb(newUser);
             string resetToken = "fakeResetToken";
             //Act
-            var response = pm.ExistingResetToken(resetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsFalse(response);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var response = pm.ExistingResetToken(resetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsFalse(response);
+            }
         }
 
         [TestMethod]
@@ -404,11 +497,15 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            //Act
-            var response = pm.GetPasswordResetStatus(newlyAddedPasswordReset.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                //Act
+                var response = pm.GetPasswordResetStatus(newlyAddedPasswordReset.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+            }
         }
 
         [TestMethod]
@@ -419,9 +516,13 @@ namespace UnitTesting
             tu.CreateUserInDb(newUser);
             string resetToken = "fakeResetToken";
             //Act
-            var response = pm.GetPasswordReset(resetToken);
-            //Assert
-            Assert.IsNull(response);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var response = pm.GetPasswordReset(resetToken);
+                //Assert
+                Assert.IsNull(response);
+            }
         }
 
         [TestMethod]
@@ -433,11 +534,15 @@ namespace UnitTesting
             string resetToken = "fakeResetRoken";
             string newPassword = "asdf";
             //Act
-            var response = pm.ResetPassword(resetToken, newPassword);
-            var actual = _db.Users.Find(newUser.Id).PasswordHash;
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsFalse(response);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var response = pm.ResetPassword(resetToken, newPassword);
+                var actual = _db.Users.Find(newUser.Id).PasswordHash;
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsFalse(response);
+            }
         }
 
         [TestMethod]
@@ -456,14 +561,18 @@ namespace UnitTesting
             string expectedSecQ1 = "Favorite drink?";
             string expectedSecQ2 = "Favorite pantone?";
             string expectedSecQ3 = "Favorite thing to do?";
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            //Act 
-            var response = pm.GetSecurityQuestions(newlyAddedPasswordReset.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.AreNotEqual(response[0], expectedSecQ1);
-            Assert.AreNotEqual(response[1], expectedSecQ2);
-            Assert.AreNotEqual(response[2], expectedSecQ3);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                //Act 
+                var response = pm.GetSecurityQuestions(newlyAddedPasswordReset.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.AreNotEqual(response[0], expectedSecQ1);
+                Assert.AreNotEqual(response[1], expectedSecQ2);
+                Assert.AreNotEqual(response[2], expectedSecQ3);
+            }
         }
 
         [TestMethod]
@@ -478,18 +587,22 @@ namespace UnitTesting
             newUser.SecurityQ2Answer = secA2;
             newUser.SecurityQ3Answer = secA3;
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            List<string> submittedAnswers = new List<string>
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                List<string> submittedAnswers = new List<string>
             {
                 "Pizza",
                 "Cyan",
                 "Photography"
             };
-            //Act
-            var response = pm.CheckSecurityAnswers(newlyAddedPasswordReset.ResetToken, submittedAnswers);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsFalse(response);
+                //Act
+                var response = pm.CheckSecurityAnswers(newlyAddedPasswordReset.ResetToken, submittedAnswers);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsFalse(response);
+            }
         }
 
         [TestMethod]
@@ -498,14 +611,18 @@ namespace UnitTesting
             //Arrange
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            newlyAddedPasswordReset.AllowPasswordReset = false;
-            pm.UpdatePasswordReset(newlyAddedPasswordReset);
-            //Act
-            var response = pm.CheckIfPasswordResetAllowed(newlyAddedPasswordReset.ResetToken);
-            //Assert
-            Assert.IsNotNull(response);
-            Assert.IsFalse(response);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                newlyAddedPasswordReset.AllowPasswordReset = false;
+                pm.UpdatePasswordReset(newlyAddedPasswordReset);
+                //Act
+                var response = pm.CheckIfPasswordResetAllowed(newlyAddedPasswordReset.ResetToken);
+                //Assert
+                Assert.IsNotNull(response);
+                Assert.IsFalse(response);
+            }
         }
 
         [TestMethod]
@@ -516,9 +633,13 @@ namespace UnitTesting
             string url = "kfc-sso.com/resetpassword/";
             int expected = 1;
             //Act
-            int actual = pm.SendResetEmail(email, url);
-            //Assert
-            Assert.AreEqual(expected, actual);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                int actual = pm.SendResetEmail(email, url);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -529,9 +650,13 @@ namespace UnitTesting
             string url = "kfc-sso.com/resetpassword/";
             int expected = 0;
             //Act
-            int actual = pm.SendResetEmail(email, url);
-            //Assert
-            Assert.AreEqual(expected, actual);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                int actual = pm.SendResetEmail(email, url);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -548,17 +673,21 @@ namespace UnitTesting
             newUser.SecurityQ3Answer = secA3;
             tu.CreateUserInDb(newUser);
 
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
 
-            SecurityAnswersRequest request = new SecurityAnswersRequest();
-            request.securityA1 = secA1;
-            request.securityA2 = secA2;
-            request.securityA3 = secA3;
+                SecurityAnswersRequest request = new SecurityAnswersRequest();
+                request.securityA1 = secA1;
+                request.securityA2 = secA2;
+                request.securityA3 = secA3;
 
-            //Act
-            var actual = pm.CheckSecurityAnswersController(newlyAddedPasswordReset.ResetToken, request);
-            //Assert
-            Assert.AreEqual(expected, actual);
+                //Act
+                var actual = pm.CheckSecurityAnswersController(newlyAddedPasswordReset.ResetToken, request);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -582,10 +711,14 @@ namespace UnitTesting
             request.securityA2 = secA2;
             request.securityA3 = secA3;
 
-            //Act
-            var actual = pm.CheckSecurityAnswersController(newlyAddedPasswordReset, request);
-            //Assert
-            Assert.AreEqual(expected, actual);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                //Act
+                var actual = pm.CheckSecurityAnswersController(newlyAddedPasswordReset, request);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -602,17 +735,21 @@ namespace UnitTesting
             newUser.SecurityQ3Answer = "photography";
             tu.CreateUserInDb(newUser);
 
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
 
-            SecurityAnswersRequest request = new SecurityAnswersRequest();
-            request.securityA1 = secA1;
-            request.securityA2 = secA2;
-            request.securityA3 = secA3;
+                SecurityAnswersRequest request = new SecurityAnswersRequest();
+                request.securityA1 = secA1;
+                request.securityA2 = secA2;
+                request.securityA3 = secA3;
 
-            //Act
-            var actual = pm.CheckSecurityAnswersController(newlyAddedPasswordReset.ResetToken, request);
-            //Assert
-            Assert.AreEqual(expected, actual);
+                //Act
+                var actual = pm.CheckSecurityAnswersController(newlyAddedPasswordReset.ResetToken, request);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -622,15 +759,19 @@ namespace UnitTesting
             var expected = 1;
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            newlyAddedPasswordReset.AllowPasswordReset = true;
-            pm.UpdatePasswordReset(newlyAddedPasswordReset);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                newlyAddedPasswordReset.AllowPasswordReset = true;
+                pm.UpdatePasswordReset(newlyAddedPasswordReset);
 
-            var newPassword = "qweruianvkdasd123";
-            //Act
-            var actual = pm.ResetPasswordController(newlyAddedPasswordReset.ResetToken, newPassword);
-            //Assert
-            Assert.AreEqual(expected, actual);
+                var newPassword = "qweruianvkdasd123";
+                //Act
+                var actual = pm.ResetPasswordController(newlyAddedPasswordReset.ResetToken, newPassword);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -641,9 +782,13 @@ namespace UnitTesting
             var newlyAddedPasswordReset = "asdf";
             var newPassword = "shortpass";
             //Act
-            var actual = pm.ResetPasswordController(newlyAddedPasswordReset, newPassword);
-            //Assert
-            Assert.AreEqual(expected, actual);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var actual = pm.ResetPasswordController(newlyAddedPasswordReset, newPassword);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -654,9 +799,13 @@ namespace UnitTesting
             var newlyAddedPasswordReset = "asdf";
             var newPassword = "qweruianvkdasd123";
             //Act
-            var actual = pm.ResetPasswordController(newlyAddedPasswordReset, newPassword);
-            //Assert
-            Assert.AreEqual(expected, actual);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var actual = pm.ResetPasswordController(newlyAddedPasswordReset, newPassword);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -666,13 +815,17 @@ namespace UnitTesting
             var expected = -2;
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
 
-            var newPassword = "qweruianvkdasd123";
-            //Act
-            var actual = pm.ResetPasswordController(newlyAddedPasswordReset.ResetToken, newPassword);
-            //Assert
-            Assert.AreEqual(expected, actual);
+                var newPassword = "qweruianvkdasd123";
+                //Act
+                var actual = pm.ResetPasswordController(newlyAddedPasswordReset.ResetToken, newPassword);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -682,15 +835,19 @@ namespace UnitTesting
             var expected = -1;
             var newUser = tu.CreateUserObject();
             tu.CreateUserInDb(newUser);
-            var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
-            newlyAddedPasswordReset.AllowPasswordReset = true;
-            pm.UpdatePasswordReset(newlyAddedPasswordReset);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var newlyAddedPasswordReset = pm.CreatePasswordReset(newUser.Id);
+                newlyAddedPasswordReset.AllowPasswordReset = true;
+                pm.UpdatePasswordReset(newlyAddedPasswordReset);
 
-            var newPassword = "passwordpassword";
-            //Act
-            var actual = pm.ResetPasswordController(newlyAddedPasswordReset.ResetToken, newPassword);
-            //Assert
-            Assert.AreEqual(expected, actual);
+                var newPassword = "passwordpassword";
+                //Act
+                var actual = pm.ResetPasswordController(newlyAddedPasswordReset.ResetToken, newPassword);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -701,22 +858,26 @@ namespace UnitTesting
             var newUser = tu.CreateUserObject();
 
             var oldPassword = "qwertyswag123"; //These three lines of code change the password of the user using the password salt
-            var oldPasswordHashed = pm.HashPassword(oldPassword, newUser.PasswordSalt); //so that the password hash is known
-            newUser.PasswordHash = oldPasswordHashed;
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var oldPasswordHashed = pm.HashPassword(oldPassword, newUser.PasswordSalt); //so that the password hash is known
+                newUser.PasswordHash = oldPasswordHashed;
 
-            tu.CreateUserInDb(newUser);
+                tu.CreateUserInDb(newUser);
 
-            var newSession = tu.CreateSessionInDb(newUser);
+                var newSession = tu.CreateSessionInDb(newUser);
 
-            UpdatePasswordRequest request = new UpdatePasswordRequest();
-            request.sessionToken = newSession.Token;
-            request.oldPassword = oldPassword;
-            request.newPassword = "123qwertyswag";
+                UpdatePasswordRequest request = new UpdatePasswordRequest();
+                request.sessionToken = newSession.Token;
+                request.oldPassword = oldPassword;
+                request.newPassword = "123qwertyswag";
 
-            //Act
-            var actual = pm.UpdatePasswordController(request);
-            //Assert
-            Assert.AreEqual(expected, actual);
+                //Act
+                var actual = pm.UpdatePasswordController(request);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -726,21 +887,25 @@ namespace UnitTesting
             var expected = -1;
             var newUser = tu.CreateUserObject();
             var oldPassword = "qwertyswag123";
-            var oldPasswordHashed = pm.HashPassword(oldPassword, newUser.PasswordSalt);
-            newUser.PasswordHash = oldPasswordHashed;
-            tu.CreateUserInDb(newUser);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var oldPasswordHashed = pm.HashPassword(oldPassword, newUser.PasswordSalt);
+                newUser.PasswordHash = oldPasswordHashed;
+                tu.CreateUserInDb(newUser);
 
-            var newSession = tu.CreateSessionInDb(newUser);
+                var newSession = tu.CreateSessionInDb(newUser);
 
-            UpdatePasswordRequest request = new UpdatePasswordRequest();
-            request.sessionToken = newSession.Token;
-            request.oldPassword = oldPassword;
-            request.newPassword = "qwertyswag123";
+                UpdatePasswordRequest request = new UpdatePasswordRequest();
+                request.sessionToken = newSession.Token;
+                request.oldPassword = oldPassword;
+                request.newPassword = "qwertyswag123";
 
-            //Act
-            var actual = pm.UpdatePasswordController(request);
-            //Assert
-            Assert.AreEqual(expected, actual);
+                //Act
+                var actual = pm.UpdatePasswordController(request);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -750,21 +915,25 @@ namespace UnitTesting
             var expected = -2;
             var newUser = tu.CreateUserObject();
             var oldPassword = "qwertyswag123";
-            var oldPasswordHashed = pm.HashPassword(oldPassword, newUser.PasswordSalt);
-            newUser.PasswordHash = oldPasswordHashed;
-            tu.CreateUserInDb(newUser);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var oldPasswordHashed = pm.HashPassword(oldPassword, newUser.PasswordSalt);
+                newUser.PasswordHash = oldPasswordHashed;
+                tu.CreateUserInDb(newUser);
 
-            var newSession = tu.CreateSessionInDb(newUser);
+                var newSession = tu.CreateSessionInDb(newUser);
 
-            UpdatePasswordRequest request = new UpdatePasswordRequest();
-            request.sessionToken = newSession.Token;
-            request.oldPassword = oldPassword;
-            request.newPassword = "passwordpassword";
+                UpdatePasswordRequest request = new UpdatePasswordRequest();
+                request.sessionToken = newSession.Token;
+                request.oldPassword = oldPassword;
+                request.newPassword = "passwordpassword";
 
-            //Act
-            var actual = pm.UpdatePasswordController(request);
-            //Assert
-            Assert.AreEqual(expected, actual);
+                //Act
+                var actual = pm.UpdatePasswordController(request);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -774,21 +943,25 @@ namespace UnitTesting
             var expected = -3;
             var newUser = tu.CreateUserObject();
             var oldPassword = "qwertyswag123";
-            var oldPasswordHashed = pm.HashPassword(oldPassword, newUser.PasswordSalt);
-            newUser.PasswordHash = oldPasswordHashed;
-            tu.CreateUserInDb(newUser);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var oldPasswordHashed = pm.HashPassword(oldPassword, newUser.PasswordSalt);
+                newUser.PasswordHash = oldPasswordHashed;
+                tu.CreateUserInDb(newUser);
 
-            var newSession = tu.CreateSessionInDb(newUser);
+                var newSession = tu.CreateSessionInDb(newUser);
 
-            UpdatePasswordRequest request = new UpdatePasswordRequest();
-            request.sessionToken = newSession.Token;
-            request.oldPassword = oldPassword;
-            request.newPassword = "eucildjeo";
+                UpdatePasswordRequest request = new UpdatePasswordRequest();
+                request.sessionToken = newSession.Token;
+                request.oldPassword = oldPassword;
+                request.newPassword = "eucildjeo";
 
-            //Act
-            var actual = pm.UpdatePasswordController(request);
-            //Assert
-            Assert.AreEqual(expected, actual);
+                //Act
+                var actual = pm.UpdatePasswordController(request);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -807,9 +980,13 @@ namespace UnitTesting
             request.newPassword = "eucildjeo";
 
             //Act
-            var actual = pm.UpdatePasswordController(request);
-            //Assert
-            Assert.AreEqual(expected, actual);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var actual = pm.UpdatePasswordController(request);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]
@@ -826,9 +1003,13 @@ namespace UnitTesting
             request.newPassword = "eucildjeo";
 
             //Act
-            var actual = pm.UpdatePasswordController(request);
-            //Assert
-            Assert.AreEqual(expected, actual);
+            using (_db = tu.CreateDataBaseContext())
+            {
+                PasswordManager pm = new PasswordManager(_db);
+                var actual = pm.UpdatePasswordController(request);
+                //Assert
+                Assert.AreEqual(expected, actual);
+            }
         }
     }
 }

@@ -23,34 +23,22 @@
                 <div class="content">
                   <!-- Launching to an app can be done by clicking the app title -->
                   <h3 class="headline mb-0">
-                    <strong class="truncate">
-                      {{ app.Title }}
-                      <v-tooltip right>
-                        <template v-slot:activator="{ on }">
-                          <v-icon color="orange" large right v-on="on">warning</v-icon>
-                        </template>
-                        <span>Under Maintenance</span>
-                      </v-tooltip>
-                    </strong>
+                    <strong class="truncate">{{ app.Title | truncate(maxTitleLength, textTail)}}</strong>
                   </h3>
                 </div>
-
-                <read-more
-                  v-if="app.Description === null"
-                  more-str="read more"
-                  :text="defaultDescription"
-                  less-str="read less"
-                  :max-chars="175"
-                ></read-more>
-                <!-- Allows expansion or shrinkage of app description -->
-                <read-more
-                  v-else
-                  more-str="read more"
-                  :text="app.Description"
-                  less-str="read less"
-                  :max-chars="175"
-                ></read-more>
               </v-card-title>
+              <div class="appInfo">
+                <AppDetails :title="app.Title" :description="app.Description"/>
+                <v-chip
+                  color="indigo"
+                  text-color="white"
+                >Popularity: {{ app.ClickCount | truncate(maxPopularityLength, textTail)}}</v-chip>
+
+                <v-chip color="orange" text-color="white">
+                  Under Maintenance
+                  <v-icon right large>build</v-icon>
+                </v-chip>
+              </div>
             </v-card>
 
             <!-- The card that shows up if the app is not under maintenance -->
@@ -66,13 +54,8 @@
                 <div id="content" v-if="app.UnderMaintenance">
                   <!-- Launching to an app can be done by clicking the app title -->
                   <h3 class="headline mb-0" row wrap>
-                    <strong class="truncate">
-                      {{ app.Title }}
-                      <br>
-                    </strong>
+                    <strong>{{ app.Title | truncate(maxTitleLength, textTail)}}</strong>
                   </h3>
-
-                  <p>{{app.UnderMaintenance}}</p>
                 </div>
                 <div class="content" v-else>
                   <!-- Launching to an app can be done by clicking the app title -->
@@ -81,26 +64,17 @@
                     class="headline mb-0"
                     @click="launch(app.Id, app)"
                   >
-                    <strong>{{ app.Title }}</strong>
+                    <strong>{{ app.Title | truncate(maxTitleLength, textTail)}}</strong>
                   </h3>
                 </div>
-
-                <read-more
-                  v-if="app.Description === null"
-                  more-str="read more"
-                  :text="defaultDescription"
-                  less-str="read less"
-                  :max-chars="175"
-                ></read-more>
-                <!-- Allows expansion or shrinkage of app description -->
-                <read-more
-                  v-else
-                  more-str="read more"
-                  :text="app.Description"
-                  less-str="read less"
-                  :max-chars="175"
-                ></read-more>
               </v-card-title>
+              <div class="appInfo">
+                <AppDetails :title="app.Title" :description="app.Description"/>
+                <v-chip
+                  color="indigo"
+                  text-color="white"
+                >Popularity: {{ app.ClickCount | truncate(maxPopularityLength, textTail)}}</v-chip>
+              </div>
             </v-card>
             <!-- Loads only if app is in progress of launching -->
             <div v-if="launchLoading">
@@ -119,21 +93,25 @@
 import Vue from "vue";
 import Loading from "@/components/Dialogs/Loading.vue";
 import { signAndLaunch } from "@/services/oauth";
+import AppDetails from "@/components/Dialogs/AppDetails.vue";
+import { filter } from "@/services/TextFormat";
 import { apiURL } from "@/const.js";
 import axios from "axios";
-import ReadMore from "vue-read-more";
 
-Vue.use(ReadMore);
+Vue.filter("truncate", filter);
 
 export default {
-  components: { Loading },
+  components: { Loading, AppDetails },
   data() {
     return {
+      text: "This Is An Extremely Long Application Title",
+      textTail: "...",
+      maxPopularityLength: 5,
       applications: [],
       sortBy: [
         "Alphabetical (Ascending)",
         "Alphabetical (Descending)",
-        "Number of clicks",
+        "Popularity",
         "Number of logins"
       ],
       defaultDescription:
@@ -142,6 +120,14 @@ export default {
       maintenance: false,
       error: ""
     };
+  },
+  computed: {
+    maxTitleLength: function() {
+      var maxTitleLength = 0;
+      if (window.innerWidth > 414) maxTitleLength = 25;
+      else maxTitleLength = 16;
+      return maxTitleLength;
+    }
   },
   methods: {
     launch(appId, app) {
@@ -222,8 +208,9 @@ export default {
   padding: 2em 3em 0 2em;
 }
 
-#maintenance {
-  margin-left: 1em;
+.appInfo {
+  padding-bottom: 1em;
+  margin: 0 1em;
 }
 
 #launchable:hover {
@@ -234,11 +221,5 @@ export default {
   background-color: white !important;
   opacity: 0.65;
   border-color: transparent !important;
-}
-
-.truncate {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 </style>
