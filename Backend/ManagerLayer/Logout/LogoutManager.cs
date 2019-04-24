@@ -6,6 +6,7 @@ using DataAccessLayer.Models;
 using System.Security.Cryptography;
 using DataAccessLayer.Database;
 using ServiceLayer.Services;
+using Newtonsoft.Json;
 
 namespace ManagerLayer.Logout
 {
@@ -29,14 +30,10 @@ namespace ManagerLayer.Logout
             return acc;
         }
     }
-    public class LogoutResponse
-    {
-        public string url { get; set; }
-        public UserLogoutPayload logoutPayload{ get; set; }
-    }
 
-    public class LogoutManager : ILogoutManager
-    {
+
+    public class LogoutManager
+    { 
         DatabaseContext _db;
         UserService userService;
         public LogoutManager(DatabaseContext _db)
@@ -48,7 +45,7 @@ namespace ManagerLayer.Logout
 
         }
         IApplicationService _applicationService;
-        public LogoutResponse SendLogoutRequest(Session session)
+        public async Task<HttpResponseMessage> SendLogoutRequest(Session session)
         {
             var applist = _applicationService.GetAllApplications();
             foreach (Application app in applist)
@@ -66,11 +63,10 @@ namespace ManagerLayer.Logout
                 byte[] signatureBytes = hmacsha1.ComputeHash(logoutPayloadBuffer);
                 logoutPayload.signature = Convert.ToBase64String(signatureBytes);
 
-                return new LogoutResponse
-                {
-                    logoutPayload = logoutPayload,
-                    url = app.LaunchUrl
-                };
+                var stringPayload = JsonConvert.SerializeObject(logoutPayload);
+                var jsonPayload = new StringContent(stringPayload, Encoding.UTF8, "application/json");
+                var request = await client.PostAsync(app.LogoutUrl, jsonPayload);
+                return request;
             }
             return null;
         }

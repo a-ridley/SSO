@@ -1,6 +1,7 @@
 ﻿using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using ManagerLayer.Login;
+using ManagerLayer.Logout;
 using System;
 using System.Data.Entity.Validation;
 using System.Net;
@@ -276,9 +277,12 @@ namespace KFC_WebAPI.Controllers
             {
                 SessionService serv = new SessionService(_db);
                 IAuthorizationManager authorizationManager = new AuthorizationManager(_db);
+                ILogoutManager logoutManager = new LogoutManager(_db);
 
+                try
+                {
 
-
+                }
                 try
                 {
                     var response = authorizationManager.DeleteSession(request.token);
