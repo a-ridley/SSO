@@ -69,6 +69,8 @@
     <Compile Include="LaunchManagement\LaunchManager.cs" />
     <Compile Include="LaunchManagement\ILaunchManager.cs" />
     <Compile Include="Login\LoginManager.cs" />
+    <Compile Include="Logout\ILogoutManager.cs" />
+    <Compile Include="Logout\LogoutManager.cs" />
     <Compile Include="PasswordManagement\PasswordManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AuthorizationManagement\AuthorizationManager.cs" />
