@@ -80,6 +80,7 @@
     <Compile Include="Services\PasswordService.cs" />
     <Compile Include="Services\ResetService.cs" />
     <Compile Include="Services\SessionService.cs" />
+    <Compile Include="Services\SignatureService.cs" />
     <Compile Include="Services\TokenService.cs" />
     <Compile Include="Services\UserDeleteService.cs" />
     <Compile Include="Services\UserService.cs" />

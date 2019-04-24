@@ -34,7 +34,6 @@ namespace DataAccessLayer.Repositories
         {
             session.UpdatedAt = DateTime.UtcNow;
             session.ExpiresAt = DateTime.UtcNow.AddMinutes(Session.MINUTES_UNTIL_EXPIRATION);
-            _db.Entry(session).State = EntityState.Modified;
             return session;
         }
 

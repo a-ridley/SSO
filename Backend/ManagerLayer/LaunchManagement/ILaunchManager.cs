@@ -6,6 +6,6 @@ namespace ManagerLayer.LaunchManagement
 {
     public interface ILaunchManager
     {
-        LaunchResponse SignLaunch(Session session, Guid appId);
+        LaunchData SignLaunch(Session session, Guid appId);
     }
 }

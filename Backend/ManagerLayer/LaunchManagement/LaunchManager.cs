@@ -2,39 +2,11 @@
 using DataAccessLayer.Models;
 using ServiceLayer.Services;
 using System;
-using System.ComponentModel.DataAnnotations;
-using System.Security.Cryptography;
-using System.Text;
+using System.Collections.Generic;
 
 namespace ManagerLayer.LaunchManagement
 {
-    public class LaunchPayload
-    {
-        // Included in signature
-        public Guid ssoUserId { get; set; }
-        public string email { get; set; }
-        public long timestamp { get; set; }
-
-        // Excluded from signature
-        public string signature { get; set; }
-
-        // Generate string to be signed
-        public string PreSignatureString()
-        {
-            string acc = "";
-            acc += "ssoUserId=" + ssoUserId + ";";
-            acc += "email=" + email + ";";
-            acc += "timestamp=" + timestamp + ";";
-            return acc;
-        }
-    }
-
-    public class LaunchResponse
-    {
-        public string url { get; set; }
-        public LaunchPayload launchPayload { get; set; }   
-    }
-
+    // Creates a signed launch ready to be submitted to applications
     public class LaunchManager : ILaunchManager
     {
         DatabaseContext _db;
@@ -45,7 +17,8 @@ namespace ManagerLayer.LaunchManagement
             userService = new UserService(_db);
         }
 
-        public LaunchResponse SignLaunch(Session session, Guid appId)
+        // Creates and signs a payload to launch to a given application
+        public LaunchData SignLaunch(Session session, Guid appId)
         {
             Application app = ApplicationService.GetApplication(_db, appId);
 
@@ -56,26 +29,28 @@ namespace ManagerLayer.LaunchManagement
 
             User user = userService.GetUser(session.UserId);
 
-            LaunchPayload launchPayload = new LaunchPayload
-            {
-                ssoUserId = session.UserId,
-                email = user.Email,
-                timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-            };
+            // Dictionary represents the signed body of the request to the destination server
+            // Props can be added to this, and they will be added to signature
+            var launchPayload = new Dictionary<string, string>();
+            launchPayload.Add("ssoUserId", session.UserId.ToString());
+            launchPayload.Add("email", user.Email);
+            launchPayload.Add("timestamp", DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString());
 
-            HMACSHA256 hmacsha1 = new HMACSHA256(Encoding.ASCII.GetBytes(app.SharedSecretKey));
+            // Sign the dictionary and add the resulting signature back
+            // SECURITY: This step is important for the validity of the payload
+            var signatureService = new SignatureService();
+            var signature = signatureService.Sign(app.SharedSecretKey, launchPayload);
 
-            byte[] launchPayloadBuffer = Encoding.ASCII.GetBytes(launchPayload.PreSignatureString());
+            launchPayload.Add("signature", signature);
 
-            byte[] signatureBytes = hmacsha1.ComputeHash(launchPayloadBuffer);
-
-            launchPayload.signature = Convert.ToBase64String(signatureBytes);
-
-            return new LaunchResponse
+            // Include app URL for routing purposes
+            var launchData = new LaunchData
             {
                 launchPayload = launchPayload,
                 url = app.LaunchUrl
             };
+
+            return launchData;
         }
     }
 }
