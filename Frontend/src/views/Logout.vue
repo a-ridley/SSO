@@ -20,8 +20,8 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-    <div v-if="true">
-      <PopupDialog :dialog="true" :text="popupMessage" :redirect="false" :route="true" :routeTo="routeTo" />
+    <div v-if="showPopup">
+      <PopupDialog :dialog="showPopup" :text="popupMessage" :redirect="false" :route="true" :routeTo="routeTo" />
     </div>
   </div>  
 </template>
@@ -40,7 +40,7 @@ export default {
   data() {
     return {
       loading: false,
-      logoutSuccess: false,
+      showPopup: false,
       popupMessage: '',
       token: "",
       routeTo: '/home'
@@ -55,7 +55,7 @@ export default {
         })
         .then(response => {
           this.routeTo = '/login';
-          this.logoutSuccess = true;
+          this.showPopup = true;
           this.popupMessage = response.data;
           localStorage.removeItem('token');
           store.state.isLogin = false;
@@ -63,12 +63,12 @@ export default {
         .catch(e => {
           if (e.response.status === 417) {
             this.routeTo = '/dashboard';
-            this.logoutSuccess = true;
+            this.showPopup = true;
             this.popupMessage = "Logout has encountered an error."
           }
           else {
             this.routeTo = '/dashboard';
-            this.logoutSuccess = true;
+            this.showPopup = true;
             this.popupMessage = e.response.data
           }
         })
