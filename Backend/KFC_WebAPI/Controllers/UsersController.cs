@@ -160,25 +160,21 @@ namespace KFC_WebAPI.Controllers
                 //400
                 return Content(HttpStatusCode.BadRequest, "Invalid Username");
             }
+
+            if (loginM.LoginCheckUserDisabled(request.email))
+            {
+                //401
+                return Content(HttpStatusCode.Unauthorized, "User is Disabled");
+            }
+
+            if (loginM.LoginCheckPassword(request))
+            {
+                return Ok(loginM.LoginAuthorized(request.email));
+            }
             else
             {
-                if (loginM.LoginCheckUserDisabled(request.email))
-                {
-                    //401
-                    return Content(HttpStatusCode.Unauthorized, "User is Disabled");
-                }
-                else
-                {
-                    if (loginM.LoginCheckPassword(request))
-                    {
-                        return Ok(loginM.LoginAuthorized(request.email));
-                    }
-                    else
-                    {
-                        //400
-                        return Content(HttpStatusCode.BadRequest, "Invalid Password");
-                    }
-                }
+                //400
+                return Content(HttpStatusCode.BadRequest, "Invalid Password");
             }
         }
 

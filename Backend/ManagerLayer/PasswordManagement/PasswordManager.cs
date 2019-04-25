@@ -261,6 +261,8 @@ namespace ManagerLayer.PasswordManagement
                 var userToUpdate = _db.Users.Find(userIDAssociatedWithPasswordReset);
                 if (userToUpdate != null)
                 {
+                    userToUpdate.IncorrectPasswordCount = 0;
+                    userToUpdate.Disabled = false;
                     userToUpdate.PasswordHash = newPasswordHash;
                     _db.SaveChanges();
                     LockPasswordReset(resetToken);
