@@ -39,7 +39,7 @@ namespace KFC_WebAPI.Controllers
                 {
                     launchResponse = launchManager.SignLaunch(session, request.AppId);
                 }
-                catch(ArgumentException e)
+                catch(ArgumentException)
                 {
                     return Content(System.Net.HttpStatusCode.NotFound, "Application not found");
                 }
