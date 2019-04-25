@@ -1,7 +1,7 @@
 <template>
   <v-flex xs12 sm6 offset-sm3>
     <img src="@/assets/KFC_Logo_v2.png" id="logo"/>
-    <h1 align="center" id="text">Welcome to your single sign on portal!</h1>
+    <h1 align="center" id="text">Welcome to the KFC Single Sign-On portal!</h1>
   </v-flex>
 </template>
 
