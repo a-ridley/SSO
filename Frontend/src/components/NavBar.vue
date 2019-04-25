@@ -27,7 +27,7 @@
     </v-menu>
     <div>
       <v-btn to="login" flat v-if="!isLoggedIn.isLogin">Login</v-btn>
-      <v-menu v-else offset-y
+      <v-menu offset-y
               content-class="dropdown-menu"
               transition="slide-y-transition" v-if="isLoggedIn.isLogin">
         <v-btn slot="activator" fab dark color="teal">
@@ -39,7 +39,7 @@
           <v-list-tile v-for="item in this.UserMenuItems"
                         :key="item.title"
                         route :to="item.route"
-                        @click="">
+                        >
             <v-list-tile-title>{{item.title}}</v-list-tile-title>
           </v-list-tile>
         </v-list>
@@ -49,7 +49,6 @@
 </template>
 
 <script>
-  import { apiURL } from '@/const.js'
   import { store } from '@/services/request'
   export default {
     name: 'NavBar',

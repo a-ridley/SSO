@@ -115,7 +115,7 @@ export default {
           this.redirectToHome()
           
         })
-        .catch(e => { this.error = "Failed to delete user, try again" })
+        .catch(() => { this.error = "Failed to delete user, try again" })
         .finally(() => { this.loading = false; })
     }
   }
