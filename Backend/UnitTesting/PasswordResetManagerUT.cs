@@ -629,7 +629,7 @@ namespace UnitTesting
         public void SendResetEmail_Pass()
         {
             //Arrage
-            var email = "winnmoo@gmail.com";
+            var email = "cecs491gucci@gmail.com";
             string url = "kfc-sso.com/resetpassword/";
             int expected = 1;
             //Act
