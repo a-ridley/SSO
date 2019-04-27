@@ -28,7 +28,7 @@ namespace UnitTesting
             launchPayload.Add("email", "example2");
             launchPayload.Add("timestamp", "example3");
             var secretKey = "supersecretexample";
-            var expectedSignatureResult = "jhppQnvrilRxIiK6ysnVk3wvCuHlLv1XGS7XZlfBHW0="; // Hardcoded from a previous run
+            var expectedSignatureResult = "bGqhkWq4Nia3jU7TYj/2i2ewG79ZtkLXwLrDy+mFSVc="; // Hardcoded from a previous run
 
             // Run
             var signatureService = new SignatureService();
@@ -36,7 +36,7 @@ namespace UnitTesting
 
             // Assert
             Assert.IsNotNull(signature);
-            Assert.AreEqual(signature, expectedSignatureResult);
+            Assert.AreEqual(expectedSignatureResult, signature);
         }
 
         // Signatures should not match if different keys are used
