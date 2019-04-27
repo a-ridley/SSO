@@ -7,29 +7,11 @@ using System.Security.Cryptography;
 using DataAccessLayer.Database;
 using ServiceLayer.Services;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace ManagerLayer.Logout
 {
-    public class UserLogoutPayload
-    {
-        // Included in signature
-        public Guid ssoUserId { get; set; }
-        public string email { get; set; }
-        public long timestamp { get; set; }
-
-        // Excluded from signature
-        public string signature { get; set; }
-
-        // Generate string to be signed
-        public string PreSignatureString()
-        {
-            string acc = "";
-            acc += "ssoUserId=" + ssoUserId + ";";
-            acc += "email=" + email + ";";
-            acc += "timestamp=" + timestamp + ";";
-            return acc;
-        }
-    }
+   
 
 
     public class LogoutManager
@@ -55,17 +37,19 @@ namespace ManagerLayer.Logout
             {
                 User user = userService.GetUser(session.UserId);
                 HttpClient client = new HttpClient();
-                UserLogoutPayload logoutPayload = new UserLogoutPayload
-                {
-                    email = user.Email,
-                    ssoUserId = session.UserId,
-                    timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
-                };
-                HMACSHA256 hmacsha1 = new HMACSHA256(Encoding.ASCII.GetBytes(app.SharedSecretKey));
-                byte[] logoutPayloadBuffer = Encoding.ASCII.GetBytes(logoutPayload.PreSignatureString());
-                byte[] signatureBytes = hmacsha1.ComputeHash(logoutPayloadBuffer);
-                logoutPayload.signature = Convert.ToBase64String(signatureBytes);
 
+                //The logoutpayload will have a dictonary that represents signed body of request.
+                var logoutPayload = new Dictionary<string, string>();
+                logoutPayload.Add("ssoUserId", session.UserId.ToString());
+                logoutPayload.Add("email", user.Email);
+                logoutPayload.Add("timestamp", DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString());
+
+                //This signs the dictonary and adds it back to the payload.
+                var signatureService = new SignatureService();
+                var signature = signatureService.Sign(app.SharedSecretKey, logoutPayload);
+                logoutPayload.Add("signature", signature);
+
+                //This converts payload to JSON and sends it to each application logout URL.
                 var stringPayload = JsonConvert.SerializeObject(logoutPayload);
                 var jsonPayload = new StringContent(stringPayload, Encoding.UTF8, "application/json");
                 var request = await client.PostAsync(app.LogoutUrl, jsonPayload);
