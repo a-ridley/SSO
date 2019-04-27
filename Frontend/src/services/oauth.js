@@ -24,7 +24,7 @@ const generateInput = (name, value) => {
 
 const signAndLaunch = appId => {
   return signLaunch(appId).then(launchData => {
-    let form = generateForm("https://webhook.site/ab7a14af-dbe2-45dc-b43e-f929c7df8d92", launchData.url);
+    let form = generateForm(launchData.url);
 
     // Create an input within the form for each key
     for (let key in launchData.launchPayload) {
