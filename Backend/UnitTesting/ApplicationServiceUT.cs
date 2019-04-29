@@ -4,6 +4,7 @@ using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.Entity.Validation;
+using System.Threading.Tasks;
 
 namespace UnitTesting
 {
@@ -406,7 +407,7 @@ namespace UnitTesting
         {
             using (var _db = tu.CreateDataBaseContext())
             {
-                IApplicationService _applicationService = new ApplicationService(_db); ;
+                IApplicationService _applicationService = new ApplicationService(_db);
 
                 // Arrange
                 var expected = true;
@@ -416,6 +417,56 @@ namespace UnitTesting
                 // Act
                 if (applications != null)
                 {
+                    actual = true;
+                }
+
+                // Assert
+                Assert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public async Task CheckWorkingApplicationHealth_Pass_ReturnHttpResponse()
+        {
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Arrange
+                IApplicationService _applicationService = new ApplicationService(_db);
+                var healthCheckUrl = "https://www.google.com/";
+                var expected = 200;
+
+                // Act
+                var actual = await _applicationService.GetApplicationHealth(healthCheckUrl);
+   
+                // Assert
+                Assert.AreEqual(expected, (int) actual.StatusCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task CheckFailingApplicationHealth_Fail_ReturnHttpResponse()
+        {
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Arrange
+                IApplicationService _applicationService = new ApplicationService(_db);
+                var healthCheckUrl = "https://www.gooogle.com/";
+                var expected = true;
+                var actual = false;
+
+                // Act
+                try
+                {
+                    var response = await _applicationService.GetApplicationHealth(healthCheckUrl);
+                    // Checks if the reponse did not have a success status code
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        actual = true;
+                    }
+                }
+                catch
+                {
+                    // Sets actual to true if the url could not be accessed
                     actual = true;
                 }
 
