@@ -197,7 +197,7 @@ export default {
         .get(`${apiURL}/applications/healthcheck`)
         .then(response => (this.healthCheck = response.data))
         .catch("Unexpected error occured in the server.");
-    }, 500);
+    }, 10000);
   }
 };
 </script>
