@@ -68,7 +68,12 @@
       }
     },
     mounted() {
-      store.isUserLogin()
+      if(this.$route.path === '/landing'){
+        this.$router.push( "/home" )
+      }
+      else{
+        store.isUserLogin()
+      }
       if (store.state.isLogin === true) {
           store.getEmail()
       }

@@ -132,8 +132,8 @@ namespace ManagerLayer
                 User deletedUser = _userService.DeleteUser(userId);
                 if(deletedUser != null){
                     _sessionService.DeleteSessions(deletedUser.Id);
+                    _db.SaveChanges();
                 }
-                _db.SaveChanges();
                 return deletedUser;
             }
             return null;
