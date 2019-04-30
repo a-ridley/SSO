@@ -3,10 +3,12 @@ using System.Collections;
 using System.Data.Entity.Validation;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using DataAccessLayer.RequestModels;
+using KFC_WebAPI.Models;
 using ManagerLayer.ApplicationManagement;
 using ServiceLayer.Exceptions;
 using ServiceLayer.Services;
@@ -16,6 +18,8 @@ namespace KFC_WebAPI.Controllers
     public class ApplicationController : ApiController
     {
         //private ApplicationManager manager = new ApplicationManager(_db);
+        private static ApplicationHealthCheck _appHealthStatus = new ApplicationHealthCheck();
+
 
         /// <summary>
         /// Get all individual applications registered with the SSO
@@ -319,6 +323,46 @@ namespace KFC_WebAPI.Controllers
 
                 return response;
             }
+        }
+
+        /// <summary>
+        /// Performs a health check of all applications every minute
+        /// Uses a dictionary to store the health status of all applications
+        /// The application only gets added to the dictionary if the health
+        /// check url return anything other than 200 Success
+        /// </summary>
+        /// <returns>A timestamp of the last health check and the health statuses of every app</returns>
+        [HttpGet]
+        [Route("api/applications/healthcheck")]
+        public async Task<IHttpActionResult> CheckApplicationHealthCheckAsync()
+        {
+            // This is checking if the last health check was within the last minute
+            if (_appHealthStatus.LastHealthCheck < (DateTime.Now - TimeSpan.FromMinutes(1)))
+            {
+                using (var _db = new DatabaseContext())
+                {
+                    // Get the entire list of applications again each time in case they were updated
+                    // or new ones were added
+                    ApplicationService _applicationService = new ApplicationService(_db);
+                    var applications = _applicationService.GetAllApplicationsList();
+
+                    // For every app in the applications table, perform a health check
+                    foreach (Application app in applications)
+                    {
+                        var response = await _applicationService.GetApplicationHealth(app.HealthCheckUrl);
+                        // If the status is not a 200 Success, then the the app is down (true)
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            _appHealthStatus.HealthStatuses[app.Id] = true;
+                        }
+                    }
+                    // Updates last health check to current time
+                    _appHealthStatus.LastHealthCheck = DateTime.Now;
+                }
+            }
+            // If the the last health check has been one minute then just return the statuses again
+            // Or, return the updated statuses if they were updated
+            return Content((HttpStatusCode)200, _appHealthStatus);
         }
     }
 }

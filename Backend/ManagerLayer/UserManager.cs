@@ -115,9 +115,16 @@ namespace ManagerLayer
             var applications = _applicationService.GetAllApplicationsList();
             var responseList = new List<HttpResponseMessage>();
 
-            foreach(Application app in applications)
+            SignatureService _signatureService = new SignatureService();
+            foreach (Application app in applications)
             {
-                var request = await uds.SendDeleteRequest(app,userId, deletingUser.Email );
+                var deletePayload = new Dictionary<string, string>();
+                deletePayload.Add("ssoUserId", userId.ToString());
+                deletePayload.Add("email", deletingUser.Email);
+                deletePayload.Add("timestamp", DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString());
+                var signature = _signatureService.Sign(app.SharedSecretKey, deletePayload);
+                deletePayload.Add("signature", signature);
+                var request = await uds.SendDeleteRequest(app.UserDeletionUrl,deletePayload);
                 responseList.Add(request);
             }
             if (responseList.All(response => response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound))

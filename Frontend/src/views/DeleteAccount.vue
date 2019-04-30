@@ -98,15 +98,11 @@ export default {
     runDelete: function () {
         this.loading = true;
           axios({
-          method: 'POST',
+          method: 'DELETE',
           url: `${apiURL}/users/deleteuser`,
-          data: {
+          params: {
             token: localStorage.token,
           },
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Credentials': true
-          }
         })
         .then(response => {
           this.message = response.data;

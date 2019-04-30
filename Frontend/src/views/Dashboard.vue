@@ -14,7 +14,7 @@
         <v-layout row wrap>
           <v-flex xs12 md6 lg6 v-for="(app, index) in applications" :key="index">
             <!-- The card that shows up if the app is under maintenance -->
-            <v-card v-if="app.UnderMaintenance" class="transparent">
+            <v-card v-if="app.UnderMaintenance || healthCheck.HealthStatuses[app.Id]" class="transparent">
               <v-card-title primary-title>
                 <!-- If there is no logo, then a default image will be shown -->
                 <img v-if="app.LogoUrl === null" src="@/assets/no-image-icon.png">
@@ -28,11 +28,10 @@
                 </div>
               </v-card-title>
               <div class="appInfo">
-                <AppDetails :title="app.Title" :description="app.Description"/>
-                <v-chip
-                  color="indigo"
-                  text-color="white"
-                >Popularity: {{ app.ClickCount | truncate(maxPopularityLength, textTail)}}</v-chip>
+                <AppDetails v-if="app.Description != ''" :title="app.Title" :description="app.Description" />
+                <AppDetails v-else :title="app.Title" :description="defaultDescription" />
+
+                <v-chip color="indigo" text-color="white">Popularity: {{ app.ClickCount | truncate(maxPopularityLength, textTail)}}</v-chip>
 
                 <v-chip color="orange" text-color="white">
                   Under Maintenance
@@ -45,13 +44,9 @@
             <v-card v-else hover>
               <v-card-title primary-title>
                 <!-- If there is no logo, then a default image will be shown -->
-                <img
-                  v-if="app.LogoUrl === null"
-                  src="@/assets/no-image-icon.png"
-                  @click="launch(app.Id, app)"
-                >
+                <img v-if="app.LogoUrl === null" src="@/assets/no-image-icon.png" @click="launch(app.Id, app)">
                 <img v-else :src="app.LogoUrl" @click="launch(app.Id, app)">
-                <div id="content" v-if="app.UnderMaintenance">
+                <div id="content" v-if="app.UnderMaintenance || healthCheck.HealthStatuses[app.Id]">
                   <!-- Launching to an app can be done by clicking the app title -->
                   <h3 class="headline mb-0" row wrap>
                     <strong>{{ app.Title | truncate(maxTitleLength, textTail)}}</strong>
@@ -59,26 +54,19 @@
                 </div>
                 <div class="content" v-else>
                   <!-- Launching to an app can be done by clicking the app title -->
-                  <h3
-                    id="launchable"
-                    class="headline mb-0"
-                    @click="launch(app.Id, app)"
-                  >
+                  <h3 id="launchable" class="headline mb-0" @click="launch(app.Id, app)">
                     <strong>{{ app.Title | truncate(maxTitleLength, textTail)}}</strong>
                   </h3>
                 </div>
               </v-card-title>
               <div class="appInfo">
-                <AppDetails :title="app.Title" :description="app.Description"/>
-                <v-chip
-                  color="indigo"
-                  text-color="white"
-                >Popularity: {{ app.ClickCount | truncate(maxPopularityLength, textTail)}}</v-chip>
+                <AppDetails :title="app.Title" :description="app.Description" />
+                <v-chip color="indigo" text-color="white">Popularity: {{ app.ClickCount | truncate(maxPopularityLength, textTail)}}</v-chip>
               </div>
             </v-card>
             <!-- Loads only if app is in progress of launching -->
             <div v-if="launchLoading">
-              <Loading :dialog="launchLoading"/>
+              <Loading :dialog="launchLoading" />
             </div>
           </v-flex>
         </v-layout>
@@ -118,6 +106,12 @@ export default {
         "No Description. Sirloin short loin tenderloin tri-tip jowl chicken shank ribeye landjaeger, pancetta pork chop. Cupim filet mignon tail porchetta, biltong leberkas turkey flank pork chop frankfurter kevin short loin tenderloin tri-tip shankle. Porchetta boudin shoulder sausage, beef ribs pancetta burgdoggen prosciutto tongue. Sausage kevin strip steak, pork belly pig filet mignon chuck shankle andouille tri-tip ham cow. Pork loin t-bone doner, kevin jowl cupim sausage meatloaf.",
       launchLoading: false,
       maintenance: false,
+      currentPage: 1,
+      pageSize: 20,
+      healthCheck: {
+        LastHealthCheck: new Date(),
+        HealthStatuses: {}
+      },
       error: ""
     };
   },
@@ -137,11 +131,13 @@ export default {
 
       this.launchLoading = true;
 
-      signAndLaunch(appId).catch(e => {
-        this.error = e.message;
-      }).finally(() => {
-        this.launchLoading = false;
-      });
+      signAndLaunch(appId)
+        .catch(e => {
+          this.error = e.message;
+        })
+        .finally(() => {
+          this.launchLoading = false;
+        });
     },
     filterApps: function(value) {
       if (value === this.sortBy[0]) this.sortByAscending();
@@ -180,10 +176,28 @@ export default {
       });
     }
   },
-  async mounted() {
+  async created() {
     await axios
-      .get(`${apiURL}/applications`)
-      .then(response => (this.applications = response.data));
+      .get(`${apiURL}/applications`, {
+        params: {
+          currentPage: this.currentPage,
+          pageSize: this.pageSize
+        }
+      })
+      .then(response => {
+        this.applications = response.data;
+        this.applications.forEach(app => {
+          this.healthCheck.HealthStatuses[app.Id] = false;
+        });
+      });
+  },
+  mounted() {
+    setInterval(() => {
+      axios
+        .get(`${apiURL}/applications/healthcheck`)
+        .then(response => (this.healthCheck = response.data))
+        .catch("Unexpected error occured in the server.");
+    }, 10000);
   }
 };
 </script>
