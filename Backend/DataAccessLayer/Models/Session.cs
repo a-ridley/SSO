@@ -15,6 +15,13 @@ namespace DataAccessLayer.Models
             Id = Guid.NewGuid();
             //isExpired = false;
         }
+		public Session(DateTime CreatedAt, DateTime UpdatedAt, DateTime ExpiresAt)
+		{
+			this.CreatedAt = CreatedAt;
+			this.UpdatedAt = UpdatedAt;
+			this.ExpiresAt = ExpiresAt;
+			Id = Guid.NewGuid();
+		}
 
         [Required]
         public string Token { get; set; }

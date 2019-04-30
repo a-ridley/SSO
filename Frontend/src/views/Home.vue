@@ -1,12 +1,8 @@
 <template>
-  <div>
-    <vlayout>
-      <v-flex xs12 sm6 offset-sm3>
-        <img src="@/assets/KFC_Logo_v2.png" id="logo"/>
-        <h1 align="center" id="text">Welcome to your single sign on portal!</h1>
-      </v-flex>
-    </vlayout>
-  </div>
+  <v-flex xs12 sm6 offset-sm3>
+    <img src="@/assets/KFC_Logo_v2.png" id="logo"/>
+    <h1 align="center" id="text">Welcome to the KFC Single Sign-On portal!</h1>
+  </v-flex>
 </template>
 
 <script>
@@ -16,7 +12,7 @@ export default {
 </script>
 
 <style scoped>
-  #logo{
+#logo{
   width: 100%;
   height: 100%;
   align: center;

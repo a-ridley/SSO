@@ -1,4 +1,4 @@
-﻿using DataAccessLayer.Models;
+using DataAccessLayer.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -7,24 +7,18 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.SqlServer.Server;
 using System.Data.SqlClient;
+using System.Configuration;
 
 namespace DataAccessLayer.Database
 {
     public class DatabaseContext : DbContext
     {
-        string username = "Admin";
-        string password = "";
-        string hostname = "mydbinstance.ce5cmkuh7zii.us-east-2.rds.amazonaws.com";
-        string port = "1433";
-        string dbname = "mydbinstance";
 
         public DatabaseContext()
         {
-            //dev
-            this.Database.Connection.ConnectionString = "Data Source =(LocalDB)\\MSSQLLocalDB; AttachDbFilename = C:\\Users\\Vik\\Documents\\Project\\Current SSO LOgout Vicotoakdas Kim\\SSO\\Backend\\DataAccessLayer\\Database1.mdf;Integrated Security = True";
-
-            //release
-            //this.Database.Connection.ConnectionString = "Data Source=" + hostname + ";Initial Catalog=" + dbname + ";User ID=" + username + ";Password=" + password + ";";
+             //set a system enviorment variable for dev, "Data Source=(localdb);Initial Catalog=SSO;Integrated Security = True"
+            var connectionString = Environment.GetEnvironmentVariable("KFC_SSO_DEV_DATABASE", EnvironmentVariableTarget.User);
+            this.Database.Connection.ConnectionString = connectionString;
         }
 
         public DbSet<User> Users { get; set; }
@@ -32,7 +26,5 @@ namespace DataAccessLayer.Database
         public DbSet<Application> Applications { get; set; }
         public DbSet<ApiKey> Keys { get; set; }
         public DbSet<PasswordReset> PasswordResets { get; set; }
-
-
     }
 }

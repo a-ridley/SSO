@@ -1,7 +1,9 @@
 ﻿using DataAccessLayer.Database;
 using DataAccessLayer.Models;
+using ServiceLayer.Exceptions;
 using ServiceLayer.Services;
 using System;
+using System.Data.Entity.Infrastructure;
 using System.Security.Cryptography;
 
 namespace ManagerLayer
@@ -10,9 +12,12 @@ namespace ManagerLayer
     {
         private ISessionService _sessionService;
 
-        public AuthorizationManager()
+        private DatabaseContext _db;
+
+        public AuthorizationManager(DatabaseContext _db)
         {
-             _sessionService = new SessionService();
+            this._db = _db;
+            _sessionService = new SessionService(_db);
         }
 
         public string GenerateSessionToken()
@@ -23,37 +28,57 @@ namespace ManagerLayer
             return BitConverter.ToString(b).Replace("-", "").ToLower();
         }
 
-        public Session CreateSession(DatabaseContext _db, User user)
+        public Session CreateSession(User user)
         {
             Session session = new Session();
             session.Token = GenerateSessionToken();
-            session.User = user;
             session.UserId = user.Id;
 
-            var response = _sessionService.CreateSession(_db, session);
+            var response = _sessionService.CreateSession(session);
 
             return session;
         }
 
-        public Session ValidateAndUpdateSession(DatabaseContext _db, string token)
+        public Session ValidateAndUpdateSession(string token)
         {
-            Session response = _sessionService.GetSession(_db, token);
-
-            if(response != null)
-            {
-                return _sessionService.UpdateSession(_db, response);
-            }
-            else
+            Session response = _sessionService.GetSession(token);
+            if (response == null)
             {
                 return null;
             }
-        }
+			if (response.ExpiresAt > DateTime.UtcNow)
+			{
+				return _sessionService.UpdateSession(response);
+			}
+			else 
+			{
+				try
+				{
+					_sessionService.DeleteSession(token);
+                    _db.SaveChanges();
+					return null;
+				}
+				catch (DbUpdateException ex)
+				{
+					if (ex.InnerException == null)
+					{
+						throw;
+					}
+					else
+					{
+						//Log?
+						var decodeErrors = ex.Entries;
+						return null;
+					}
 
-        public Session DeleteSession(DatabaseContext _db, string token)
+				}
+			
+			}
+		}
+
+		public Session DeleteSession(string token)
         {
-            Session session = new Session();
-
-            return _sessionService.DeleteSession(_db, token);
+            return _sessionService.DeleteSession(token);
         }
     }
 }

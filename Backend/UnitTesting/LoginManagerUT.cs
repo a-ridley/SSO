@@ -3,6 +3,7 @@ using ManagerLayer.UserManagement;
 using ManagerLayer.Login;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DataAccessLayer.Models;
+using DataAccessLayer.Requests;
 
 namespace UnitTesting
 {
@@ -13,127 +14,298 @@ namespace UnitTesting
 
         LoginManager lm;
         UserManagementManager um;
-        User user;
         LoginRequest request;
+        TestingUtils tu;
 
         public LoginManagerUT()
         {
             lm = new LoginManager();
             um = new UserManagementManager();
-            user = um.GetUser("cf2080@gmail.com");
-            //CreateUser("new@csulb.edu", "passwordtest54321", new DateTime(1996, 12, 15));
             request = new LoginRequest();
-            request.email = "cf2080@gmail.com";
-            request.password = "qwertyuiop";
+            tu = new TestingUtils();
         }
 
         //LoginCheckUserExists()
-
         [TestMethod]
         public void LoginCheckUserExists_Success_ReturnTrue()
         {
-            bool result = lm.LoginCheckUserExists(request);
-            Assert.AreEqual(true, result);
+            // Arrange
+            User newUser = tu.CreateUserInDbManager();
+            bool result;
+            request.email = newUser.Email;
+            request.password = "qwertyuiop_!2019";
+
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Act 
+                result = lm.LoginCheckUserExists(request.email);
+
+                // Assert
+                Assert.AreEqual(true, result);
+                um.DeleteUser(newUser.Id);
+                _db.SaveChanges();
+            }
         }
 
         [TestMethod]
         public void LoginCheckUserExists_Fail_ReturnTrue()
-        {
+        {            
+            // Arrange
+            User newUser = tu.CreateUserInDbManager();
+            bool result;
             request.email = "doesnotexist@gmail.com";
-            bool result = lm.LoginCheckUserExists(request);
-            Assert.AreNotEqual(true, result);
+            request.password = "qwertyuiop_!2019";
+
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Act 
+                result = lm.LoginCheckUserExists(request.email);
+
+                // Assert
+                Assert.AreNotEqual(true, result);
+                um.DeleteUser(newUser.Id);
+                _db.SaveChanges();
+            }
         }
 
         [TestMethod]
         public void LoginCheckUserExists_Success_ReturnFalse()
         {
+            // Arrange
+            User newUser = tu.CreateUserInDbManager();
+            bool result;
             request.email = "doesnotexist@gmail.com";
-            bool result = lm.LoginCheckUserExists(request);
-            Assert.AreEqual(false, result);
+            request.password = "qwertyuiop_!2019";
+
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Act 
+                result = lm.LoginCheckUserExists(request.email);
+
+                // Assert
+                Assert.AreEqual(false, result);
+                um.DeleteUser(newUser.Id);
+                _db.SaveChanges();
+            }
         }
 
         [TestMethod]
         public void LoginCheckUserExists_Fail_ReturnFalse()
         {
-            bool result = lm.LoginCheckUserExists(request);
-            Assert.AreNotEqual(false, result);
+            // Arrange
+            User newUser = tu.CreateUserInDbManager();
+            bool result;
+            request.email = "doesnotexist@gmail.com";
+            request.password = "qwertyuiop_!2019";
+
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Act 
+                result = lm.LoginCheckUserExists(request.email);
+
+                // Assert
+                Assert.AreEqual(false, result);
+                um.DeleteUser(newUser.Id);
+                _db.SaveChanges();
+            }
         }
 
         //LoginCheckUserDisabled()
-
         [TestMethod]
         public void LoginCheckUserDisabled_Success_ReturnTrue()
         {
-            user.Disabled = true;
-            bool result = lm.LoginCheckUserDisabled(request);
-            Assert.AreEqual(true, result);
+            //Arrange
+            User newUser = tu.CreateUserInDbManager();
+            bool result;
+            request.email = newUser.Email;
+            request.password = "qwertyuiop_!2019";
+
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Act 
+                newUser.Disabled = true;
+                um.UpdateUser(newUser);
+                _db.SaveChanges();
+                result = lm.LoginCheckUserDisabled(request.email);
+
+                // Assert
+                Assert.AreEqual(true, result);
+                um.DeleteUser(newUser.Id);
+                _db.SaveChanges();
+            }
         }
 
         [TestMethod]
         public void LoginCheckUserDisabled_Fail_ReturnTrue()
         {
-            um.EnableUser(user);
-            bool result = lm.LoginCheckUserDisabled(request);
-            Assert.AreNotEqual(true, result);
+            //Arrange
+            User newUser = tu.CreateUserInDbManager();
+            bool result;
+            request.email = newUser.Email;
+            request.password = "qwertyuiop_!2019";
+
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Act 
+                result = lm.LoginCheckUserDisabled(request.email);
+
+                // Assert
+                Assert.AreNotEqual(true, result);
+                um.DeleteUser(newUser.Id);
+                _db.SaveChanges();
+            }
         }
 
         [TestMethod]
         public void LoginCheckUserDisabled_Success_ReturnFalse()
         {
-            user.Disabled = false;
-            bool result = lm.LoginCheckUserDisabled(request);
-            Assert.AreEqual(false, result);
+            //Arrange
+            User newUser = tu.CreateUserInDbManager();
+            bool result;
+            request.email = newUser.Email;
+            request.password = "qwertyuiop_!2019";
+
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Act 
+                result = lm.LoginCheckUserDisabled(request.email);
+
+                // Assert
+                Assert.AreEqual(false, result);
+                um.DeleteUser(newUser.Id);
+                _db.SaveChanges();
+            }
         }
 
         [TestMethod]
         public void LoginCheckUserDisabled_Fail_ReturnFalse()
         {
-            user.Disabled = true;
-            bool result = lm.LoginCheckUserDisabled(request);
-            Assert.AreNotEqual(true, result);
+            //Arrange
+            User newUser = tu.CreateUserInDbManager();
+            bool result;
+            request.email = newUser.Email;
+            request.password = "qwertyuiop_!2019";
+
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Act 
+                newUser.Disabled = true;
+                um.UpdateUser(newUser);
+                _db.SaveChanges();
+                result = lm.LoginCheckUserDisabled(request.email);
+
+                // Assert
+                Assert.AreNotEqual(false, result);
+                um.DeleteUser(newUser.Id);
+                _db.SaveChanges();
+            }
         }
 
         //LoginCheckPassword
-
         [TestMethod]
         public void LoginCheckPassword_Success_ReturnTrue()
         {
-            bool result = lm.LoginCheckPassword(request);
-            Console.WriteLine(user.IncorrectPasswordCount);
-            Assert.AreEqual(true, result);
+            //Arrange
+            User newUser = tu.CreateUserInDbManager();
+            bool result;
+            request.email = newUser.Email;
+            request.password = "qwertyuiop136_!2019";
+
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Act 
+                result = lm.LoginCheckPassword(request);
+
+                // Assert
+                Assert.AreEqual(true, result);
+                um.DeleteUser(newUser.Id);
+                _db.SaveChanges();
+            }
         }
 
         [TestMethod]
         public void LoginCheckPassword_Fail_ReturnTrue()
-        {
-            request.password = "pass";
-            bool result = lm.LoginCheckPassword(request);
-            Assert.AreNotEqual(true, result);
+        {            
+            //Arrange
+            User newUser = tu.CreateUserInDbManager();
+            bool result;
+            request.email = newUser.Email;
+            request.password = "qwertyuiop136_!2019!";
+
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Act 
+                result = lm.LoginCheckPassword(request);
+
+                // Assert
+                Assert.AreNotEqual(true, result);
+                um.DeleteUser(newUser.Id);
+                _db.SaveChanges();
+            }
         }
 
         [TestMethod]
         public void LoginCheckPassword_Success_ReturnFalse()
         {
-            request.password = "pass";
-            bool result = lm.LoginCheckPassword(request);
-            Console.WriteLine(user.IncorrectPasswordCount);
-            Assert.AreEqual(false, result);
+            //Arrange
+            User newUser = tu.CreateUserInDbManager();
+            bool result;
+            request.email = newUser.Email;
+            request.password = "qwertyuiop136_!2019!";
+
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Act 
+                result = lm.LoginCheckPassword(request);
+
+                // Assert
+                Assert.AreEqual(false, result);
+                um.DeleteUser(newUser.Id);
+                _db.SaveChanges();
+            }
         }
 
         [TestMethod]
         public void LoginCheckPassword_Fail_ReturnFalse()
         {
-            bool result = lm.LoginCheckPassword(request);
-            Assert.AreNotEqual(false, result);
+            //Arrange
+            User newUser = tu.CreateUserInDbManager();
+            bool result;
+            request.email = newUser.Email;
+            request.password = "qwertyuiop136_!2019";
+
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Act 
+                result = lm.LoginCheckPassword(request);
+
+                // Assert
+                Assert.AreNotEqual(false, result);
+                um.DeleteUser(newUser.Id);
+                _db.SaveChanges();
+            }
         }
 
         // LoginAuthorized()
-
         [TestMethod]
         public void LoginAuthorized_Success_ReturnToken()
         {
-            string result = lm.LoginAuthorized(request);
-            Assert.IsNotNull(result);
+            //Arrange
+            User newUser = tu.CreateUserInDbManager();
+            string result;
+            request.email = newUser.Email; 
+            request.password = "qwertyuiop136_!2019";
+
+            using (var _db = tu.CreateDataBaseContext())
+            {
+                // Act 
+                result = lm.LoginAuthorized(request.email);
+
+                // Assert
+                Assert.IsNotNull(result);
+                um.DeleteUser(newUser.Id);
+                _db.SaveChanges();
+            }
         }
     }
 }

@@ -4,51 +4,74 @@
       <span>KFC SSO</span>
     </v-toolbar-title>
     <v-spacer></v-spacer>
-
-    <v-btn v-if="!isLogged" to="home"  flat>Home</v-btn>
-    <v-btn v-else to="dashboard" flat>Home</v-btn>
-    <v-btn to="about" flat>About</v-btn>
-    <v-btn v-if = "!isLogged" to="register" flat>Register</v-btn>
-    <v-btn to="add" flat>App Register</v-btn>
-    <v-btn to="key" flat>Generate Key</v-btn>
-    <v-btn to="delete" flat>App Delete</v-btn>
-    <v-btn v-if="!isLogged" to="login" flat>Login</v-btn>
-    <v-btn v-if="isLogged" to="updatepassword" flat>Update Password</v-btn>
-    <v-btn v-if="isLogged" to = "Logout" v-on:click=logout() flat>Logout</v-btn>
+    <div>
+      <v-btn v-if="!isLoggedIn.isLogin" to="/home" flat>Home</v-btn>
+      <v-btn v-else to="/dashboard" flat>Home</v-btn>
+    </div>
+    <v-btn to="/register" flat v-if="!isLoggedIn.isLogin">Register</v-btn>
+    <v-btn to="/about" flat>About</v-btn>
+    <v-menu offset-y id="appDropDown">
+      <template slot="activator">
+        <v-btn flat>
+          <span>Application</span>
+          <v-icon>expand_more</v-icon>
+        </v-btn>
+      </template>
+      <v-list dense>
+        <v-list-tile v-for="link in appLinks"
+                      :key="link.text"
+                      router :to="link.route" >
+          <v-list-tile-title>{{link.text}}</v-list-tile-title>
+        </v-list-tile>
+      </v-list>
+    </v-menu>
+    <div>
+      <v-btn to="login" flat v-if="!isLoggedIn.isLogin">Login</v-btn>
+      <v-menu offset-y
+              content-class="dropdown-menu"
+              transition="slide-y-transition" v-if="isLoggedIn.isLogin">
+        <v-btn slot="activator" fab dark color="teal">
+          <v-avatar dark>
+            <span class="white--text headline">{{isLoggedIn.email[0]}}</span>
+          </v-avatar>
+        </v-btn>
+        <v-list dense>
+          <v-list-tile v-for="item in this.UserMenuItems"
+                        :key="item.title"
+                        route :to="item.route"
+                        >
+            <v-list-tile-title>{{item.title}}</v-list-tile-title>
+          </v-list-tile>
+        </v-list>
+      </v-menu>
+    </div>
   </v-toolbar>
 </template>
 
 <script>
-export default {
-  name: 'NavBar',
-  data () {
-    return{
-      isLogged: this.checkIfIsLogged()
-    }
-  },
-  created () {
-    this.$bus.$on('logged', () => {
-      this.isLogged = this.checkIfIsLogged()
-    })
-  },
-  methods: {
-    checkIfIsLogged () {
-      let token = localStorage.getItem('token')
-      if (token) {
-        return true
-      } else {
-        return false
+  import { store } from '@/services/request'
+  export default {
+    name: 'NavBar',
+    data() {
+      return {
+        appLinks: [
+            { text: 'Register', route: '/add' },
+            { text: 'Generate Key', route: '/key' },
+            { text: 'Delete', route: '/delete' },
+        ],
+        links: [],
+        UserMenuItems: [
+          { title: 'Account Settings', route: '/accountsettings'},
+          { title: 'Logout', route: '/logout' },      
+        ],
+        isLoggedIn: store.state
       }
     },
-    logout()
-    {
-     
-      this.isLogged = this.checkIfIsLogged()
-     
-      
-      
+    mounted() {
+      store.isUserLogin()
+      if (store.state.isLogin === true) {
+          store.getEmail()
+      }
     }
   }
-}
 </script>
-

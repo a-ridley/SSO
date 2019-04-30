@@ -1,7 +1,7 @@
 <template>
     <div class="delete-wrapper">
 
-        <h1>Delete Your Application</h1>
+        <h1 class="header">Delete Your Application</h1>
 
         <br />
         <v-form>
@@ -25,22 +25,43 @@
         
         <v-alert
             :value="error"
+            id="error"
             type="error"
             transition="scale-transition"
         >
             {{error}}
         </v-alert>
 
-        <div v-if="validation" id="hide">
-            <h3>Successful Deletion!</h3>
+        <div v-if="validation" id="deleteMessage">
+            <h3>{{ validation }}</h3>
         </div>
-        <p>{{ validation }}</p>
 
         <br />
 
-        <v-btn color="success" v-if="!validation" v-on:click="deleteApp">Delete</v-btn>
+        <v-btn id="btnDelete" color="success" v-if="!validation" v-on:click="deleteApp">Delete</v-btn>
 
         </v-form>
+
+        <v-dialog
+          v-model="loading"
+          hide-overlay
+          persistent
+          width="300"
+        >
+          <v-card
+            color="primary"
+            dark
+          >
+            <v-card-text>
+              Loading
+              <v-progress-linear
+                indeterminate
+                color="white"
+                class="mb-0"
+              ></v-progress-linear>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
 
     </div>
 </template>
@@ -55,7 +76,8 @@ export default {
       validation: null,
       title: '',
       email: '',
-      error: ''
+      error: '',
+      loading: false
     }
   },
   methods: {
@@ -69,6 +91,7 @@ export default {
       if (this.error) return;
 
       const url = `${apiURL}/applications/delete`
+      this.loading = true;
       axios.post(url, {
         title: document.getElementById('title').value,
         email: document.getElementById('email').value,
@@ -78,10 +101,13 @@ export default {
         }
       })
         .then(response => {
-            this.validation = response.data; // Retrieve deletion validation
+            this.validation = response.data.Message; // Retrieve deletion validation
         })
         .catch(err => {
-            this.error = err.response.data
+            this.error = err.response.data.Message
+        })
+        .finally(() => {
+          this.loading = false;
         })
     }
   }

@@ -29,4 +29,40 @@ namespace ServiceLayer.Exceptions
 
         public InvalidTokenException(string message) : base(message) { }
     }
+
+    public class InvalidStringException : Exception
+    {
+        public InvalidStringException() { }
+
+        public InvalidStringException(string message) : base(message) { }
+    }
+
+    public class InvalidEmailException : Exception
+    {
+        public InvalidEmailException() { }
+
+        public InvalidEmailException(string message) : base(message) { }
+    }
+
+    public class InvalidUrlException : Exception
+    {
+        public InvalidUrlException() { }
+
+        public InvalidUrlException(string message) : base(message) { }
+    }
+
+    public class InvalidImageException : Exception
+    {
+        public InvalidImageException() { }
+
+        public InvalidImageException(string message) : base(message) { }
+    }
+
+    public class InvalidApiKeyException : Exception
+    {
+        public InvalidApiKeyException() { }
+
+        public InvalidApiKeyException(string message) : base(message) { }
+    }
+
 }

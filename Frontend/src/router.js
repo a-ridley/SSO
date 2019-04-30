@@ -11,6 +11,8 @@ import UpdatePassword from '@/views/UpdatePassword.vue'
 import SendResetLink from '@/views/SendResetLink.vue'
 import ResetPassword from '@/views/ResetPassword.vue'
 import Logout from '@/views/Logout.vue'
+import DeleteAccount from '@/views/DeleteAccount.vue'
+import AccountSettings from '@/views/AccountSettings.vue'
 
 Vue.use(VueRouter)
 
@@ -80,14 +82,43 @@ let router = new VueRouter({
     },
     {
       path: '/logout',
-      name: '/logout',
+      name: 'Logout',
       component: Logout
+    },
+    {
+      path: '/deleteaccount',
+      name: 'deleteaccount',
+      component: DeleteAccount
+    },
+    {
+      path: '/accountsettings',
+      name: 'accountsettings',
+      component: AccountSettings,
     },
     {
       path: '*',
       component: NotFound
     }
   ]
+})
+
+router.beforeEach((to, from, next) => {
+  if(to.fullPath === '/dashboard' && from.fullPath !== '/login'){
+    if(!localStorage.getItem('token')){
+      next('/login');
+    }
+    else{
+      next();
+    }
+  }
+  else if(from.fullPath === '/login' && to.fullPath === '/dashboard'){
+    if(!localStorage.getItem('token')){
+      next('/home');
+      alert('Please login');
+    }
+  }
+
+  next();
 })
 
 export default router

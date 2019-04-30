@@ -1,22 +1,51 @@
 <template>
   <div id="update">
+    <div id="UpdatePassword">
+      <v-alert
+      :value="message"
+      dismissible
+      type="success"
+    >
+      {{message}}
+    </v-alert>
+
+    <v-alert
+      :value="errorMessage"
+      dismissible
+      type="error"
+      transition="scale-transition"
+    >
+    {{errorMessage}}
+    </v-alert>
+
+    </div>
      <h1>Update Password</h1>
-    <br />
-    {{message}}
     <br />
     <br />
     <div class="submitPasswords">
-        Old Password
-        <input name="oldPassword" type="text" v-model="oldPassword"/>
+        <v-text-field
+            name="oldPassword"
+            id="oldPassword"
+            v-model="oldPassword"
+            type="text"
+            label="Old Password"/>
         <br/>
-        New Password
-        <input name="newPassword" type="text" v-model="newPassword" />
+        <v-text-field
+            name="newPassword"
+            id="newPassword"
+            v-model="newPassword"
+            type="text"
+            label="New Password"/>
+      <br />
+      <v-text-field
+            name="confirmNewPassword"
+            id="confirmNewPassword"
+            v-model="confirmNewPassword"
+            type="text"
+            label="Confirm New Password"/>
+      <br />
         <br/>
-        Confirm New Password
-        <input name="confirmNewPassword" type="text" v-model="confirmNewPassword"/>
-        <br />
-        <br/>
-        <button type="submit" v-on:click="submitPasswords">Update Password</button>
+        <v-btn id="submit" color="success" v-on:click="submitPasswords">Update Password</v-btn>
     </div>
   </div>
 </template>
@@ -29,7 +58,8 @@ export default {
   name: 'UpdatePassword',
   data () {
     return {
-      message: 'Enter the new password:',
+      message: null,
+      errorMessage: null,
       oldPassword: null,
       newPassword: null,
       confirmNewPassword: null
@@ -37,19 +67,22 @@ export default {
   },
   methods: {
     submitPasswords: function () {
-      if (this.newPassword.length < 12 || this.oldPassword.length < 12) {
-        alert('Password does not meet minimum length of 12')
-      } else if (this.newPassword.length > 2000 || this.oldPassword.length > 2000) {
-        alert('Password exceeds maximum length of 2000')
+      if(this.newPassword == null || this.confirmNewPassword == null || this.oldPassword == null){
+        this.errorMessage = 'Password fields cannot be empty'
+      }
+      else if (this.newPassword.length < 12 || this.oldPassword.length < 12 || this.confirmNewPassword.length < 12) {
+        this.errorMessage = 'Password does not meet minimum length of 12'
+      } else if (this.newPassword.length > 2000 || this.oldPassword.length > 2000 || this.confirmNewPassword.length > 2000) {
+        this.errorMessage = 'Password exceeds maximum length of 2000'
       } else if (this.confirmNewPassword !== this.newPassword) {
-        alert('Passwords do not match')
+        this.errorMessage = 'Passwords do not match'
+      } else if (this.oldPassword === this.newPassword){
+        this.errorMessage = 'Cannot use the same password to update'
       } else {
-        this.message = 'Updating Password'
         axios({
           method: 'POST',
           url: `${apiURL}/users/updatepassword`,
           data: {
-            emailAddress: localStorage.email,
             sessionToken: localStorage.token,
             oldPassword: this.$data.oldPassword,
             newPassword: this.$data.confirmNewPassword
@@ -59,8 +92,8 @@ export default {
             'Access-Control-Allow-Credentials': true
           }
         })
-          .then(response => {alert(response.data)})
-          .catch(e => {alert(e.response.data)})
+          .then(response => {this.message = response.data})
+          .catch(e => { this.errorMessage = e.response.data })
       }
     }
   }
@@ -70,13 +103,8 @@ export default {
 <style>
 
 #update{
-  padding: 70px 0;
-  text-align: center;
-}
-
-input[type=text] {
-  border: 2px solid rgb(123, 171, 226);
-  border-radius: 4px;
+  width: 70%;
+  margin: 1px auto;
 }
 
 </style>

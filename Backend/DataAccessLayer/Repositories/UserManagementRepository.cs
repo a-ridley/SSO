@@ -1,23 +1,26 @@
 ﻿using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using System;
-using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccessLayer.Repositories
 {
     public class UserManagementRepository
     {
-        public User CreateNewUser(DatabaseContext _db, User user)
+        DatabaseContext _db;
+        public UserManagementRepository(DatabaseContext _db)
+        {
+            this._db = _db;
+        }
+
+        public User CreateNewUser(User user)
         {
             _db.Entry(user).State = EntityState.Added;
             return user;
         }
 
-        public User DeleteUser(DatabaseContext _db, Guid Id)
+        public User DeleteUser(Guid Id)
         {
             var user = _db.Users
                 .Where(c => c.Id == Id)
@@ -28,7 +31,7 @@ namespace DataAccessLayer.Repositories
             return user;
         }
 
-        public User GetUser(DatabaseContext _db, string email)
+        public User GetUser(string email)
         {
             var user = _db.Users
                 .Where(c => c.Email == email)
@@ -36,21 +39,21 @@ namespace DataAccessLayer.Repositories
             return user;
         }
 
-        public User GetUser(DatabaseContext _db, Guid Id)
+        public User GetUser(Guid Id)
         {
             return _db.Users.Find(Id);
         }
 
-        public User UpdateUser(DatabaseContext _db, User user)
+        public User UpdateUser(User user)
         {
             user.UpdatedAt = DateTime.UtcNow;
             _db.Entry(user).State = EntityState.Modified;
             return user;
         }
 
-        public bool ExistingUser(DatabaseContext _db, User user)
+        public bool ExistingUser(User user)
         {
-            var result = GetUser(_db, user.Email);
+            var result = GetUser(user.Email);
             if (result != null)
             {
                 return true;
@@ -58,9 +61,9 @@ namespace DataAccessLayer.Repositories
             return false;
         }
 
-        public bool ExistingUser(DatabaseContext _db, string email)
+        public bool ExistingUser(string email)
         {
-            var result = GetUser(_db, email);
+            var result = GetUser(email);
             if (result != null)
             {
                 return true;

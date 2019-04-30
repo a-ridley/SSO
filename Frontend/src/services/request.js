@@ -14,7 +14,9 @@ const register = registrationData => {
     });
 }
 
-const signLaunch = appId => {
+const signLaunch = appId =>
+{
+  token = localStorage.getItem('token');
   return axios.get(`${apiURL}/launch`, {
     params: {
       token,
@@ -32,8 +34,36 @@ const submitLaunch = launchData => {
     });
 }
 
+const store = {
+  state: {
+    isLogin: false,
+    email: ""
+  },
+  isUserLogin(){
+    if(token !== null){
+      this.state.isLogin = true;
+    }
+    else{
+      this.state.isLogin= false;
+    }
+  },
+  getEmail(){
+      axios.get(`${apiURL}/users/${localStorage.token}`,
+      {
+        params: {
+          token: this.token
+        }
+      })
+      .then(resp =>{
+        this.state.email = resp.data
+      })  
+  }
+};
+
+
 export {
   register,
   signLaunch,
-  submitLaunch
+  submitLaunch,
+  store
 }

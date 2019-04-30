@@ -1,10 +1,11 @@
+using System;
 using DataAccessLayer.Database;
 using DataAccessLayer.Models;
-using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ServiceLayer.Services;
-
+using System.Data.Entity;
 using System.Security.Cryptography;
+using ManagerLayer;
 
 namespace UnitTesting
 {
@@ -46,12 +47,26 @@ namespace UnitTesting
 
         public User CreateUserInDb(User user)
         {
-            using (var _db = new DatabaseContext())
+            using ( var _db = new DatabaseContext() )
             {
                 _db.Entry(user).State = System.Data.Entity.EntityState.Added;
                 _db.SaveChanges();
 
                 return user;
+            }
+        }
+
+        public User CreateUserInDbManager()
+        {
+            using (var _db = new DatabaseContext())
+            {
+                UserManager um = new UserManager(_db);
+                User u = um.CreateUser(Guid.NewGuid() + "@" + Guid.NewGuid() + ".com","qwertyuiop136_!2019",new DateTime(1996,12,15),"Long Beach", "CA",
+                    "USA", "securityQ1?", "q1", "securityQ2?", "q2", "securityQ3?", "q3");
+
+                _db.SaveChanges();
+
+                return u;
             }
         }
 
@@ -92,14 +107,68 @@ namespace UnitTesting
             return session;
         }
 
+
         public Session CreateSessionInDb(Session session)
         {
-            using (var _db = new DatabaseContext())
+            using(var _db = new DatabaseContext())
             {
                 _db.Sessions.Add(session);
                 _db.SaveChanges();
 
                 return session;
+            }
+        }
+
+        public Session CreateSessionInDb(User user)
+        {
+            Session session = new Session
+            {
+                Id = Guid.NewGuid(),
+                CreatedAt = DateTime.UtcNow,
+                UserId = user.Id,
+                UpdatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(Session.MINUTES_UNTIL_EXPIRATION),
+                Token = (Guid.NewGuid()).ToString()
+            };
+
+            return CreateSessionInDb(session);
+        }
+		public Session CreateExpiredSessionInDb(User user)
+		{
+			Session session = new Session
+			{
+				Id = Guid.NewGuid(),
+				UserId = user.Id,
+				CreatedAt = DateTime.UtcNow.AddHours(-2),
+				UpdatedAt = DateTime.UtcNow.AddHours(-2),
+				ExpiresAt = DateTime.UtcNow.AddHours(-1.5),
+			Token = (Guid.NewGuid()).ToString()
+			};
+
+			return CreateSessionInDb(session);
+		}
+
+		public PasswordReset CreatePasswordResetInDB()
+        {
+            PasswordReset pr = new PasswordReset
+            {
+                Id = new Guid(),
+                ResetToken = "",
+                UserID = new Guid(),
+                ExpirationTime = DateTime.Now.AddMinutes(5),
+                ResetCount = 0,
+                Disabled = false
+            };
+            return CreatePasswordResetInDB(pr);
+        }
+
+        public PasswordReset CreatePasswordResetInDB(PasswordReset resetToken)
+        {
+            using (var _db = new DatabaseContext())
+            {
+                _db.Entry(resetToken).State = System.Data.Entity.EntityState.Added;
+                _db.SaveChanges();
+                return resetToken;
             }
         }
 
@@ -121,17 +190,7 @@ namespace UnitTesting
 
         public Application CreateApplicationInDb()
         {
-
-            Application app = new Application
-            {
-                Id = Guid.NewGuid(),
-                Title = "KFC App",
-                LaunchUrl = "https://kfc.com",
-                Email = "kfc@email.com",
-                UserDeletionUrl = "https://kfc.com/delete",
-                LogoUrl = "https://kfc.com/logo.png",
-                Description = "A KFC app"
-            };
+            var app = CreateApplicationObject();
 
             return CreateApplicationInDb(app);
         }
@@ -149,30 +208,25 @@ namespace UnitTesting
 
         public Application CreateApplicationObject()
         {
+            var title = Guid.NewGuid();
             Application app = new Application
             {
-                Id = Guid.NewGuid(),
-                Title = "KFC App",
-                LaunchUrl = "https://kfc.com",
-                Email = "kfc@email.com",
-                UserDeletionUrl = "https://kfc.com/delete",
+                Title = Guid.NewGuid() + " App",
+                LaunchUrl = "https://" + title + ".com",
+                Email = title + "@email.com",
+                UserDeletionUrl = "https://" + title + ".com/delete",
                 LogoUrl = "https://kfc.com/logo.png",
                 Description = "A KFC app",
-                SharedSecretKey = "abcd2312312b1bc23b1c2b312bc312b3b21c3b123cb1b"
+                SharedSecretKey = Guid.NewGuid().ToString("N"),
+                HealthCheckUrl = "https://kfc.com/health",
+                LogoutUrl = "https://" + title + ".com/logout",
             };
             return app;
         }
 
         public ApiKey CreateApiKeyInDb()
         {
-            Application app = CreateApplicationObject();
-            ApiKey apiKey = new ApiKey
-            {
-                Id = Guid.NewGuid(),
-                Key = Guid.NewGuid().ToString("N"),
-                ApplicationId = app.Id,
-                IsUsed = false
-            };
+            var apiKey = CreateApiKeyObject();
 
             return CreateApiKeyInDb(apiKey);
         }
@@ -190,13 +244,11 @@ namespace UnitTesting
 
         public ApiKey CreateApiKeyObject()
         {
-            Application app = CreateApplicationObject();
+            Application app = CreateApplicationInDb();
             ApiKey apiKey = new ApiKey
             {
-                Id = Guid.NewGuid(),
                 Key = Guid.NewGuid().ToString("N"),
-                ApplicationId = app.Id,
-                IsUsed = false
+                ApplicationId = app.Id
             };
             return apiKey;
         }

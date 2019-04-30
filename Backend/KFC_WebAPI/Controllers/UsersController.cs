@@ -5,53 +5,46 @@ using System;
 using System.Data.Entity.Validation;
 using System.Net;
 using System.Web.Http;
+using System.Threading.Tasks;
 using ManagerLayer;
 using ServiceLayer.Exceptions;
 using System.ComponentModel.DataAnnotations;
+using KFC_WebAPI.RequestModels;
 using ManagerLayer.PasswordManagement;
 using ServiceLayer.Services;
 using ManagerLayer.UserManagement;
+using DataAccessLayer.Requests;
+using System.Data.Entity.Infrastructure;
+using System.Net.Http;
 
 namespace KFC_WebAPI.Controllers
 {
-    public class UserRegistrationRequest
+    public class UserDeleteRequest
     {
         [Required]
-        public string email { get; set; }
-        [Required]
-        public string password { get; set; }
-        [Required]
-        public DateTime dob { get; set; }
-        [Required]
-        public string city { get; set; }
-        [Required]
-        public string state { get; set; }
-        [Required]
-        public string country { get; set; }
-        [Required]
-        public string securityQ1 { get; set; }
-        [Required]
-        public string securityQ1Answer { get; set; }
-        [Required]
-        public string securityQ2 { get; set; }
-        [Required]
-        public string securityQ2Answer { get; set; }
-        [Required]
-        public string securityQ3 { get; set; }
-        [Required]
-        public string securityQ3Answer { get; set; }
+        public string token { get; set; }
     }
 
-    public class UpdatePasswordRequest
+    public class UserDeleteRequestFromApp
     {
-        [Required]
-        public string emailAddress { get; set; }
-        [Required]
-        public string sessionToken { get; set; }
-        [Required]
-        public string oldPassword { get; set; }
-        [Required]
-        public string newPassword { get; set; }
+        // Included in signature
+        public string appId { get; set; }
+        public Guid ssoUserId { get; set; }
+        public string email { get; set; }
+        public long timestamp { get; set; }
+
+        // Excluded from signature
+        public string signature { get; set; }
+
+        // Generate string to be signed
+        public string PreSignatureString()
+        {
+            string acc = "";
+            acc += "ssoUserId=" + ssoUserId + ";";
+            acc += "email=" + email + ";";
+            acc += "timestamp=" + timestamp + ";";
+            return acc;
+        }
     }
 
     public class UsersController : ApiController
@@ -70,9 +63,8 @@ namespace KFC_WebAPI.Controllers
                 User user;
                 try
                 {
-                    UserManager userManager = new UserManager();
+                    UserManager userManager = new UserManager(_db);
                     user = userManager.CreateUser(
-                        _db,
                         request.email,
                         request.password,
                         request.dob,
@@ -85,10 +77,12 @@ namespace KFC_WebAPI.Controllers
                         request.securityQ2Answer,
                         request.securityQ3,
                         request.securityQ3Answer);
-                } catch (ArgumentException)
+                }
+                catch (ArgumentException)
                 {
                     return Conflict();
-                } catch (FormatException)
+                }
+                catch (FormatException)
                 {
                     return Content((HttpStatusCode)406, "Invalid email address.");
                 }
@@ -105,8 +99,8 @@ namespace KFC_WebAPI.Controllers
                     return Content((HttpStatusCode)401, "This software is intended for persons over 18 years of age.");
                 }
 
-                AuthorizationManager authorizationManager = new AuthorizationManager();
-                Session session = authorizationManager.CreateSession(_db, user);
+                AuthorizationManager authorizationManager = new AuthorizationManager(_db);
+                Session session = authorizationManager.CreateSession(user);
                 try
                 {
                     _db.SaveChanges();
@@ -125,35 +119,62 @@ namespace KFC_WebAPI.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("api/users/{token}")]
+        public string GetEmail(string token)
+        {
+            UserManagementManager umm = new UserManagementManager();
+            Session session = new Session();
+            User user;
+            string email;
+
+            try
+            {
+                using (var _db = new DatabaseContext())
+                {
+                    SessionService ss = new SessionService(_db);
+                    session = ss.GetSession(token);
+                    Console.WriteLine(session);
+                }
+
+                var id = session.UserId;
+                user = umm.GetUser(id);
+                email = user.Email;
+
+            }
+            catch(ArgumentNullException)
+            {
+                throw new ArgumentNullException("Session is null");
+            }
+
+            return email;
+        }
+
         [HttpPost]
         [Route("api/users/login")]
         public IHttpActionResult Login([FromBody] LoginRequest request)
         {
             LoginManager loginM = new LoginManager();
-            if (loginM.LoginCheckUserExists(request) == false)
+            if (loginM.LoginCheckUserExists(request.email) == false)
             {
-                //404
-                return Content(HttpStatusCode.NotFound, "Invalid Username");
+                //400
+                return Content(HttpStatusCode.BadRequest, "Invalid Username");
+            }
+
+            if (loginM.LoginCheckUserDisabled(request.email))
+            {
+                //401
+                return Content(HttpStatusCode.Unauthorized, "User is Disabled");
+            }
+
+            if (loginM.LoginCheckPassword(request))
+            {
+                return Ok(loginM.LoginAuthorized(request.email));
             }
             else
             {
-                if (loginM.LoginCheckUserDisabled(request))
-                {
-                    //401
-                    return Content(HttpStatusCode.Unauthorized, "User is Disabled");
-                }
-                else
-                {
-                    if (loginM.LoginCheckPassword(request))
-                    {
-                        return Ok(loginM.LoginAuthorized(request));
-                    }
-                    else
-                    {
-                        //400
-                        return Content(HttpStatusCode.BadRequest, "Invalid Password");
-                    }
-                }
+                //400
+                return Content(HttpStatusCode.BadRequest, "Invalid Password");
             }
         }
 
@@ -161,41 +182,120 @@ namespace KFC_WebAPI.Controllers
         [Route("api/users/updatepassword")]
         public IHttpActionResult UpdatePassword([FromBody] UpdatePasswordRequest request)
         {
-            using(var _db = new DatabaseContext())
+            using (var _db = new DatabaseContext())
             {
-                UserManagementManager umm = new UserManagementManager();
-                User retrievedUser = umm.GetUser(request.emailAddress);
-                if (retrievedUser != null)
+                PasswordManager pm = new PasswordManager(_db);
+                int result = pm.UpdatePasswordController(request);
+                if (result == 1)
                 {
-                    SessionService ss = new SessionService();
-                    Session session = ss.GetSession(_db, request.sessionToken);
-                    if (session != null)
-                    {
-                        PasswordManager pm = new PasswordManager();
-                        string oldPasswordHashed = pm.HashPassword(request.oldPassword, retrievedUser.PasswordSalt);
-                        if (oldPasswordHashed == retrievedUser.PasswordHash)
-                        {
-                            if (request.newPassword.Length >= 12 || request.newPassword.Length <= 2000)
-                            {
-                                if (!pm.CheckIsPasswordPwned(request.newPassword))
-                                {
-                                    string newPasswordHashed = pm.HashPassword(request.newPassword, retrievedUser.PasswordSalt);
-                                    if (pm.UpdatePassword(retrievedUser, newPasswordHashed))
-                                    {
-                                        return Content(HttpStatusCode.OK, "Password has been updated");
-                                    }
-                                    return Content(HttpStatusCode.BadRequest, "New password matches old password");
-                                }
-                                return Content(HttpStatusCode.BadRequest, "Password has been pwned, please use a different password");
-                            }
-                            return Content(HttpStatusCode.BadRequest, "New password does not meet minimum password requirements");
-                        }
-                        return Content(HttpStatusCode.BadRequest, "Current password inputted does not match current password");
-                    }
+                    return Content(HttpStatusCode.OK, "Password has been updated");
+                }
+                else if (result == -1)
+                {
+                    return Content(HttpStatusCode.BadRequest, "New password matches old password");
+                }
+                else if (result == -2)
+                {
+                    return Content(HttpStatusCode.BadRequest, "Password has been pwned, please use a different password");
+                }
+                else if (result == -3)
+                {
+                    return Content(HttpStatusCode.BadRequest, "New password does not meet minimum password requirements");
+                }
+                else if (result == -4)
+                {
+                    return Content(HttpStatusCode.BadRequest, "Current password inputted does not match current password");
+                }
+                else if (result == -5)
+                {
                     return Content(HttpStatusCode.Unauthorized, "Session invalid");
                 }
-                return Content(HttpStatusCode.BadRequest, "Email address is not valid");
+                else
+                {
+                    return Content(HttpStatusCode.BadRequest, "Service Unavailable");
+                }
             }
         }
+
+
+        [HttpDelete]
+        [Route("api/users/deleteuser")]
+        public async Task<IHttpActionResult> Delete([FromUri] UserDeleteRequest request)
+        {
+            using (var _db = new DatabaseContext())
+            {
+                IAuthorizationManager authorizationManager = new AuthorizationManager(_db);
+                Session session = authorizationManager.ValidateAndUpdateSession(request.token);
+                if (session == null)
+                {
+                    return Content(HttpStatusCode.Unauthorized, "Session not valid!");
+                }
+                UserManager um = new UserManager(_db);
+                User user = await um.DeleteUser(_db, session.UserId);
+                if (user != null)
+                {
+                    return Content(HttpStatusCode.OK, "Account has been deleted");
+                }
+                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
+            }
+        }
+
+        [HttpPost]
+        [Route("api/users/appdeleteuser")]
+        public async Task<IHttpActionResult> Delete([FromBody] UserDeleteRequestFromApp request)
+        {
+            using (var _db = new DatabaseContext())
+            {
+                IApplicationService _applicationService = new ApplicationService(_db);
+                HttpClient client = new HttpClient();
+                ITokenService _tokenService = new TokenService();
+                Application app = _applicationService.GetApplication(Guid.Parse(request.appId));
+                if (!(_tokenService.GenerateSignature(request.PreSignatureString(), app) == request.signature))
+                {
+                    return Content(HttpStatusCode.Unauthorized, "Signature not valid!");
+                }
+                UserManager um = new UserManager(_db);
+                User deletedUser = await um.DeleteUser(_db, request.ssoUserId);
+                if(deletedUser != null)
+                {
+                    return Content(HttpStatusCode.OK, "Account has been deleted");
+                }
+                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
+            }
+        }
+
+        [HttpPost]
+        [Route("api/Logout")]
+        public IHttpActionResult Logout([FromBody] LogoutRequest request)
+        {
+            using (var _db = new DatabaseContext())
+            {
+                SessionService serv = new SessionService(_db);
+                IAuthorizationManager authorizationManager = new AuthorizationManager(_db);
+
+
+
+                try
+                {
+                    var response = authorizationManager.DeleteSession(request.token);
+                    _db.SaveChanges();
+
+                    if (response != null)
+                    {
+
+                        return Ok("User has logged out");
+                    }
+
+                }
+                catch (DbUpdateException)
+                {
+                    return Content(HttpStatusCode.InternalServerError, "There was an error on the server and the request could not be completed");
+                }
+                return Content(HttpStatusCode.ExpectationFailed, "Session has not been found.");
+
+            }
+
+        }
+
     }
 }

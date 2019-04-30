@@ -13,21 +13,6 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -55,7 +40,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -90,14 +77,39 @@
     <Compile Include="Migrations\201903160219313_update-applications-add-SharedSecretKey.Designer.cs">
       <DependentUpon>201903160219313_update-applications-add-SharedSecretKey.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201903180837171_ghost-migration.cs" />
-    <Compile Include="Migrations\201903180837171_ghost-migration.Designer.cs">
-      <DependentUpon>201903180837171_ghost-migration.cs</DependentUpon>
+    <Compile Include="Migrations\201903282245124_update-applications-add-UnderMaintenance.cs" />
+    <Compile Include="Migrations\201903282245124_update-applications-add-UnderMaintenance.Designer.cs">
+      <DependentUpon>201903282245124_update-applications-add-UnderMaintenance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904021012527_upate-passwordresets-modify-table.cs" />
+    <Compile Include="Migrations\201904021012527_upate-passwordresets-modify-table.Designer.cs">
+      <DependentUpon>201904021012527_upate-passwordresets-modify-table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904081702539_update-applications-add-click-count.cs" />
+    <Compile Include="Migrations\201904081702539_update-applications-add-click-count.Designer.cs">
+      <DependentUpon>201904081702539_update-applications-add-click-count.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904160246563_update-applications-add-HealthCheckUrl.cs" />
+    <Compile Include="Migrations\201904160246563_update-applications-add-HealthCheckUrl.Designer.cs">
+      <DependentUpon>201904160246563_update-applications-add-HealthCheckUrl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904161956235_delete-applications-apikeys.cs" />
+    <Compile Include="Migrations\201904161956235_delete-applications-apikeys.Designer.cs">
+      <DependentUpon>201904161956235_delete-applications-apikeys.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904162002023_create-updated-tables-applications-apiKeys.cs" />
+    <Compile Include="Migrations\201904162002023_create-updated-tables-applications-apiKeys.Designer.cs">
+      <DependentUpon>201904162002023_create-updated-tables-applications-apiKeys.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904200642298_update-applications-add-LogoutUrl.cs" />
+    <Compile Include="Migrations\201904200642298_update-applications-add-LogoutUrl.Designer.cs">
+      <DependentUpon>201904200642298_update-applications-add-LogoutUrl.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApiKey.cs" />
     <Compile Include="Models\Application.cs" />
-    <Compile Include="Models\LoginRequest.cs" />
+    <Compile Include="Models\LogoutRequest.cs" />
+    <Compile Include="Requests\LoginRequest.cs" />
     <Compile Include="Models\Session.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -108,11 +120,19 @@
       <DependentUpon>201903051936518_PasswordReset.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\PasswordReset.cs" />
+    <Compile Include="Repositories\IApiKeyRepository.cs" />
+    <Compile Include="Repositories\IApplicationRepository.cs" />
     <Compile Include="Repositories\ISessionRepository.cs" />
     <Compile Include="Repositories\ResetRepository.cs" />
     <Compile Include="Repositories\SessionRepository.cs" />
     <Compile Include="Repositories\UserManagementRepository.cs" />
     <Compile Include="Repositories\UserRepository.cs" />
+    <Compile Include="RequestModels\ApplicationRequest.cs" />
+    <Compile Include="RequestModels\HttpResponseContent.cs" />
+    <Compile Include="RequestModels\NewPasswordRequest.cs" />
+    <Compile Include="RequestModels\SecurityAnswersRequest.cs" />
+    <Compile Include="RequestModels\SendResetEmailRequest.cs" />
+    <Compile Include="RequestModels\UpdatePasswordRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -145,30 +165,28 @@
     <EmbeddedResource Include="Migrations\201903160219313_update-applications-add-SharedSecretKey.resx">
       <DependentUpon>201903160219313_update-applications-add-SharedSecretKey.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201903180837171_ghost-migration.resx">
-      <DependentUpon>201903180837171_ghost-migration.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201903282245124_update-applications-add-UnderMaintenance.resx">
+      <DependentUpon>201903282245124_update-applications-add-UnderMaintenance.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904021012527_upate-passwordresets-modify-table.resx">
+      <DependentUpon>201904021012527_upate-passwordresets-modify-table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904081702539_update-applications-add-click-count.resx">
+      <DependentUpon>201904081702539_update-applications-add-click-count.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904160246563_update-applications-add-HealthCheckUrl.resx">
+      <DependentUpon>201904160246563_update-applications-add-HealthCheckUrl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904161956235_delete-applications-apikeys.resx">
+      <DependentUpon>201904161956235_delete-applications-apikeys.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904162002023_create-updated-tables-applications-apiKeys.resx">
+      <DependentUpon>201904162002023_create-updated-tables-applications-apiKeys.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904200642298_update-applications-add-LogoutUrl.resx">
+      <DependentUpon>201904200642298_update-applications-add-LogoutUrl.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="DatabaseContext.mdf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="DatabaseContext_log.ldf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <DependentUpon>DatabaseContext.mdf</DependentUpon>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.6.2">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.6.2 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

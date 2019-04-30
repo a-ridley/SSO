@@ -8,10 +8,10 @@ namespace DataAccessLayer.Migrations
         public override void Up()
         {
             CreateTable(
-                "dbo.PasswordResets",
+                "dbo.ResetIDs",
                 c => new
                 {
-                    Id = c.Guid(nullable: false),
+                    PasswordResetID = c.Guid(nullable: false),
                     ResetToken = c.String(nullable: false),
                     UserID = c.Guid(nullable: false),
                     ExpirationTime = c.DateTime(nullable: false, precision: 7, storeType: "datetime2"),
@@ -19,16 +19,16 @@ namespace DataAccessLayer.Migrations
                     Disabled = c.Boolean(nullable: false),
                     AllowPasswordReset = c.Boolean(nullable: false),
                 })
-                .PrimaryKey(t => t.Id)
+                .PrimaryKey(t => t.PasswordResetID)
                 .ForeignKey("dbo.Users", t => t.UserID, cascadeDelete: true)
                 .Index(t => t.UserID);
         }
         
         public override void Down()
         {
-            DropIndex("dbo.PasswordResets", new[] { "UserId" });
-            DropForeignKey("dbo.PasswordResets", "UserId", "dbo.Users");
-            DropTable("dbo.PasswordResets");
+            DropIndex("dbo.ResetIDs", new[] { "UserId" });
+            DropForeignKey("dbo.ResetIDs", "UserId", "dbo.Users");
+            DropTable("dbo.ResetIDs");
         }
     }
 }

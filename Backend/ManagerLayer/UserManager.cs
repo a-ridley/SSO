@@ -3,6 +3,10 @@ using DataAccessLayer.Models;
 using ServiceLayer.Exceptions;
 using ServiceLayer.Services;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Net.Http;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,8 +14,17 @@ namespace ManagerLayer
 {
     public class UserManager
     {
+        IApplicationService _applicationService;
+        PasswordService _passwordService;
+        UserService _userService;
+        public UserManager(DatabaseContext _db)
+        {
+            this._passwordService = new PasswordService();
+            this._userService = new UserService(_db);
+            _applicationService = new ApplicationService(_db);
+        }
+
         public User CreateUser(
-            DatabaseContext _db,
             string email,
             string password,
             DateTime dob,
@@ -32,8 +45,6 @@ namespace ManagerLayer
             {
                 throw new InvalidDobException("Date of birth less than 18 years ago");
             }
-
-            IPasswordService _passwordService = new PasswordService();
 
             if (!_passwordService.CheckPasswordLength(password))
             {
@@ -71,8 +82,7 @@ namespace ManagerLayer
                 CreatedAt = DateTime.UtcNow
             };
 
-            IUserService _userService = new UserService();
-            return _userService.CreateUser(_db, user);
+            return _userService.CreateUser(user);
         }
 
 
@@ -89,10 +99,44 @@ namespace ManagerLayer
             //var user = _userService.Login(email, password);
         }
 
-        public User GetUser(DatabaseContext _db, Guid userId)
+        public User GetUser(Guid userId)
         {
-            IUserService _userService = new UserService();
-            return _userService.GetUser(_db, userId);
+            return _userService.GetUser(userId);
+        }
+
+
+        public async Task<User> DeleteUser(DatabaseContext _db, Guid userId)
+        {
+            UserDeleteService uds = new UserDeleteService();
+            IUserService _userService = new UserService(_db);
+            User deletingUser = _userService.GetUser(userId);
+            ISessionService _sessionService = new SessionService(_db);
+            var sessions = _sessionService.GetSessions(userId);
+            var applications = _applicationService.GetAllApplicationsList();
+            var responseList = new List<HttpResponseMessage>();
+
+            SignatureService _signatureService = new SignatureService();
+            foreach (Application app in applications)
+            {
+                var deletePayload = new Dictionary<string, string>();
+                deletePayload.Add("ssoUserId", userId.ToString());
+                deletePayload.Add("email", deletingUser.Email);
+                deletePayload.Add("timestamp", DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString());
+                var signature = _signatureService.Sign(app.SharedSecretKey, deletePayload);
+                deletePayload.Add("signature", signature);
+                var request = await uds.SendDeleteRequest(app.UserDeletionUrl,deletePayload);
+                responseList.Add(request);
+            }
+            if (responseList.All(response => response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound))
+            {
+                User deletedUser = _userService.DeleteUser(userId);
+                if(deletedUser != null){
+                    _sessionService.DeleteSessions(deletedUser.Id);
+                }
+                _db.SaveChanges();
+                return deletedUser;
+            }
+            return null;
         }
     }
 }

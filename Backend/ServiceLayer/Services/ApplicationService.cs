@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
 using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using DataAccessLayer.Repositories;
@@ -6,63 +10,81 @@ using DataAccessLayer.Repositories;
 
 namespace ServiceLayer.Services
 {
-    public static class ApplicationService
+    public class ApplicationService: IApplicationService
     {
+        IApplicationRepository _applicationRepository;
+        IApiKeyRepository _apiKeyRepository;
+        HttpClient client = new HttpClient();
+        DatabaseContext _db;
 
-        /// <summary>
-        /// Call the application repository to create a new application record
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="app">application</param>
-        /// <returns>The application created</returns>
-        public static Application CreateApplication(DatabaseContext _db, Application app)
+        public ApplicationService(DatabaseContext _db)
         {
-            return ApplicationRepository.CreateNewApplication(_db, app);
+            this._db = _db;
+            _applicationRepository = new ApplicationRepository(_db);
+            _apiKeyRepository = new ApiKeyRepository(_db);
         }
 
-        /// <summary>
-        /// Call the application repository to delete an application record
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="url">application url</param>
-        /// <returns>The deleted application</returns>
-        public static Application DeleteApplication(DatabaseContext _db, Guid id)
+        public Application CreateApplication(Application app)
         {
-            return ApplicationRepository.DeleteApplication(_db, id);
+            return _applicationRepository.CreateNewApplication(app);
         }
 
-        /// <summary>
-        /// Call the application repository to retrieve an application record by id
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="url">application</param>
-        /// <returns>The retrieved application</returns>
-        public static Application GetApplication(DatabaseContext _db, Guid id)
+        public Application DeleteApplication(Guid id)
         {
-            return ApplicationRepository.GetApplication(_db, id);
+            // Delete children api keys first
+            List<ApiKey> keys = _apiKeyRepository.GetAllKeys(id);
+            foreach(ApiKey key in keys)
+            {
+                _apiKeyRepository.DeleteKey(key.Id);
+            }
+
+            return _applicationRepository.DeleteApplication(id);
         }
 
-        /// <summary>
-        /// Call the application repository to retrieve an application record by title and email
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="title">application title</param>
-        /// <param name="email">email</param>
-        /// <returns></returns>
-        public static Application GetApplication(DatabaseContext _db, string title, string email)
+        public Application GetApplication(Guid id)
         {
-            return ApplicationRepository.GetApplication(_db, title, email);
+            return _applicationRepository.GetApplication(id);
         }
 
-        /// <summary>
-        /// Call the application repository to update an application record
-        /// </summary>
-        /// <param name="_db">database</param>
-        /// <param name="app">application</param>
-        /// <returns>The updated application</returns>
-        public static Application UpdateApplication(DatabaseContext _db, Application app)
+        public Application GetApplication(string title, string email)
         {
-            return ApplicationRepository.UpdateApplication(_db, app);
+            return _applicationRepository.GetApplication(title, email);
         }
+
+        public List<Application> GetAllApplicationsList()
+        {
+            return _applicationRepository.GetAllApplicationsList();
+        }
+       
+        public IEnumerable GetAllApplications()
+        {
+            return _applicationRepository.GetAllApplications();
+        }
+        
+        public IEnumerable SortAllApplicationsAlphaAscending()
+        {
+            return _applicationRepository.SortAllApplicationsAlphaAscending();
+        }
+
+        public IEnumerable SortAllApplicationsNumOfClicks()
+        {
+            return _applicationRepository.SortAllApplicationsNumOfClicks();
+        }
+
+        public IEnumerable SortAllApplicationsAlphaDescending()
+        {
+            return _applicationRepository.SortAllApplicationsAlphaDescending();
+        }
+
+        public Application UpdateApplication(Application app)
+        {
+            return _applicationRepository.UpdateApplication(app);
+        }
+
+        public async Task<HttpResponseMessage> GetApplicationHealth(string healthCheckUrl)
+        {
+            return await client.GetAsync(healthCheckUrl);
+        }
+
     }
 }
