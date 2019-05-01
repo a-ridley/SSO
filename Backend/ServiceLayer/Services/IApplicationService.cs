@@ -3,6 +3,8 @@ using DataAccessLayer.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace ServiceLayer.Services
 {
@@ -18,5 +20,6 @@ namespace ServiceLayer.Services
         IEnumerable SortAllApplicationsNumOfClicks();
         IEnumerable SortAllApplicationsAlphaDescending();
         Application UpdateApplication(Application app);
+        Task<HttpResponseMessage> GetApplicationHealth(string healthCheckUrl);
     }
 }

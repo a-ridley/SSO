@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
 using DataAccessLayer.Database;
 using DataAccessLayer.Models;
 using DataAccessLayer.Repositories;
@@ -12,7 +14,7 @@ namespace ServiceLayer.Services
     {
         IApplicationRepository _applicationRepository;
         IApiKeyRepository _apiKeyRepository;
-
+        HttpClient client = new HttpClient();
         DatabaseContext _db;
 
         public ApplicationService(DatabaseContext _db)
@@ -77,6 +79,11 @@ namespace ServiceLayer.Services
         public Application UpdateApplication(Application app)
         {
             return _applicationRepository.UpdateApplication(app);
+        }
+
+        public async Task<HttpResponseMessage> GetApplicationHealth(string healthCheckUrl)
+        {
+            return await client.GetAsync(healthCheckUrl);
         }
 
     }
