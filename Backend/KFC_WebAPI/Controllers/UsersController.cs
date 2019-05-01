@@ -219,9 +219,9 @@ namespace KFC_WebAPI.Controllers
         }
 
 
-        [HttpDelete]
+        [HttpPost]
         [Route("api/users/deleteuser")]
-        public async Task<IHttpActionResult> Delete([FromUri] UserDeleteRequest request)
+        public async Task<IHttpActionResult> Delete([FromBody] UserDeleteRequest request)
         {
             using (var _db = new DatabaseContext())
             {
@@ -282,16 +282,18 @@ namespace KFC_WebAPI.Controllers
                 try
                 {
                     var appresponse = logoutManager.SendLogoutRequest(request.token);
-                    _db.SaveChanges();
                     if (appresponse != null)
                     {
-                        return Content(HttpStatusCode.BadRequest, "Service is not available");
+                        return Content(HttpStatusCode.BadRequest, "Service is not available: " + appresponse + " shas not properly logged out");
+                      
                     }
+                    
                 }
                 catch
                 {
                     return Content(HttpStatusCode.InternalServerError, "There was an error on the server and the request could not be completed");
                 }
+                
                 try
                 {
                     var response = authorizationManager.DeleteSession(request.token);

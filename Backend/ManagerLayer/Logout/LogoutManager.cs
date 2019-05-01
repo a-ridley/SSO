@@ -3,11 +3,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
 using DataAccessLayer.Models;
-using System.Security.Cryptography;
 using DataAccessLayer.Database;
 using ServiceLayer.Services;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+
 
 namespace ManagerLayer.Logout
 {
@@ -19,6 +19,8 @@ namespace ManagerLayer.Logout
         DatabaseContext _db;
         UserService userService;
         SessionService sessionServ;
+        Dictionary<Application,Boolean> checkResult = new Dictionary<Application,Boolean>();
+        
         public LogoutManager(DatabaseContext _db)
         {
             this._db = _db;
@@ -29,10 +31,14 @@ namespace ManagerLayer.Logout
 
         }
         IApplicationService _applicationService;
-        public async Task<HttpResponseMessage> SendLogoutRequest(string token)
+        public Task<Dictionary<Application,Boolean>> SendLogoutRequest(string token)
         {
             var applist = _applicationService.GetAllApplications();
             Session session = sessionServ.GetSession(token);
+            foreach (Application app in applist)
+            {
+                checkResult.Add(app,false);
+            }
             foreach (Application app in applist)
             {
                 User user = userService.GetUser(session.UserId);
@@ -52,13 +58,16 @@ namespace ManagerLayer.Logout
                 //This converts payload to JSON and sends it to each application logout URL.
                 var stringPayload = JsonConvert.SerializeObject(logoutPayload);
                 var jsonPayload = new StringContent(stringPayload, Encoding.UTF8, "application/json");
-                var request = await client.PostAsync(app.LogoutUrl, jsonPayload);
-                if(request != null)
+                var request = client.PostAsync(app.LogoutUrl, jsonPayload);
+                if(request.Status.Equals(200))
                 {
-                    return request;
+                    checkResult[app] = false;
+                    return Task.FromResult(checkResult);
                 }
+               
 
             }
+            
             return null;
         }
 
