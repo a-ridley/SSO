@@ -13,6 +13,7 @@ import ResetPassword from '@/views/ResetPassword.vue'
 import Logout from '@/views/Logout.vue'
 import DeleteAccount from '@/views/DeleteAccount.vue'
 import AccountSettings from '@/views/AccountSettings.vue'
+import Landing from '@/views/Landing.vue'
 
 Vue.use(VueRouter)
 
@@ -93,7 +94,12 @@ let router = new VueRouter({
     {
       path: '/accountsettings',
       name: 'accountsettings',
-      component: AccountSettings,
+      component: AccountSettings
+    },
+    {
+      path: '/landing',
+      name: 'landing',
+      component: Landing,
     },
     {
       path: '*',
