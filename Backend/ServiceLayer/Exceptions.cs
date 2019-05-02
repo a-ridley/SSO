@@ -65,4 +65,18 @@ namespace ServiceLayer.Exceptions
         public InvalidApiKeyException(string message) : base(message) { }
     }
 
+    public class FailHealthCheckException : Exception
+    {
+        public FailHealthCheckException() { }
+
+        public FailHealthCheckException(string message) : base(message) { }
+    }
+
+    public class FailedDeleteException : Exception
+    {
+        public FailedDeleteException() { }
+
+        public FailedDeleteException(string message) : base(message) { }
+    }
+
 }
