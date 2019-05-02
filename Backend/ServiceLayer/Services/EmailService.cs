@@ -6,10 +6,10 @@ namespace ServiceLayer.Services
 {
     public class EmailService: IEmailService
     {
-        private string SmtpServer = Environment.GetEnvironmentVariable("smtpServer", EnvironmentVariableTarget.User);
-        private int SmtpPort = Int32.Parse(Environment.GetEnvironmentVariable("smtpPort", EnvironmentVariableTarget.User));
-        private string SmtpUsername = Environment.GetEnvironmentVariable("smtpUsername", EnvironmentVariableTarget.User);
-        private string SmtpPassword = Environment.GetEnvironmentVariable("smtpPassword", EnvironmentVariableTarget.User);
+        private string SmtpServer = "email-smtp.us-west-2.amazonaws.com";
+        private int SmtpPort = 25;
+        private string SmtpUsername = "AKIAIYJ66B6UXRL6LKFQ";
+        private string SmtpPassword = "BEA+vRI2ZS+i4P1c2Atma1VZhIIKwh8eaS7Gx6EmMx8k";
 
         //Function to send an email without formatting
         public MimeMessage CreateEmailPlainBody(string receiverName, string receiverEmail, string emailSubject, string emailBody)

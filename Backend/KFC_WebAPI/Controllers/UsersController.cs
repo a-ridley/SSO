@@ -284,14 +284,14 @@ namespace KFC_WebAPI.Controllers
                     var appresponse = logoutManager.SendLogoutRequest(request.token);
                     if (appresponse == null)
                     {
-                        return Content(HttpStatusCode.BadRequest, "Service is not available: " + appresponse + " shas not properly logged out");
+                        return Content(HttpStatusCode.BadRequest, "Service is not available");
                       
                     }
                     
                 }
                 catch
                 {
-                    return Content(HttpStatusCode.InternalServerError, "There was an error on the server and the request could not be completed...");
+                    return Content(HttpStatusCode.InternalServerError, "There was an error on the server and the request could not be completed.");
                 }
                 
                 try

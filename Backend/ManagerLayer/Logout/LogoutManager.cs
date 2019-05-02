@@ -21,6 +21,7 @@ namespace ManagerLayer.Logout
         DatabaseContext _db;
         UserService userService;
         SessionService sessionServ;
+        LogoutService logservice;
 
         public LogoutManager(DatabaseContext _db)
         {
@@ -28,14 +29,13 @@ namespace ManagerLayer.Logout
             userService = new UserService(_db);
             _applicationService = new ApplicationService(_db);
             sessionServ = new SessionService(_db);
-
+            logservice = new LogoutService();
 
         }
         IApplicationService _applicationService;
-        public async Task<Session   > SendLogoutRequest(string token)
+        public async Task<Session> SendLogoutRequest(string token)
         {
             var responseList = new List<HttpResponseMessage>();
-            LogoutService logservice = new LogoutService();
             var applist = _applicationService.GetAllApplications();
             Session session = sessionServ.GetSession(token);
 
@@ -65,9 +65,10 @@ namespace ManagerLayer.Logout
             {
                 return session;
             }
-           
-
-            return null;
+            else
+            {
+                return null;
+            }
         }
 
     }
