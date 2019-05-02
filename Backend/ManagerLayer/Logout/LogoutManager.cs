@@ -5,22 +5,23 @@ using System.Net.Http;
 using DataAccessLayer.Models;
 using DataAccessLayer.Database;
 using ServiceLayer.Services;
+using ServiceLayer.Exceptions;
+using System.Linq;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
 
 namespace ManagerLayer.Logout
 {
-   
+
 
 
     public class LogoutManager
-    { 
+    {
         DatabaseContext _db;
         UserService userService;
         SessionService sessionServ;
-        Dictionary<Application,Boolean> checkResult = new Dictionary<Application,Boolean>();
-        
+
         public LogoutManager(DatabaseContext _db)
         {
             this._db = _db;
@@ -31,14 +32,13 @@ namespace ManagerLayer.Logout
 
         }
         IApplicationService _applicationService;
-        public Task<Dictionary<Application,Boolean>> SendLogoutRequest(string token)
+        public async Task<Session   > SendLogoutRequest(string token)
         {
+            var responseList = new List<HttpResponseMessage>();
+            LogoutService logservice = new LogoutService();
             var applist = _applicationService.GetAllApplications();
             Session session = sessionServ.GetSession(token);
-            foreach (Application app in applist)
-            {
-                checkResult.Add(app,false);
-            }
+
             foreach (Application app in applist)
             {
                 User user = userService.GetUser(session.UserId);
@@ -58,16 +58,15 @@ namespace ManagerLayer.Logout
                 //This converts payload to JSON and sends it to each application logout URL.
                 var stringPayload = JsonConvert.SerializeObject(logoutPayload);
                 var jsonPayload = new StringContent(stringPayload, Encoding.UTF8, "application/json");
-                var request = client.PostAsync(app.LogoutUrl, jsonPayload);
-                if(request.Status.Equals(200))
-                {
-                    checkResult[app] = false;
-                    return Task.FromResult(checkResult);
-                }
-               
-
+                var request = await logservice.LogoutRequest(app.LogoutUrl, logoutPayload);
+                responseList.Add(request);
             }
-            
+            if (responseList.All(response => response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound))
+            {
+                return session;
+            }
+           
+
             return null;
         }
 
