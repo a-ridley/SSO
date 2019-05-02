@@ -1,7 +1,15 @@
 <template>
-  <v-toolbar app>
-      <v-img :src="image" id="logo"></v-img>
-    <v-toolbar-title class="headline text-uppercase">
+  <v-toolbar id="toolbar" app>
+    <router-link
+      to="/dashboard"
+      tag="v-btn"
+      color="white"
+      id="logoNav">
+      <v-btn id="iconBtn" flat>
+        <v-img :src="image" id="logo"></v-img>
+      </v-btn>
+    </router-link>
+    <v-toolbar-title id="toolbarTitle" class="headline text-uppercase">
       <span>SPG SSO</span>
     </v-toolbar-title>
     <v-spacer></v-spacer>
@@ -66,7 +74,7 @@
     name: 'NavBar',
     data() {
       return {
-        image: require("@/assets/SPG_SSO_Logo.png"),
+        image: require("@/assets/SPG_SSO_Logo_T.png"),
         appLinks: [
             { text: 'Register', route: '/add', display: true },
             { text: 'Generate Key', route: '/key', display: true },
@@ -98,8 +106,30 @@
 </script>
 
 <style>
+#logoNav {
+  height: 100%;
+  padding: 0px;
+  margin-left: -24px;
+}
+
+#iconBtn {
+  max-width: 41px;
+  height: 100%;
+  padding: 0px;
+  margin: 0px;
+}
+
+#toolbarTitle {
+  margin-left: 0px;
+}
+
+#toolbar {
+  padding-left: 0px;
+}
+
 #logo {
-  max-width: 41px
+  max-width: 57px;
+  height: 57px;
 }
 
 #avatar {
