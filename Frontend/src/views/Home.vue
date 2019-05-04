@@ -1,7 +1,7 @@
 <template>
   <v-flex xs12 sm6 offset-sm3>
-    <img src="@/assets/KFC_Logo_v2.png" id="logo"/>
-    <h1 align="center" id="text">Welcome to the KFC Single Sign-On portal!</h1>
+    <img src="@/assets/SPG_Logo_Banner.png" id="banner"/>
+    <h1 align="center" id="text">Welcome to the SPG Single Sign-On portal!</h1>
   </v-flex>
 </template>
 
@@ -12,7 +12,7 @@ export default {
 </script>
 
 <style scoped>
-#logo{
+#banner{
   width: 100%;
   height: 100%;
   align: center;
