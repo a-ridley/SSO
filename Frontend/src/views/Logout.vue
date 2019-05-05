@@ -62,14 +62,16 @@ export default {
         })
         .catch(e => {
           if (e.response.status === 417) {
-            this.routeTo = '/dashboard';
+            this.routeTo = '/login';
             this.showPopup = true;
-            this.popupMessage = "Logout has encountered an error."
+            this.popupMessage = "An error has been encounted. User will be logged out.";
+            localStorage.removeItem('token');
           }
           else {
-            this.routeTo = '/dashboard';
+            this.routeTo = '/login';
             this.showPopup = true;
-            this.popupMessage = e.response.data
+            this.popupMessage = e.response.data;
+            localStorage.removeItem('token');
           }
         })
         .finally(() => {
