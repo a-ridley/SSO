@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="register-wrapper">
     <h1>Register</h1>
 
     <br />
@@ -255,4 +255,8 @@ export default {
 </script>
 
 <style scoped>
+.register-wrapper {
+    width: 70%;
+    margin: 1px auto;
+}
 </style>
