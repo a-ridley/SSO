@@ -106,8 +106,10 @@
     </Compile>
     <Compile Include="Models\ApplicationHealthCheck.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RequestModels\ExternalUserDeleteRequestModel.cs" />
     <Compile Include="RequestModels\LaunchRequestModel.cs" />
     <Compile Include="RequestModels\RegistrationRequestModel.cs" />
+    <Compile Include="RequestModels\UserDeleteRequestModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

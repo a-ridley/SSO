@@ -1,5 +1,6 @@
 ﻿using DataAccessLayer.Database;
 using DataAccessLayer.Models;
+using System.Data.Entity.Validation;
 using ServiceLayer.Exceptions;
 using ServiceLayer.Services;
 using System;
@@ -109,13 +110,21 @@ namespace ManagerLayer
         {
             UserDeleteService uds = new UserDeleteService();
             IUserService _userService = new UserService(_db);
-            User deletingUser = _userService.GetUser(userId);
+            SignatureService _signatureService = new SignatureService();
             ISessionService _sessionService = new SessionService(_db);
+            User deletingUser = _userService.GetUser(userId);
             var sessions = _sessionService.GetSessions(userId);
             var applications = _applicationService.GetAllApplicationsList();
             var responseList = new List<HttpResponseMessage>();
-
-            SignatureService _signatureService = new SignatureService();
+            //iterate through each application to check health, if any app is down, do not run delete process
+            foreach(Application app in applications)
+            {
+                var httpresponse = await _applicationService.GetApplicationHealth(app.HealthCheckUrl);
+                if (!httpresponse.IsSuccessStatusCode)
+                {
+                    throw new FailHealthCheckException("Failed to delete, an application is down");
+                }
+            }
             foreach (Application app in applications)
             {
                 var deletePayload = new Dictionary<string, string>();
@@ -132,11 +141,18 @@ namespace ManagerLayer
                 User deletedUser = _userService.DeleteUser(userId);
                 if(deletedUser != null){
                     _sessionService.DeleteSessions(deletedUser.Id);
+                    try
+                    {
+                        _db.SaveChanges();
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        _db.Entry(deletedUser).State = System.Data.Entity.EntityState.Detached;
+                    }
                 }
-                _db.SaveChanges();
-                return deletedUser;
+                return deletedUser; // delete successful 
             }
-            return null;
+            throw new FailedDeleteException("Some applications failed to delete"); // some application(s) sent back a non 200 or 404 reponse
         }
     }
 }

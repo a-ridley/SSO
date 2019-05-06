@@ -17,36 +17,10 @@ using ManagerLayer.UserManagement;
 using DataAccessLayer.Requests;
 using System.Data.Entity.Infrastructure;
 using System.Net.Http;
+using System.Collections.Generic;
 
 namespace KFC_WebAPI.Controllers
 {
-    public class UserDeleteRequest
-    {
-        [Required]
-        public string token { get; set; }
-    }
-
-    public class UserDeleteRequestFromApp
-    {
-        // Included in signature
-        public string appId { get; set; }
-        public Guid ssoUserId { get; set; }
-        public string email { get; set; }
-        public long timestamp { get; set; }
-
-        // Excluded from signature
-        public string signature { get; set; }
-
-        // Generate string to be signed
-        public string PreSignatureString()
-        {
-            string acc = "";
-            acc += "ssoUserId=" + ssoUserId + ";";
-            acc += "email=" + email + ";";
-            acc += "timestamp=" + timestamp + ";";
-            return acc;
-        }
-    }
 
     public class UsersController : ApiController
     {
@@ -221,8 +195,14 @@ namespace KFC_WebAPI.Controllers
 
         [HttpPost]
         [Route("api/users/deleteuser")]
-        public async Task<IHttpActionResult> Delete([FromBody] UserDeleteRequest request)
+       
+        public async Task<IHttpActionResult> Delete([FromUri] UserDeleteRequestModel request)
         {
+            if (!ModelState.IsValid || request == null)
+            {
+                return Content((HttpStatusCode)412, ModelState);
+            }
+
             using (var _db = new DatabaseContext())
             {
                 IAuthorizationManager authorizationManager = new AuthorizationManager(_db);
@@ -231,37 +211,78 @@ namespace KFC_WebAPI.Controllers
                 {
                     return Content(HttpStatusCode.Unauthorized, "Session not valid!");
                 }
-                UserManager um = new UserManager(_db);
-                User user = await um.DeleteUser(_db, session.UserId);
-                if (user != null)
+
+                try
                 {
-                    return Content(HttpStatusCode.OK, "Account has been deleted");
+                    UserManager um = new UserManager(_db);
+                    User user = await um.DeleteUser(_db, session.UserId);
+                    return Ok(user);
                 }
-                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
+                catch (Exception ex)
+                {
+                    if (ex is FailedDeleteException)
+                    {
+                        return Content(HttpStatusCode.BadRequest, "Some applications failed to delete");
+                    }
+
+                    if (ex is DbEntityValidationException)
+                    {
+                        return Content(HttpStatusCode.InternalServerError, "Database error");
+                    }
+
+                    return Content(HttpStatusCode.InternalServerError, "Service Unavailable");
+                }
             }
         }
 
         [HttpPost]
         [Route("api/users/appdeleteuser")]
-        public async Task<IHttpActionResult> Delete([FromBody] UserDeleteRequestFromApp request)
+        public async Task<IHttpActionResult> Delete([FromBody] ExternalUserDeleteRequestModel request)
         {
+
+            if (!ModelState.IsValid || request == null)
+            {
+                return Content((HttpStatusCode)412, ModelState);
+            }
+
             using (var _db = new DatabaseContext())
             {
                 IApplicationService _applicationService = new ApplicationService(_db);
-                HttpClient client = new HttpClient();
-                ITokenService _tokenService = new TokenService();
+                SignatureService _signatureService = new SignatureService();
                 Application app = _applicationService.GetApplication(Guid.Parse(request.appId));
-                if (!(_tokenService.GenerateSignature(request.PreSignatureString(), app) == request.signature))
+
+                var incomingPayload = new Dictionary<string, string>();
+                incomingPayload.Add("appId", request.appId);
+                incomingPayload.Add("ssoUserId", request.ssoUserId.ToString());
+                incomingPayload.Add("email", request.email);
+                incomingPayload.Add("timestamp", request.timestamp.ToString());
+
+                if (!(_signatureService.Sign(app.SharedSecretKey, incomingPayload) == request.signature))
                 {
                     return Content(HttpStatusCode.Unauthorized, "Signature not valid!");
                 }
-                UserManager um = new UserManager(_db);
-                User deletedUser = await um.DeleteUser(_db, request.ssoUserId);
-                if(deletedUser != null)
+
+                try
                 {
-                    return Content(HttpStatusCode.OK, "Account has been deleted");
+                    UserManager um = new UserManager(_db);
+                    User user = await um.DeleteUser(_db, request.ssoUserId);
+                    return Ok(user);
+
                 }
-                return Content(HttpStatusCode.BadRequest, "Service Unavailable");
+                catch (Exception ex)
+                {
+                    if (ex is FailedDeleteException)
+                    {
+                        return Content(HttpStatusCode.BadRequest, "Some applications failed to delete");
+                    }
+
+                    if (ex is DbEntityValidationException)
+                    {
+                        return Content(HttpStatusCode.InternalServerError, "Database error");
+                    }
+
+                    return Content(HttpStatusCode.InternalServerError, "Service Unavailable");
+                }
             }
         }
 
