@@ -15,7 +15,7 @@ namespace ServiceLayer.Services
         Application GetApplication(Guid id);
         Application GetApplication(string title, string email);
         List<Application> GetAllApplicationsList();
-        IEnumerable GetAllApplications();
+        IEnumerable GetPaginatedApplications(int currentPage, int pageSize, out int totalPages);
         IEnumerable SortAllApplicationsAlphaAscending();
         IEnumerable SortAllApplicationsNumOfClicks();
         IEnumerable SortAllApplicationsAlphaDescending();

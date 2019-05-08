@@ -17,24 +17,24 @@ namespace KFC_WebAPI.Controllers
 {
     public class ApplicationController : ApiController
     {
-        //private ApplicationManager manager = new ApplicationManager(_db);
-        private static ApplicationHealthCheck _appHealthStatus = new ApplicationHealthCheck();
 
+        private static ApplicationHealthCheck _appHealthStatus = new ApplicationHealthCheck();
+        private readonly DatabaseContext _db = new DatabaseContext();
 
         /// <summary>
-        /// Get all individual applications registered with the SSO
+        /// Using the application service, obtain a selection of applications based on the 
+        /// pagination parameters.
         /// </summary>
-        /// <returns>Ok Status Code with the list of all applications registered with the SSO</returns>
-        [HttpGet]
-        [Route("api/applications")]
-        public IHttpActionResult GetAllApplications()
+        /// <param name="currentPage">The current page the user is viewing</param>
+        /// <param name="pageSize">The amount of applications to display</param>
+        /// <returns>A response with an object for the total pages and another for the paginated applications</returns>
+        [HttpGet, Route("api/applications")]
+        public IHttpActionResult GetPaginatedApplications(int currentPage, int pageSize)
         {
-            using (var _db = new DatabaseContext())
-            {
-                IApplicationService _applicationService = new ApplicationService(_db);
-                var applications = _applicationService.GetAllApplications();
-                return Content((HttpStatusCode) 200, applications);
-            }
+            IApplicationService applicationService = new ApplicationService(_db);
+            var applications = applicationService.GetPaginatedApplications(currentPage, pageSize, out int totalPages);
+            var applicationResponse = new ApplicationResponse(totalPages, applications);
+            return Content((HttpStatusCode) 200, applicationResponse);
         }
 
         /// <summary>
@@ -45,12 +45,9 @@ namespace KFC_WebAPI.Controllers
         [Route("api/applications/ascending")]
         public IHttpActionResult SortAllApplicationsAscending()
         {
-            using (var _db = new DatabaseContext())
-            {
-                IApplicationService _applicationService = new ApplicationService(_db);
-                var applications = _applicationService.SortAllApplicationsAlphaAscending();
-                return Content((HttpStatusCode)200, applications);
-            }
+            IApplicationService _applicationService = new ApplicationService(_db);
+            var applications = _applicationService.SortAllApplicationsAlphaAscending();
+            return Content((HttpStatusCode) 200, applications);
         }
 
         /// <summary>
@@ -61,12 +58,9 @@ namespace KFC_WebAPI.Controllers
         [Route("api/applications/descending")]
         public IHttpActionResult SortAllApplicationsDescending()
         {
-            using (var _db = new DatabaseContext())
-            {
-                IApplicationService _applicationService = new ApplicationService(_db);
-                var applications = _applicationService.SortAllApplicationsAlphaDescending();
-                return Content((HttpStatusCode)200, applications);
-            }
+            IApplicationService _applicationService = new ApplicationService(_db);
+            var applications = _applicationService.SortAllApplicationsAlphaDescending();
+            return Content((HttpStatusCode)200, applications);
         }
 
         /// <summary>
@@ -77,12 +71,9 @@ namespace KFC_WebAPI.Controllers
         [Route("api/applications/clicks")]
         public IHttpActionResult SortAllApplicationsNumOfClicks()
         {
-            using (var _db = new DatabaseContext())
-            {
-                IApplicationService _applicationService = new ApplicationService(_db);
-                var applications = _applicationService.SortAllApplicationsNumOfClicks();
-                return Content((HttpStatusCode)200, applications);
-            }
+            IApplicationService _applicationService = new ApplicationService(_db);
+            var applications = _applicationService.SortAllApplicationsNumOfClicks();
+            return Content((HttpStatusCode)200, applications);
         }
 
         /// <summary>
@@ -106,19 +97,16 @@ namespace KFC_WebAPI.Controllers
 
             try
             {
-                using (var _db = new DatabaseContext())
-                {
-                    IApplicationManager manager = new ApplicationManager(_db);
-                    // Validate request and register application
-                    responseContent = manager.ValidateRegistration(request);
-                }
-                    
+                IApplicationManager manager = new ApplicationManager(_db);
+                // Validate request and register application
+                responseContent = manager.ValidateRegistration(request);
+
                 responseContent.Code = HttpStatusCode.OK;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // Request inputs are invalid format or violate business rules
-                if(ex is InvalidStringException ||
+                if (ex is InvalidStringException ||
                     ex is InvalidEmailException ||
                     ex is InvalidUrlException ||
                     ex is ArgumentException)
@@ -126,7 +114,7 @@ namespace KFC_WebAPI.Controllers
                     responseContent.Code = HttpStatusCode.BadRequest;
                 }
                 // Error in data store
-                else if(ex is DbEntityValidationException)
+                else if (ex is DbEntityValidationException)
                 {
                     responseContent.Code = HttpStatusCode.InternalServerError;
                 }
@@ -137,7 +125,6 @@ namespace KFC_WebAPI.Controllers
 
                 responseContent.Message = ex.Message;
             }
-
             return Content(responseContent.Code, responseContent);
         }
 
@@ -162,19 +149,16 @@ namespace KFC_WebAPI.Controllers
 
             try
             {
-                using (var _db = new DatabaseContext())
-                {
-                    IApplicationManager manager = new ApplicationManager(_db);
-                    // Validate request inputs and publish application
-                    responseContent = manager.ValidatePublish(request);
-                }
+                IApplicationManager manager = new ApplicationManager(_db);
+                // Validate request inputs and publish application
+                responseContent = manager.ValidatePublish(request);
 
                 responseContent.Code = HttpStatusCode.OK;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // User inputs are invalid format or violate business rules
-                if(ex is InvalidStringException ||
+                if (ex is InvalidStringException ||
                     ex is InvalidUrlException ||
                     ex is InvalidImageException ||
                     ex is InvalidApiKeyException)
@@ -182,7 +166,7 @@ namespace KFC_WebAPI.Controllers
                     responseContent.Code = HttpStatusCode.BadRequest;
                 }
                 // Error in data store
-                else if(ex is DbEntityValidationException)
+                else if (ex is DbEntityValidationException)
                 {
                     responseContent.Code = HttpStatusCode.InternalServerError;
                 }
@@ -193,7 +177,6 @@ namespace KFC_WebAPI.Controllers
 
                 responseContent.Message = ex.Message;
             }
-            
             return Content(responseContent.Code, responseContent);
         }
 
@@ -218,15 +201,14 @@ namespace KFC_WebAPI.Controllers
 
             try
             {
-                using (var _db = new DatabaseContext())
-                {
-                    IApplicationManager manager = new ApplicationManager(_db);
-                    // Validate request inputs and generate a new api key
-                    responseContent = manager.ValidateKeyGeneration(request);
-                }
+
+                IApplicationManager manager = new ApplicationManager(_db);
+                // Validate request inputs and generate a new api key
+                responseContent = manager.ValidateKeyGeneration(request);
+
                 responseContent.Code = HttpStatusCode.OK;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // User inputs are invalid format or violate business rules
                 if (ex is InvalidStringException ||
@@ -236,7 +218,7 @@ namespace KFC_WebAPI.Controllers
                     responseContent.Code = HttpStatusCode.BadRequest;
                 }
                 // Error in data store
-                else if(ex is DbEntityValidationException)
+                else if (ex is DbEntityValidationException)
                 {
                     responseContent.Code = HttpStatusCode.InternalServerError;
                 }
@@ -272,16 +254,13 @@ namespace KFC_WebAPI.Controllers
 
             try
             {
-                using (var _db = new DatabaseContext())
-                {
-                    IApplicationManager manager = new ApplicationManager(_db);
-                    // Validate request inputs and delete application from portal
-                    responseContent = manager.ValidateDeletion(request);
-                }
+                IApplicationManager manager = new ApplicationManager(_db);
+                // Validate request inputs and delete application from portal
+                responseContent = manager.ValidateDeletion(request);
 
                 responseContent.Code = HttpStatusCode.OK;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // User inputs are invalid format or violate business rules
                 if (ex is InvalidStringException ||
@@ -291,7 +270,7 @@ namespace KFC_WebAPI.Controllers
                     responseContent.Code = HttpStatusCode.BadRequest;
                 }
                 // Error in data store
-                else if(ex is DbEntityValidationException)
+                else if (ex is DbEntityValidationException)
                 {
                     responseContent.Code = HttpStatusCode.InternalServerError;
                 }
@@ -302,7 +281,6 @@ namespace KFC_WebAPI.Controllers
 
                 responseContent.Message = ex.Message;
             }
-
             return Content(responseContent.Code, responseContent);
         }
 
@@ -315,14 +293,11 @@ namespace KFC_WebAPI.Controllers
         [Route("api/applications/update")]
         public HttpResponseMessage UpdateApplication([FromBody] ApplicationRequest request)
         {
-            using (var _db = new DatabaseContext())
-            {
-                IApplicationManager manager = new ApplicationManager(_db);
-                HttpResponseContent responseContent = manager.ValidateUpdate(request);
-                HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent.Message);
+            IApplicationManager manager = new ApplicationManager(_db);
+            HttpResponseContent responseContent = manager.ValidateUpdate(request);
+            HttpResponseMessage response = Request.CreateResponse(responseContent.Code, responseContent.Message);
 
-                return response;
-            }
+            return response;
         }
 
         /// <summary>
@@ -339,26 +314,23 @@ namespace KFC_WebAPI.Controllers
             // This is checking if the last health check was within the last minute
             if (_appHealthStatus.LastHealthCheck < (DateTime.Now - TimeSpan.FromMinutes(1)))
             {
-                using (var _db = new DatabaseContext())
-                {
-                    // Get the entire list of applications again each time in case they were updated
-                    // or new ones were added
-                    ApplicationService _applicationService = new ApplicationService(_db);
-                    var applications = _applicationService.GetAllApplicationsList();
+                // Get the entire list of applications again each time in case they were updated
+                // or new ones were added
+                ApplicationService _applicationService = new ApplicationService(_db);
+                var applications = _applicationService.GetAllApplicationsList();
 
-                    // For every app in the applications table, perform a health check
-                    foreach (Application app in applications)
+                // For every app in the applications table, perform a health check
+                foreach (Application app in applications)
+                {
+                    var response = await _applicationService.GetApplicationHealth(app.HealthCheckUrl);
+                    // If the status is not a 200 Success, then the the app is down (true)
+                    if (!response.IsSuccessStatusCode)
                     {
-                        var response = await _applicationService.GetApplicationHealth(app.HealthCheckUrl);
-                        // If the status is not a 200 Success, then the the app is down (true)
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            _appHealthStatus.HealthStatuses[app.Id] = true;
-                        }
+                        _appHealthStatus.HealthStatuses[app.Id] = true;
                     }
-                    // Updates last health check to current time
-                    _appHealthStatus.LastHealthCheck = DateTime.Now;
                 }
+                // Updates last health check to current time
+                _appHealthStatus.LastHealthCheck = DateTime.Now;
             }
             // If the the last health check has been one minute then just return the statuses again
             // Or, return the updated statuses if they were updated

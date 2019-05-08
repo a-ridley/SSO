@@ -56,9 +56,17 @@ namespace ServiceLayer.Services
             return _applicationRepository.GetAllApplicationsList();
         }
        
-        public IEnumerable GetAllApplications()
+        /// <summary>
+        /// Uses the application repository to get paginated applications
+        /// along with the total number of pages to display
+        /// </summary>
+        /// <param name="currentPage">The current page the user is on</param>
+        /// <param name="pageSize">The number of applications to display</param>
+        /// <param name="totalPages">The total number of pages to display</param>
+        /// <returns>A collection of paginated applications and the total pages</returns>
+        public IEnumerable GetPaginatedApplications(int currentPage, int pageSize, out int totalPages)
         {
-            return _applicationRepository.GetAllApplications();
+            return _applicationRepository.GetPaginatedApplications(currentPage, pageSize, out totalPages);
         }
         
         public IEnumerable SortAllApplicationsAlphaAscending()
