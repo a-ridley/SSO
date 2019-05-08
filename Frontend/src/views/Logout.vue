@@ -82,6 +82,7 @@ export default {
       })
       .finally(() => {
         this.loading = false;
+        store.state.isLogin = false;
       })
   }
 };
