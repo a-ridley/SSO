@@ -36,13 +36,13 @@ namespace ManagerLayer.Logout
         public async Task<Session> SendLogoutRequest(string token)
         {
             var responseList = new List<HttpResponseMessage>();
-            var applist = _applicationService.GetAllApplications();
+            var applist = _applicationService.GetAllApplicationsList();
             Session session = sessionServ.GetSession(token);
+            User user = userService.GetUser(session.UserId);
+           
 
             foreach (Application app in applist)
             {
-                User user = userService.GetUser(session.UserId);
-                HttpClient client = new HttpClient();
 
                 //The logoutpayload will have a dictonary that represents signed body of request.
                 var logoutPayload = new Dictionary<string, string>();
