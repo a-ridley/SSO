@@ -109,7 +109,7 @@ let router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  if(to.fullPath === '/dashboard' && from.fullPath !== '/login'){
+  if((to.fullPath === '/dashboard' || to.fullPath === '/home') && from.fullPath !== '/login'){
     if(!localStorage.getItem('token')){
       next('/login');
     }

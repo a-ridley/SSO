@@ -1,69 +1,69 @@
 <template>
-    <div class="delete-wrapper">
+  <v-layout id="appDelete">
+    <div id="appDelete">
+      <h1 class="display-1">Delete Application</h1>
+      <v-divider class="my-3"></v-divider>
+      <br />
+      <v-form>
+      <v-text-field
+          name="title"
+          id="title"
+          v-model="title"
+          type="title"
+          label="Application Title" 
+          v-if="!validation"
+          /><br />
+      <v-text-field
+          name="email"
+          id="email"
+          type="email"
+          v-model="email"
+          label="Email" 
+          v-if="!validation"
+          /><br />
 
-        <h1 class="header">Delete Your Application</h1>
+      
+      <v-alert
+          :value="error"
+          id="error"
+          type="error"
+          transition="scale-transition"
+      >
+          {{error}}
+      </v-alert>
 
-        <br />
-        <v-form>
-        <v-text-field
-            name="title"
-            id="title"
-            v-model="title"
-            type="title"
-            label="Application Title" 
-            v-if="!validation"
-            /><br />
-        <v-text-field
-            name="email"
-            id="email"
-            type="email"
-            v-model="email"
-            label="Email" 
-            v-if="!validation"
-            /><br />
+      <div v-if="validation" id="deleteMessage">
+          <h3>{{ validation }}</h3>
+      </div>
 
-        
-        <v-alert
-            :value="error"
-            id="error"
-            type="error"
-            transition="scale-transition"
+      <br />
+
+      <v-btn id="btnDelete" color="success" v-if="!validation" v-on:click="deleteApp">Delete</v-btn>
+
+      </v-form>
+
+      <v-dialog
+        v-model="loading"
+        hide-overlay
+        persistent
+        width="300"
+      >
+        <v-card
+          color="primary"
+          dark
         >
-            {{error}}
-        </v-alert>
-
-        <div v-if="validation" id="deleteMessage">
-            <h3>{{ validation }}</h3>
-        </div>
-
-        <br />
-
-        <v-btn id="btnDelete" color="success" v-if="!validation" v-on:click="deleteApp">Delete</v-btn>
-
-        </v-form>
-
-        <v-dialog
-          v-model="loading"
-          hide-overlay
-          persistent
-          width="300"
-        >
-          <v-card
-            color="primary"
-            dark
-          >
-            <v-card-text>
-              Loading
-              <v-progress-linear
-                indeterminate
-                color="white"
-                class="mb-0"
-              ></v-progress-linear>
-            </v-card-text>
-          </v-card>
-        </v-dialog>
-
+          <v-card-text>
+            Loading
+            <v-progress-linear
+              indeterminate
+              color="white"
+              class="mb-0"
+            ></v-progress-linear>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
     </div>
+  </v-layout>
 </template>
 
 <script>
@@ -116,9 +116,13 @@ export default {
 </script>
 
 <style lang="css">
-.delete-wrapper {
-    width: 70%;
-    margin: 1px auto;
+#appDelete {
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  max-width: 800px;
+  margin: 1px auto;
+  align: center;
 }
 
 </style>

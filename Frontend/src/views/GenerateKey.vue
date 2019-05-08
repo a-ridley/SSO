@@ -1,74 +1,68 @@
 <template>
-    <div class="generate-wrapper">
+  <v-layout id="generateKey">
+    <div id="generateKey">
+      <h1 class="display-1">Generate API Key</h1>
+      <v-divider class="my-3"></v-divider>
+      <br />
+      <v-form>
+      <v-text-field
+          name="title"
+          id="title"
+          v-model="title"
+          type="title"
+          label="Application Title" 
+          v-if="!key"
+          /><br />
+      <v-text-field
+          name="email"
+          id="email"
+          type="email"
+          v-model="email"
+          label="Email" 
+          v-if="!key"
+          /><br />
+      <v-alert
+          :value="error"
+          id="error"
+          type="error"
+          transition="scale-transition"
+      >
+          {{error}}
+      </v-alert>
 
-        <h1 class="header">Generate a New API Key</h1>
-
-        <br />
-        <v-form>
-        <v-text-field
-            name="title"
-            id="title"
-            v-model="title"
-            type="title"
-            label="Application Title" 
-            v-if="!key"
-            /><br />
-        <v-text-field
-            name="email"
-            id="email"
-            type="email"
-            v-model="email"
-            label="Email" 
-            v-if="!key"
-            /><br />
-
-        
-        <v-alert
-            :value="error"
-            id="error"
-            type="error"
-            transition="scale-transition"
+      <div v-if="message" id="responseMessage">
+          <h3>{{ message }}</h3>
+          <br />
+      </div>
+      <div v-if="key" id="keyMessage">
+          <h3>Your New API Key:</h3>
+          <p>{{ key }}</p>
+      </div>
+      <br />
+      <v-btn id="btnGenerate" color="success" v-if="!key" v-on:click="generate">Generate</v-btn>
+      </v-form>
+      <v-dialog
+        v-model="loading"
+        hide-overlay
+        persistent
+        width="300"
+      >
+        <v-card
+          color="primary"
+          dark
         >
-            {{error}}
-        </v-alert>
-
-        <div v-if="message" id="responseMessage">
-            <h3>{{ message }}</h3>
-            <br />
-        </div>
-        <div v-if="key" id="keyMessage">
-            <h3>Your New API Key:</h3>
-            <p>{{ key }}</p>
-        </div>
-
-        <br />
-
-        <v-btn id="btnGenerate" color="success" v-if="!key" v-on:click="generate">Generate</v-btn>
-
-        </v-form>
-
-        <v-dialog
-          v-model="loading"
-          hide-overlay
-          persistent
-          width="300"
-        >
-          <v-card
-            color="primary"
-            dark
-          >
-            <v-card-text>
-              Loading
-              <v-progress-linear
-                indeterminate
-                color="white"
-                class="mb-0"
-              ></v-progress-linear>
-            </v-card-text>
-          </v-card>
-        </v-dialog>
-
+          <v-card-text>
+            Loading
+            <v-progress-linear
+              indeterminate
+              color="white"
+              class="mb-0"
+            ></v-progress-linear>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
     </div>
+  </v-layout>
 </template>
 
 <script>
@@ -123,9 +117,12 @@ export default {
 </script>
 
 <style lang="css">
-.generate-wrapper {
-    width: 70%;
-    margin: 1px auto;
+#generateKey {
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  max-width: 800px;
+  margin: 1px auto;
+  align: center;
 }
-
 </style>

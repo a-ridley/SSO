@@ -1,114 +1,114 @@
 <template>
-    <div class="register-wrapper">
-        
-        <h1 class="header">Register your Application</h1>
+  <v-layout id="appRegister">
+    <div id="appRegister">
+      <h1 class="display-1">Application Registration</h1>
+      <v-divider class="my-3"></v-divider>
+      <br />
+      <v-form>
+      <v-text-field
+          name="title"
+          id="title"
+          v-model="title"
+          type="title"
+          label="Title" 
+          v-if="!key"
+          /><br />
+      <v-text-field
+          name="launchUrl"
+          id="launchUrl"
+          type="launchUrl"
+          v-model="launchUrl"
+          label="Launch Url" 
+          v-if="!key"
+          /><br />
+      <v-text-field
+          name="email"
+          id="email"
+          type="email"
+          v-model="email"
+          label="Email" 
+          v-if="!key"
+          /><br />
+      <v-text-field
+          name="healthCheckUrl"
+          id="healthCheckUrl"
+          type="healthCheckUrl"
+          v-model="healthCheckUrl"
+          label="Health Check Url" 
+          v-if="!key"
+          /><br />
+      <v-text-field
+          name="deleteUrl"
+          id="deleteUrl"
+          type="deleteUrl"
+          v-model="deleteUrl"
+          label="User Deletion Url" 
+          v-if="!key"
+          /><br />
+      <v-text-field
+          name="logoutUrl"
+          id="logoutUrl"
+          type="logoutUrl"
+          v-model="logoutUrl"
+          label="Logout Url" 
+          v-if="!key"
+          /><br />
 
-        <br />
-        <v-form>
-        <v-text-field
-            name="title"
-            id="title"
-            v-model="title"
-            type="title"
-            label="Title" 
-            v-if="!key"
-            /><br />
-        <v-text-field
-            name="launchUrl"
-            id="launchUrl"
-            type="launchUrl"
-            v-model="launchUrl"
-            label="Launch Url" 
-            v-if="!key"
-            /><br />
-        <v-text-field
-            name="email"
-            id="email"
-            type="email"
-            v-model="email"
-            label="Email" 
-            v-if="!key"
-            /><br />
-        <v-text-field
-            name="healthCheckUrl"
-            id="healthCheckUrl"
-            type="healthCheckUrl"
-            v-model="healthCheckUrl"
-            label="Health Check Url" 
-            v-if="!key"
-            /><br />
-        <v-text-field
-            name="deleteUrl"
-            id="deleteUrl"
-            type="deleteUrl"
-            v-model="deleteUrl"
-            label="User Deletion Url" 
-            v-if="!key"
-            /><br />
-        <v-text-field
-            name="logoutUrl"
-            id="logoutUrl"
-            type="logoutUrl"
-            v-model="logoutUrl"
-            label="Logout Url" 
-            v-if="!key"
-            /><br />
+      
+      <v-alert
+          :value="error"
+          id="error"
+          type="error"
+          transition="scale-transition"
+      >
+          {{error}}
+      </v-alert>
 
-        
-        <v-alert
-            :value="error"
-            id="error"
-            type="error"
-            transition="scale-transition"
+      <div id="responseMessage" v-if="message">
+          <h3>{{ message }}</h3>
+          <br />
+      </div>
+      <div id="applicationId" v-if="appId">
+          <h3>Your Application ID</h3>
+          <p>{{ appId }}</p>
+      </div>
+      <div id="apiKeyMessage" v-if="key">
+          <h3>Your API Key:</h3>
+          <p>{{ key }}</p>
+      </div>
+      <div id="secretKeyMessage" v-if="secretKey">
+          <h3>Your Secret Key</h3>
+          <p>{{ secretKey }}</p>
+      </div>
+
+      <br />
+
+      <v-btn id="btnRegister" color="success" v-if="!key" v-on:click="register">Register</v-btn>
+
+      </v-form>
+
+      <v-dialog
+        v-model="loading"
+        hide-overlay
+        persistent
+        width="300"
+      >
+        <v-card
+          color="primary"
+          dark
         >
-            {{error}}
-        </v-alert>
-
-        <div id="responseMessage" v-if="message">
-            <h3>{{ message }}</h3>
-            <br />
-        </div>
-        <div id="applicationId" v-if="appId">
-            <h3>Your Application ID</h3>
-            <p>{{ appId }}</p>
-        </div>
-        <div id="apiKeyMessage" v-if="key">
-            <h3>Your API Key:</h3>
-            <p>{{ key }}</p>
-        </div>
-        <div id="secretKeyMessage" v-if="secretKey">
-            <h3>Your Secret Key</h3>
-            <p>{{ secretKey }}</p>
-        </div>
-
-        <br />
-
-        <v-btn id="btnRegister" color="success" v-if="!key" v-on:click="register">Register</v-btn>
-
-        </v-form>
-
-        <v-dialog
-          v-model="loading"
-          hide-overlay
-          persistent
-          width="300"
-        >
-          <v-card
-            color="primary"
-            dark
-          >
-            <v-card-text>
-              Loading
-              <v-progress-linear
-                indeterminate
-                color="white"
-                class="mb-0"
-              ></v-progress-linear>
-            </v-card-text>
-          </v-card>
-        </v-dialog>
-        
+          <v-card-text>
+            Loading
+            <v-progress-linear
+              indeterminate
+              color="white"
+              class="mb-0"
+            ></v-progress-linear>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
     </div>
+  </v-layout>
 </template>
 
 <script>
@@ -176,9 +176,13 @@ export default {
 
 <style lang="css">
 
-.register-wrapper {
-    width: 70%;
-    margin: 1px auto;
+#appRegister {
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  max-width: 800px;
+  margin: 1px auto;
+  align: center;
 }
 
 </style>

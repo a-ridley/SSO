@@ -1,47 +1,46 @@
 <template>
-   <div class="login-wrapper">
-
-        <h1>Login</h1>
-
-        <br />
+  <v-layout id="login" xs>
+    <div id="login">
+      <h1 class="display-1">Login</h1>
+      <v-divider class="my-3"/>
+      <v-flex>
         <v-form>
         <v-text-field
-            name="email"
-            id="email"
-            v-model="email"
-            type="email"
-            label="email" 
-            /><br />
+          name="email"
+          id="email"
+          v-model="email"
+          type="email"
+          label="Email" 
+          /><br />
         <v-text-field
-            name="password"
-            id="password"
-            type="password"
-            v-model="password"
-            label="Password" 
-            /><br />
-
-        
+          name="password"
+          id="password"
+          type="password"
+          v-model="password"
+          label="Password" 
+        />
+        <br/>
         <v-alert
-            :value="error"
-            type="error"
-            transition="scale-transition"
+          :value="error"
+          type="error"
+          transition="scale-transition"
         >
-            {{error}}
+          {{error}}
         </v-alert>
-
-        <br />
-
-        <v-btn id="login" color="success" v-on:click="login">Login</v-btn>
-
-        <v-btn id="reset" color="success" v-on:click="goToResetPassword">Reset Password</v-btn>
         </v-form>
-
-    <v-dialog
-      v-model="loading"
-      hide-overlay
-      persistent
-      width="300"
-    >
+      </v-flex>
+      <v-flex>
+        <v-btn id="resetButton" color="success" flat small v-on:click="goToResetPassword">Reset Password</v-btn>
+      </v-flex>
+      <v-flex>
+        <v-btn id="loginButton" color="success" v-on:click="login">Login</v-btn>
+      </v-flex>
+      <v-dialog
+        v-model="loading"
+        hide-overlay
+        persistent
+        width="300"
+      >
       <v-card
         color="primary"
         dark
@@ -56,8 +55,8 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-
     </div>
+  </v-layout>
 </template>
 
 <script>
@@ -114,8 +113,22 @@
 </script>
 
 <style>
-    .login-wrapper {
-        width: 70%;
-        margin: 1px auto;
-    }
+#login{
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  max-width: 800px;
+  margin: 1px auto;
+  align: center;
+}
+
+#loginButton {
+  margin: 0px
+}
+
+#resetButton {
+  margin: 0px;
+  margin-bottom: 15px;
+  padding: 0px;
+}
 </style>

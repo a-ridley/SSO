@@ -48,36 +48,41 @@ export default {
   },
   created() {
     this.loading = true;
-      const url = `${apiURL}/Logout`
-      axios.post(url, 
-        {
-          token: localStorage.getItem('token')
-        })
-        .then(response => {
+    const token = localStorage.getItem("token");
+    if(!token){
+      this.routeTo = '/login';
+      this.showPopup = true;
+      this.popupMessage = "User has logged out.";   
+    }
+    const url = `${apiURL}/Logout`;
+    axios.post(url, 
+      {
+        "token": token
+      })
+      .then(response => {
+        this.routeTo = '/login';
+        this.showPopup = true;
+        this.popupMessage = response.data;
+        localStorage.removeItem('token');
+        store.state.isLogin = false;
+      })
+      .catch(e => {
+        if (e.response.status === 417) {
           this.routeTo = '/login';
           this.showPopup = true;
-          this.popupMessage = response.data;
+          this.popupMessage = "An error has been encounted. User will be logged out.";
           localStorage.removeItem('token');
-          store.state.isLogin = false;
-        })
-        .catch(e => {
-          if (e.response.status === 417) {
-            this.routeTo = '/login';
-            this.showPopup = true;
-            this.popupMessage = "An error has been encounted. User will be logged out.";
-            localStorage.removeItem('token');
-          }
-          else {
-            this.routeTo = '/login';
-            this.showPopup = true;
-            this.popupMessage = e.response.data;
-            localStorage.removeItem('token');
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        })
-    
+        }
+        else {
+          this.routeTo = '/login';
+          this.showPopup = true;
+          this.popupMessage = e.response.data;
+          localStorage.removeItem('token');
+        }
+      })
+      .finally(() => {
+        this.loading = false;
+      })
   }
 };
 </script>

@@ -1,53 +1,45 @@
 <template>
-  <div id="update">
-    <div id="UpdatePassword">
+  <v-layout id="updatePassword">
+    <div id="updatePassword">
       <v-alert
-      :value="message"
-      dismissible
-      type="success"
-    >
-      {{message}}
-    </v-alert>
-
-    <v-alert
-      :value="errorMessage"
-      dismissible
-      type="error"
-      transition="scale-transition"
-    >
-    {{errorMessage}}
-    </v-alert>
-
-    </div>
-     <h1>Update Password</h1>
-    <br />
-    <br />
-    <div class="submitPasswords">
+        :value="message" 
+        dismissible 
+        type="success"
+      >{{message}}</v-alert>
+      <v-alert
+        :value="errorMessage"
+        dismissible
+        type="error"
+        transition="scale-transition"
+      >{{errorMessage}}</v-alert>
+      <h1 class="display-1">Update Password</h1>
+      <v-divider class="my-3"></v-divider>
+      <div class="submitPasswords">
         <v-text-field
             name="oldPassword"
             id="oldPassword"
             v-model="oldPassword"
-            type="text"
+            type="password"
             label="Old Password"/>
         <br/>
         <v-text-field
             name="newPassword"
             id="newPassword"
             v-model="newPassword"
-            type="text"
+            type="password"
             label="New Password"/>
-      <br />
-      <v-text-field
-            name="confirmNewPassword"
-            id="confirmNewPassword"
-            v-model="confirmNewPassword"
-            type="text"
-            label="Confirm New Password"/>
-      <br />
-        <br/>
+        <br />
+        <v-text-field
+              name="confirmNewPassword"
+              id="confirmNewPassword"
+              v-model="confirmNewPassword"
+              type="password"
+              label="Confirm New Password"/>
+        <br />
         <v-btn id="submit" color="success" v-on:click="submitPasswords">Update Password</v-btn>
+      </div>
     </div>
-  </div>
+  </v-layout>
 </template>
 
 <script>
@@ -105,6 +97,15 @@ export default {
 #update{
   width: 70%;
   margin: 1px auto;
+}
+
+#updatePassword {
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  max-width: 800px;
+  margin: 1px auto;
+  align: center;
 }
 
 </style>

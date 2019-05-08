@@ -72,7 +72,10 @@
         </v-layout>
       </v-container>
     </v-card>
-
+      
+    <div v-if="popupshow">
+      <PopupDialog :dialog="popupshow" :text="popuptext" :redirect="false" :route="true" :routeTo="popuprouteTo" />
+    </div>
     <v-alert :value="error" type="error" transition="scale-transition">{{error}}</v-alert>
   </div>
 </template>
@@ -85,11 +88,14 @@ import AppDetails from "@/components/Dialogs/AppDetails.vue";
 import { filter } from "@/services/TextFormat";
 import { apiURL } from "@/const.js";
 import axios from "axios";
+import PopupDialog from '@/components/Dialogs/PopupDialog.vue';
+import { store } from '@/services/request';
 
 Vue.filter("truncate", filter);
 
 export default {
-  components: { Loading, AppDetails },
+  name: "Dashboard",
+  components: { Loading, AppDetails, PopupDialog },
   data() {
     return {
       text: "This Is An Extremely Long Application Title",
@@ -112,8 +118,11 @@ export default {
         LastHealthCheck: new Date(),
         HealthStatuses: {}
       },
-      error: ""
-    };
+      error: "",
+      popupshow: false,
+      popuptext: "",
+      popuprouteTo: "/login",
+    }
   },
   computed: {
     maxTitleLength: function() {
@@ -132,7 +141,12 @@ export default {
       this.launchLoading = true;
 
       signAndLaunch(appId)
-        .catch(e => {
+        .catch(e=> {
+          this.popuprouteTo = "/login";
+          this.popuptext = e.message;
+          this.popupshow = true;
+          localStorage.removeItem('token');
+          store.state.isLogin = false;
           this.error = e.message;
         })
         .finally(() => {
