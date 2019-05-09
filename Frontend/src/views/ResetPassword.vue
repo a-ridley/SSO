@@ -1,6 +1,9 @@
 <template>
-  <div class="reset">
-    <v-alert
+  <v-layout id="reset" xs>
+    <div id="reset">
+      <h1 class="display-1">Password Reset</h1>
+      <v-divider class="my-3"/>
+      <v-alert
       :value="message"
       dismissible
       type="success"
@@ -27,7 +30,6 @@
     One or more of the answers are incorrect
     </v-alert>
 
-    <h1>Reset Password</h1>
     <br />
     <div class="SecurityQuestions" v-if="securityQuestions.length">
       <br/>
@@ -83,7 +85,8 @@
       <v-btn id="submitPassword" color="success" v-on:click="submitNewPassword">Submit New Password</v-btn>
     </div>
     <Loading :dialog="loading" :text="loadingText" />
-  </div>
+    </div>
+  </v-layout>
 </template>
 
 <script>
@@ -208,8 +211,12 @@ export default {
 </script>
 
 <style>
-.reset{
-  width: 70%;
+#reset{
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  max-width: 800px;
   margin: 1px auto;
+  align: center;
 }
 </style>

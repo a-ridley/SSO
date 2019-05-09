@@ -131,8 +131,8 @@
 }
 
 #logo {
-  max-width: 57px;
-  height: 57px;
+  max-width: 50px;
+  height: 50px;
 }
 
 #avatar {

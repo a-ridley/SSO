@@ -1,25 +1,26 @@
 <template>
-  <div class="sendLink">
-    <h1>Reset Password</h1>
-    <br />
-        <v-form>
-        <v-text-field
-            name="email"
-            id="email"
-            v-model="email"
-            type="email"
-            label="Email" 
-            /><br 
-        />
-        <v-alert
-          :value="errorMessage"
-          dismissible=""
-          type="error"
-          transition="scale-transition"
-        >
-        {{errorMessage}}
-        </v-alert>
-        </v-form>
+  <v-layout id="sendLink">
+    <div id="sendLink">
+      <h1 class="display-1">Reset Password</h1>
+      <v-divider class="my-3"/>
+      <v-form>
+      <v-text-field
+          name="email"
+          id="email"
+          v-model="email"
+          type="email"
+          label="Email" 
+          /><br 
+      />
+      <v-alert
+        :value="errorMessage"
+        dismissible=""
+        type="error"
+        transition="scale-transition"
+      >
+      {{errorMessage}}
+      </v-alert>
+      </v-form>
 
       <v-alert
         :value="message"
@@ -31,7 +32,9 @@
       </v-alert>
 
 <v-btn id="sendEmail" color="success" v-on:click="submitEmail">Send Email</v-btn>
-  </div>
+  
+    </div>
+  </v-layout>
 </template>
 
 <script>
@@ -78,8 +81,17 @@ export default {
 </script>
 
 <style>
-.sendLink{
-  width: 70%;
+#sendLink{
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  max-width: 800px;
   margin: 1px auto;
+  align: center;
+}
+
+#sendEmail {
+  margin: 0px;
+  margin-bottom: 15px;
 }
 </style>
