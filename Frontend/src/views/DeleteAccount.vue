@@ -53,26 +53,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog
-      v-model="loading"
-      hide-overlay
-      persistent
-      width="300"
-    >
-      <v-card
-        color="primary"
-        dark
-      >
-        <v-card-text>
-          Deleting
-          <v-progress-linear
-            indeterminate
-            color="white"
-            class="mb-0"
-          ></v-progress-linear>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+    <Loading :dialog="loading" :text="loadingText" />
   </div>
 </template>
 
@@ -80,14 +61,20 @@
 import axios from 'axios'
 import { apiURL } from '@/const.js';
 import { store } from '@/services/request'
+import Loading from '@/components/Dialogs/Loading'
+
 export default {
   name: 'DeleteAccount',
+  components:{
+    Loading,
+  },
   data(){
       return{
           token: "",
           error: "",
           message: "",
           loading: false,
+          loadingText: "",
           dialog: false
       }
   },
@@ -97,6 +84,7 @@ export default {
     },
     runDelete: function () {
         this.loading = true;
+        this.loadingText = "Deleting...";
           axios({
           method: 'DELETE',
           url: `${apiURL}/users/deleteuser`,

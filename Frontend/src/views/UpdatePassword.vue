@@ -39,22 +39,29 @@
         <v-btn id="submit" color="success" v-on:click="submitPasswords">Update Password</v-btn>
       </div>
     </div>
+    <Loading :dialog="loading" :text="loadingText" />
   </v-layout>
 </template>
 
 <script>
 import axios from 'axios';
 import { apiURL } from '@/const.js';
+import Loading from '@/components/Dialogs/Loading';
 
 export default {
   name: 'UpdatePassword',
+  components:{
+    Loading,
+  },
   data () {
     return {
       message: null,
       errorMessage: null,
       oldPassword: null,
       newPassword: null,
-      confirmNewPassword: null
+      confirmNewPassword: null,
+      loading: false,
+      loadingText: "",
     }
   },
   methods: {
@@ -71,6 +78,8 @@ export default {
       } else if (this.oldPassword === this.newPassword){
         this.errorMessage = 'Cannot use the same password to update'
       } else {
+        this.loading = true;
+        this.loadingText = "Updating Password...";
         axios({
           method: 'POST',
           url: `${apiURL}/users/updatepassword`,
@@ -86,6 +95,9 @@ export default {
         })
           .then(response => {this.message = response.data})
           .catch(e => { this.errorMessage = e.response.data })
+          .finally(() => {
+            this.loading = false;
+          })
       }
     }
   }

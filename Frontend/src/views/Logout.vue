@@ -1,25 +1,6 @@
 <template>
   <div>
-     <v-dialog
-      v-model="loading"
-      hide-overlay
-      persistent
-      width="300"
-    >
-      <v-card
-        color="primary"
-        dark
-      >
-        <v-card-text>
-          Logging out...
-          <v-progress-linear
-            indeterminate
-            color="white"
-            class="mb-0"
-          ></v-progress-linear>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+    <Loading :dialog="loading" :text="loadingText" />
     <div v-if="showPopup">
       <PopupDialog :dialog="showPopup" :text="popupMessage" :redirect="false" :route="true" :routeTo="routeTo" />
     </div>
@@ -31,15 +12,18 @@ import axios from "axios"
 import { apiURL } from "@/const.js"
 import { store } from '@/services/request'
 import PopupDialog from '@/components/Dialogs/PopupDialog.vue'
+import Loading from "@/components/Dialogs/Loading.vue";
 
 export default {
   name: "Logout",
   components: {
-    PopupDialog
+    PopupDialog,
+    Loading
   },
   data() {
     return {
       loading: false,
+      loadingText: "",
       showPopup: false,
       popupMessage: '',
       token: "",
@@ -48,6 +32,7 @@ export default {
   },
   created() {
     this.loading = true;
+    this.loadingText = "Logging out...";
     const token = localStorage.getItem("token");
     if(!token){
       this.routeTo = '/login';

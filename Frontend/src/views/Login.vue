@@ -30,34 +30,15 @@
         </v-form>
       </v-flex>
       <v-flex>
+        <v-btn id="loginButton" color="success" v-on:click="login">Login</v-btn>
+      </v-flex>
+      <v-flex>
         <v-btn id="resetButton" color="success" flat small v-on:click="goToResetPassword">Reset Password</v-btn>
       </v-flex>
       <v-flex>
-        <v-btn id="newuserButton" color="primary" flat small v-on:click="goToRegisterPage">New User? Register Here</v-btn>
+        <v-btn id="newuserButton" color="primary" flat small v-on:click="goToRegisterPage">New User? Register Account</v-btn>
       </v-flex>
-      <v-flex>
-        <v-btn id="loginButton" color="success" v-on:click="login">Login</v-btn>
-      </v-flex>
-      <v-dialog
-        v-model="loading"
-        hide-overlay
-        persistent
-        width="300"
-      >
-      <v-card
-        color="primary"
-        dark
-      >
-        <v-card-text>
-          Signing in...
-          <v-progress-linear
-            indeterminate
-            color="white"
-            class="mb-0"
-          ></v-progress-linear>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+      <Loading :dialog="loading" :text="loadingText" />
     </div>
   </v-layout>
 </template>
@@ -66,21 +47,27 @@
     import axios from "axios"
     import { apiURL } from '@/const.js'
     import { store } from '@/services/request'
+    import Loading from '@/components/Dialogs/Loading'
     
     export default {
         name: 'login',
+        components:{
+          Loading,
+        },
         data() {
             return {
                 email: "",
                 password: "",
                 error: "",
-                loading: false
+                loading: false,
+                loadingText: "",
             }
         },
         methods: {
             login() {
                const url = `${apiURL}/users/login`
               this.loading = true;
+              this.loadingText = "Signing in...";
                axios.post(url,
                {
                     email: this.$data.email,
@@ -129,7 +116,8 @@
 }
 
 #loginButton {
-  margin: 0px
+  margin: 0px;
+  margin-bottom: 15px;
 }
 
 #resetButton {

@@ -65,11 +65,9 @@
               </div>
             </v-card>
             <!-- Loads only if app is in progress of launching -->
-            <div v-if="launchLoading">
-              <Loading :dialog="launchLoading" />
-            </div>
           </v-flex>
         </v-layout>
+        <Loading :dialog="launchLoading" :text="loadingText" />
       </v-container>
     </v-card>
       
@@ -111,6 +109,7 @@ export default {
       defaultDescription:
         "No Description. Sirloin short loin tenderloin tri-tip jowl chicken shank ribeye landjaeger, pancetta pork chop. Cupim filet mignon tail porchetta, biltong leberkas turkey flank pork chop frankfurter kevin short loin tenderloin tri-tip shankle. Porchetta boudin shoulder sausage, beef ribs pancetta burgdoggen prosciutto tongue. Sausage kevin strip steak, pork belly pig filet mignon chuck shankle andouille tri-tip ham cow. Pork loin t-bone doner, kevin jowl cupim sausage meatloaf.",
       launchLoading: false,
+      loadingText: "",
       maintenance: false,
       currentPage: 1,
       pageSize: 20,
@@ -139,6 +138,7 @@ export default {
       this.updateClickCount(app);
 
       this.launchLoading = true;
+      this.loadingText= "Launching Application...";
 
       signAndLaunch(appId)
         .catch(e=> {

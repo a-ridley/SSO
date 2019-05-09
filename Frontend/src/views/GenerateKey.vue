@@ -41,26 +41,7 @@
       <br />
       <v-btn id="btnGenerate" color="success" v-if="!key" v-on:click="generate">Generate</v-btn>
       </v-form>
-      <v-dialog
-        v-model="loading"
-        hide-overlay
-        persistent
-        width="300"
-      >
-        <v-card
-          color="primary"
-          dark
-        >
-          <v-card-text>
-            Loading
-            <v-progress-linear
-              indeterminate
-              color="white"
-              class="mb-0"
-            ></v-progress-linear>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
+      <Loading :dialog="loading" :text="loadingText" />
     </div>
   </v-layout>
 </template>
@@ -68,8 +49,12 @@
 <script>
 import axios from 'axios'
 import { apiURL } from '@/const.js'
+import Loading from '@/components/Dialogs/Loading'
 
 export default {
+  components: {
+    Loading
+  },
   data () {
     return {
       message: null,
@@ -77,7 +62,8 @@ export default {
       title: '',
       email: '',
       error: '',
-      loading: false
+      loading: false,
+      loadingText: "",
     }
   },
   methods: {
@@ -92,6 +78,7 @@ export default {
 
       const url = `${apiURL}/applications/generatekey`
       this.loading = true;
+      this.loadingText = "Generating...";
       axios.post(url, {
         title: document.getElementById('title').value,
         email: document.getElementById('email').value,
@@ -124,5 +111,11 @@ export default {
   max-width: 800px;
   margin: 1px auto;
   align: center;
+}
+
+#btnGenerate {
+  margin: 0px;
+  margin-bottom: 15px;
+  padding: 0px;
 }
 </style>
