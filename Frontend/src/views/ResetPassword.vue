@@ -1,6 +1,9 @@
 <template>
-  <div class="reset">
-    <v-alert
+  <v-layout id="reset" xs>
+    <div id="reset">
+      <h1 class="display-1">Password Reset</h1>
+      <v-divider class="my-3"/>
+      <v-alert
       :value="message"
       dismissible
       type="success"
@@ -27,7 +30,6 @@
     One or more of the answers are incorrect
     </v-alert>
 
-    <h1>Reset Password</h1>
     <br />
     <div class="SecurityQuestions" v-if="securityQuestions.length">
       <br/>
@@ -82,15 +84,21 @@
       <br />
       <v-btn id="submitPassword" color="success" v-on:click="submitNewPassword">Submit New Password</v-btn>
     </div>
-  </div>
+    <Loading :dialog="loading" :text="loadingText" />
+    </div>
+  </v-layout>
 </template>
 
 <script>
 import axios from 'axios'
 import { apiURL } from '@/const.js';
+import Loading from '@/components/Dialogs/Loading'
 
 export default {
   name: 'ResetPassword',
+  components:{
+    Loading,
+  },
   data () {
     return {
       resetToken: this.$route.params.id,
@@ -110,10 +118,14 @@ export default {
       networkErrorMessage: null,
       haveNetworkError: false,
       wrongAnswerCounter : 0,
-      wrongAnswerAlert: null
+      wrongAnswerAlert: null,
+      loading: false,
+      loadingText: "",
     }
   },
   created () {
+    this.loading = true;
+    this.loadingText = "Loading...";
     axios({
       method: 'GET',
       url: `${apiURL}/reset/` + this.resetToken,
@@ -124,6 +136,9 @@ export default {
     })
       .then(response => (this.securityQuestions = response.data))
       .catch(e => { this.errorMessage = e.response.data })
+      .finally(() => {
+        this.loading = false;
+      })
   },
   methods: {
     redirectToReset: function () {
@@ -140,6 +155,8 @@ export default {
       if (!this.securityAnswer1 || !this.securityAnswer2 || !this.securityAnswer3){
         this.errorMessage = "Security answers cannot be empty"
       } else {
+        this.loading = true;
+        this.loadingText = "Checking Answers...";
         axios({
         method: 'POST',
         url: `${apiURL}/reset/` + this.resetToken + '/checkanswers',
@@ -152,8 +169,12 @@ export default {
           'Access-Control-Allow-Credentials': true
         }
       })
-        .then(response => (this.showPasswordResetField = response.data))
+        .then(response => (
+          this.showPasswordResetField = response.data))
         .catch(e => { this.errorMessage = e.response.data }, this.wrongAnswerCounter = this.wrongAnswerCounter + 1)
+        .finally(() => {
+          this.loading = false;
+        })
       }
     },
     submitNewPassword: function () {
@@ -167,6 +188,8 @@ export default {
         this.errorMessage = "Passwords do not match"
       } else {
         this.errormessage = null
+        this.loading = true;
+        this.loadingText = "Resetting Password...";
         axios({
         method: 'POST',
         url: `${apiURL}/reset/` + this.resetToken + '/resetpassword',
@@ -178,6 +201,9 @@ export default {
       })
         .then(response => (this.message = response.data))
         .catch(e => { this.errorMessage = e.response.data })
+        .finally(() => {
+          this.loading = false;
+        })
       }
     }
   }
@@ -185,8 +211,12 @@ export default {
 </script>
 
 <style>
-.reset{
-  width: 70%;
+#reset{
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  max-width: 800px;
   margin: 1px auto;
+  align: center;
 }
 </style>

@@ -65,14 +65,15 @@
               </div>
             </v-card>
             <!-- Loads only if app is in progress of launching -->
-            <div v-if="launchLoading">
-              <Loading :dialog="launchLoading" />
-            </div>
           </v-flex>
         </v-layout>
+        <Loading :dialog="launchLoading" :text="loadingText" />
       </v-container>
     </v-card>
-
+      
+    <div v-if="popupshow">
+      <PopupDialog :dialog="popupshow" :text="popuptext" :redirect="false" :route="true" :routeTo="popuprouteTo" />
+    </div>
     <v-alert :value="error" type="error" transition="scale-transition">{{error}}</v-alert>
   </div>
 </template>
@@ -85,11 +86,14 @@ import AppDetails from "@/components/Dialogs/AppDetails.vue";
 import { filter } from "@/services/TextFormat";
 import { apiURL } from "@/const.js";
 import axios from "axios";
+import PopupDialog from '@/components/Dialogs/PopupDialog.vue';
+import { store } from '@/services/request';
 
 Vue.filter("truncate", filter);
 
 export default {
-  components: { Loading, AppDetails },
+  name: "Dashboard",
+  components: { Loading, AppDetails, PopupDialog },
   data() {
     return {
       text: "This Is An Extremely Long Application Title",
@@ -105,6 +109,7 @@ export default {
       defaultDescription:
         "No Description. Sirloin short loin tenderloin tri-tip jowl chicken shank ribeye landjaeger, pancetta pork chop. Cupim filet mignon tail porchetta, biltong leberkas turkey flank pork chop frankfurter kevin short loin tenderloin tri-tip shankle. Porchetta boudin shoulder sausage, beef ribs pancetta burgdoggen prosciutto tongue. Sausage kevin strip steak, pork belly pig filet mignon chuck shankle andouille tri-tip ham cow. Pork loin t-bone doner, kevin jowl cupim sausage meatloaf.",
       launchLoading: false,
+      loadingText: "",
       maintenance: false,
       currentPage: 1,
       pageSize: 20,
@@ -112,8 +117,11 @@ export default {
         LastHealthCheck: new Date(),
         HealthStatuses: {}
       },
-      error: ""
-    };
+      error: "",
+      popupshow: false,
+      popuptext: "",
+      popuprouteTo: "/login",
+    }
   },
   computed: {
     maxTitleLength: function() {
@@ -130,9 +138,15 @@ export default {
       this.updateClickCount(app);
 
       this.launchLoading = true;
+      this.loadingText= "Launching Application...";
 
       signAndLaunch(appId)
-        .catch(e => {
+        .catch(e=> {
+          this.popuprouteTo = "/login";
+          this.popuptext = e.message;
+          this.popupshow = true;
+          localStorage.removeItem('token');
+          store.state.isLogin = false;
           this.error = e.message;
         })
         .finally(() => {
