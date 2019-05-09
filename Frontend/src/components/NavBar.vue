@@ -16,7 +16,6 @@
     <v-toolbar-items class="hidden-sm-and-down" >
       <v-btn v-if="!isLoggedIn.isLogin" to="/home" flat>Home</v-btn>
       <v-btn v-else to="/dashboard" flat>Home</v-btn>
-      <v-btn to="/register" flat v-if="!isLoggedIn.isLogin">Register</v-btn>
       <v-btn to="/about" flat>About</v-btn>
       <v-menu offset-y id="appDropDown">
         <template slot="activator">
@@ -40,7 +39,7 @@
           <v-list-tile v-for="link in expandMenu"
                         :key="link.text"
                         router :to="link.route"
-                        v-if="link.display" >
+                         >
             <v-list-tile-title >{{link.text}}</v-list-tile-title>
           </v-list-tile>
         </v-list>
@@ -83,7 +82,7 @@
         expandMenu: [
           { text: 'Home', route: '/', display: true},
           { text: 'About', route: '/about', display: true},
-          { text: 'Register', route: '/register', display: true},
+          // { text: 'Register', route: '/register', display: true},
           { text: 'App Register', route: '/add', display: true },
           { text: 'App Generate Key', route: '/key', display: true },
           { text: 'App Delete', route: '/delete', display: true },

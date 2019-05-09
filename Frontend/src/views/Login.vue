@@ -33,6 +33,9 @@
         <v-btn id="resetButton" color="success" flat small v-on:click="goToResetPassword">Reset Password</v-btn>
       </v-flex>
       <v-flex>
+        <v-btn id="newuserButton" color="primary" flat small v-on:click="goToRegisterPage">New User? Register Here</v-btn>
+      </v-flex>
+      <v-flex>
         <v-btn id="loginButton" color="success" v-on:click="login">Login</v-btn>
       </v-flex>
       <v-dialog
@@ -106,7 +109,10 @@
             })
         },
         goToResetPassword(){
-            this.$router.push('/sendresetlink')
+            this.$router.push('/sendresetlink');
+        },
+        goToRegisterPage(){
+          this.$router.push('/register');
         }
     }
 }
@@ -127,6 +133,12 @@
 }
 
 #resetButton {
+  margin: 0px;
+  margin-bottom: 15px;
+  padding: 0px;
+}
+
+#newuserButton {
   margin: 0px;
   margin-bottom: 15px;
   padding: 0px;
