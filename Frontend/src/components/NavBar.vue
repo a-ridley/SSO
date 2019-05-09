@@ -82,7 +82,6 @@
         expandMenu: [
           { text: 'Home', route: '/', display: true},
           { text: 'About', route: '/about', display: true},
-          // { text: 'Register', route: '/register', display: true},
           { text: 'App Register', route: '/add', display: true },
           { text: 'App Generate Key', route: '/key', display: true },
           { text: 'App Delete', route: '/delete', display: true },
