@@ -83,6 +83,7 @@
       <br />
       <v-btn id="submitPassword" color="success" v-on:click="submitNewPassword">Submit New Password</v-btn>
     </div>
+    <PopupDialog :dialog="popup" :text="popupText" :redirect="false" :route="true" :routeTo="popuprouteTo" />
     <Loading :dialog="loading" :text="loadingText" />
     </div>
   </v-layout>
@@ -91,12 +92,14 @@
 <script>
 import axios from 'axios'
 import { apiURL } from '@/const.js';
-import Loading from '@/components/Dialogs/Loading'
+import Loading from '@/components/Dialogs/Loading';
+import PopupDialog from '@/components/Dialogs/PopupDialog';
 
 export default {
   name: 'ResetPassword',
   components:{
     Loading,
+    PopupDialog
   },
   data () {
     return {
@@ -120,6 +123,9 @@ export default {
       wrongAnswerAlert: null,
       loading: false,
       loadingText: "",
+      popup: false,
+      popupText: "Password has been reset.",
+      popuprouteTo: "/login"
     }
   },
   created () {
@@ -198,7 +204,10 @@ export default {
           'Access-Control-Allow-Credentials': true
         }
       })
-        .then(response => (this.message = response.data))
+        .then(response => {
+          this.popup = true;
+          this.popupText = response.data;
+        })
         .catch(e => { this.errorMessage = e.response.data })
         .finally(() => {
           this.loading = false;
