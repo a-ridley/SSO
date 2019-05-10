@@ -83,7 +83,9 @@
       <br />
       <v-btn id="submitPassword" color="success" v-on:click="submitNewPassword">Submit New Password</v-btn>
     </div>
-    <PopupDialog :dialog="popup" :text="popupText" :redirect="false" :route="true" :routeTo="popuprouteTo" />
+    <div v-if="popup">
+      <PopupDialog :dialog="popup" :text="popupText" :redirect="false" :route="true" :routeTo="popuprouteTo" />
+    </div>
     <Loading :dialog="loading" :text="loadingText" />
     </div>
   </v-layout>
@@ -206,7 +208,7 @@ export default {
       })
         .then(response => {
           this.popup = true;
-          this.popupText = response.data;
+          this.popupText = "Password has been reset.";
         })
         .catch(e => { this.errorMessage = e.response.data })
         .finally(() => {
