@@ -126,41 +126,27 @@
         <v-btn id="registerButton" color="success" v-on:click="submit">Register</v-btn>
 
       </v-form>
-      <v-dialog
-        v-model="loading"
-        hide-overlay
-        persistent
-        width="300"
-      >
-        <v-card
-          color="primary"
-          dark
-        >
-          <v-card-text>
-            Loading
-            <v-progress-linear
-              indeterminate
-              color="white"
-              class="mb-0"
-            ></v-progress-linear>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
+      <Loading :dialog="loading" :text="loadingText" />
     </div>
   </v-layout>
 </template>
 
 <script>
 import { register } from '@/services/request';
-import { store } from '@/services/request'
+import { store } from '@/services/request';
+import Loading from '@/components/Dialogs/Loading';
 
 export default {
   name: 'Register',
+  components:{
+    Loading,
+  },
   data: () => {
     return {
       menu: false,
       error: "",
       loading: false,
+      loadingText: "",
 
       email: '',
       password: '',
@@ -203,6 +189,7 @@ export default {
       if (this.error) return;
 
       this.loading = true;
+      this.loadingText = "Registering...";
       register({
         email: this.email,
         password: this.password,

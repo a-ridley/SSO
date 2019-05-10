@@ -31,8 +31,8 @@
       {{message}}
       </v-alert>
 
-<v-btn id="sendEmail" color="success" v-on:click="submitEmail">Send Email</v-btn>
-  
+      <v-btn id="sendEmail" color="success" v-on:click="submitEmail">Send Email</v-btn>
+      <Loading :dialog="loading" :text="loadingText" />
     </div>
   </v-layout>
 </template>
@@ -40,14 +40,20 @@
 <script>
 import axios from 'axios';
 import { apiURL } from '@/const.js';
+import Loading from '@/components/Dialogs/Loading';
 
 export default {
   name: 'SendResetLink',
+  components: {
+    Loading
+  },
   data () {
     return {
       errorMessage: "",
       message: "",
-      email: ""
+      email: "",
+      loading: false,
+      loadingText: "",
     }
   },
   methods: {
@@ -57,6 +63,8 @@ export default {
       } else if (!this.validEmail(this.email)) {
         this.errorMessage = 'Valid email required'
       } else {
+        this.loading = true;
+        this.loadingText = "Sending Email...";
         axios({
           method: 'POST',
           url: `${apiURL}/reset/send`,
@@ -69,6 +77,9 @@ export default {
           .then(response => {this.message = response.data}, this.errorMessage = '', 
           setTimeout(() => this.redirectToLogin(), 3000))
           .catch(e => { this.errorMessage = e.responsed.data })
+          .finally(() => {
+            this.loading = false;
+          })
       }
     },
     validEmail: function (email) {
