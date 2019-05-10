@@ -30,9 +30,7 @@
     One or more of the answers are incorrect
     </v-alert>
 
-    <br />
     <div class="SecurityQuestions" v-if="securityQuestions.length">
-      <br/>
       <div v-for="(securityQuestion, index) in securityQuestions" :key="index">
         {{securityQuestion}}
       </div>
@@ -62,24 +60,25 @@
       <br />
       <v-btn id="submitAnswers" color="success" v-on:click="submitAnswers">Submit Answers</v-btn>
     </div>
-
+    
+    <br/>
     <br/>
 
     <div id="NewPassword" v-if="showPasswordResetField">
-      Enter a new password into the field
+      <h2 class="subheading">Enter a new password into the field</h2>
       <br/>
       <v-text-field
             name="Password"
             id="Password"
             v-model="newPassword"
-            type="text"
+            type="password"
             label="New Password"/>
       <br />
       <v-text-field
             name="ConfirmPassword"
             id="ConfirmPassword"
             v-model="confirmNewPassword"
-            type="text"
+            type="password"
             label="Cofirm New Password"/>
       <br />
       <v-btn id="submitPassword" color="success" v-on:click="submitNewPassword">Submit New Password</v-btn>
@@ -218,5 +217,13 @@ export default {
   max-width: 800px;
   margin: 1px auto;
   align: center;
+}
+
+#submitAnswers {
+  margin: 0px
+}
+
+#submitPassword {
+  margin: 0px
 }
 </style>
