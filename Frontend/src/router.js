@@ -37,6 +37,11 @@ let router = new VueRouter({
       component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
     },
     {
+      path: '/legal',
+      name: 'legal',
+      component: () => import(/* webpackChunkName: "about" */ './views/Legal.vue')
+    },
+    {
       path: '/register',
       name: 'register',
       component: () => import(/* webpackChunkName: "about" */ './views/Register.vue')
