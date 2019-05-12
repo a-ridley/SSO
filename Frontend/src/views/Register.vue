@@ -115,6 +115,10 @@
           v-model="securityQ3Answer"
           label="Security Answer 3" /><br />
 
+        <v-flex>
+          <v-btn color="primary" flat small v-on:click="goToLegalPage">By registering, you're agreeing to our terms of service</v-btn>
+        </v-flex>
+
         <v-alert
           :value="error"
           type="error"
@@ -236,7 +240,10 @@ export default {
       }).finally(() => {
         this.loading = false;
       })
-    }
+    },
+    goToLegalPage(){
+      this.$router.push('/legal');
+    },
   }
 }
 </script>
