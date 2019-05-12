@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace DataAccessLayer.Repositories
 {
-    public class ApplicationRepository: IApplicationRepository
+    public class ApplicationRepository : IApplicationRepository
     {
         DatabaseContext _db;
 
@@ -66,7 +66,7 @@ namespace DataAccessLayer.Repositories
         /// <param name="pageSize">The number of applications to display</param>
         /// <param name="totalPages">The total number of pages to display</param>
         /// <returns>A collection of paginated applications along with the total number of pages</returns>
-        public IEnumerable GetPaginatedApplications(int currentPage, int pageSize, out int totalPages)
+        public IEnumerable GetPaginatedApplications(int currentPage, int pageSize, string sortOrder, out int totalPages)
         {
             // Calculates the row index of where to start the query from.
             // This will enable us to start at a certain row based on what page the user is on.
@@ -74,95 +74,67 @@ namespace DataAccessLayer.Repositories
             var startingIndex = pageSize * (currentPage - 1);
 
             // Perform a query to get all applications from the database
-            var applications = _db.Applications
-                // Order the query by the application id
-                .OrderBy(app => app.Id)
-                .Select(app => new
-                {
-                    app.Id,
-                    app.Title,
-                    app.Description,
-                    app.Email,
-                    app.LogoUrl,
-                    app.LaunchUrl,
-                    app.UnderMaintenance,
-                    app.ClickCount
-                }).ToList();
+            var applications = _db.Applications.Select(app => new
+            {
+                app.Id,
+                app.Title,
+                app.Description,
+                app.Email,
+                app.LogoUrl,
+                app.LaunchUrl,
+                app.UnderMaintenance,
+                app.ClickCount
+            });
+
+            // Sort order cannot be enull or the switch statement breaks
+            if (sortOrder == null)
+            {
+                sortOrder = "id";
+            }
+
+            // Order the query based on the sort order parameter
+            switch (sortOrder.ToLower())
+            {
+                // Order alphabetically in ascending order
+                case "ascending":
+                case "a":
+                    applications = applications.OrderBy(app => app.Title);
+                    break;
+                // Order alphabetically in descending order
+                case "descending":
+                case "d":
+                    applications = applications.OrderByDescending(app => app.Title);
+                    break;
+                // Order by number of application clicks
+                case "count":
+                case "c":
+                case "popularity":
+                case "p":
+                    applications = applications.OrderByDescending(app => app.ClickCount);
+                    break;
+                // Order by application id
+                default:
+                    applications = applications.OrderBy(app => app.Id);
+                    break;
+            }
 
             // Get the total number of rows from the Application table
             int totalApplicationCount = applications.Count();
             // Calculates total number of pages for the pagination
-            totalPages = (int) Math.Ceiling((double) totalApplicationCount / pageSize);
+            totalPages = (int)Math.Ceiling((double)totalApplicationCount / pageSize);
 
+            // Paginated the query based on starting index and page size
             // Starting from the starting index row, take the amount of 
             // applications that the user wants to display
-            return applications.Skip(startingIndex).Take(pageSize);
-        }
+            applications = applications.Skip(startingIndex).Take(pageSize);
 
-        public IEnumerable SortAllApplicationsAlphaAscending()
-        {
-            try
+            // This is an error as the currentPage should not exceed the max number of pages
+            if (currentPage > totalPages)
             {
-                return _db.Applications.OrderBy(app => app.Title).Select(app => new
-                {
-                    Id = app.Id,
-                    LaunchUrl = app.LaunchUrl,
-                    Title = app.Title,
-                    Email = app.Email,
-                    LogoUrl = app.LogoUrl,
-                    Description = app.Description,
-                    UnderMaintenance = app.UnderMaintenance,
-                    ClickCount = app.ClickCount
-                }).ToList();
+                totalPages = 0;
             }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
 
-        public IEnumerable SortAllApplicationsAlphaDescending()
-        {
-            try
-            {
-                return _db.Applications.OrderByDescending(app => app.Title).Select(app => new
-                {
-                    Id = app.Id,
-                    LaunchUrl = app.LaunchUrl,
-                    Title = app.Title,
-                    Email = app.Email,
-                    LogoUrl = app.LogoUrl,
-                    Description = app.Description,
-                    UnderMaintenance = app.UnderMaintenance,
-                    ClickCount = app.ClickCount
-                }).ToList();
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        public IEnumerable SortAllApplicationsNumOfClicks()
-        {
-            try
-            {
-                return _db.Applications.OrderByDescending(app => app.ClickCount).Select(app => new
-                {
-                    Id = app.Id,
-                    LaunchUrl = app.LaunchUrl,
-                    Title = app.Title,
-                    Email = app.Email,
-                    LogoUrl = app.LogoUrl,
-                    Description = app.Description,
-                    UnderMaintenance = app.UnderMaintenance,
-                    ClickCount = app.ClickCount
-                }).ToList();
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            return applications.ToList();
         }
 
         public List<Application> GetAllApplicationsList()
