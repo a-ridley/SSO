@@ -119,12 +119,16 @@ namespace ManagerLayer
             //iterate through each application to check health, if any app is down, do not run delete process
             foreach(Application app in applications)
             {
-                var httpresponse = await _applicationService.GetApplicationHealth(app.HealthCheckUrl);
-                if (!httpresponse.IsSuccessStatusCode)
+                if (app.Title != "Broadway Builder")
                 {
-                    throw new FailHealthCheckException("Failed to delete, an application is down");
+                    var httpresponse = await _applicationService.GetApplicationHealth(app.HealthCheckUrl);
+                    if (!httpresponse.IsSuccessStatusCode)
+                    {
+                        throw new FailHealthCheckException("Failed to delete, an application is down");
+                    }
                 }
             }
+            var responses = "";
             foreach (Application app in applications)
             {
                 var deletePayload = new Dictionary<string, string>();
@@ -135,6 +139,8 @@ namespace ManagerLayer
                 deletePayload.Add("signature", signature);
                 var request = await uds.SendDeleteRequest(app.UserDeletionUrl,deletePayload);
                 responseList.Add(request);
+                var message = await request.Content.ReadAsStringAsync();
+                responses = responses + "(" + app.Title + ": " + request.StatusCode.ToString() + ", " + message + ") ";
             }
             if (responseList.All(response => response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound))
             {
@@ -152,7 +158,7 @@ namespace ManagerLayer
                 }
                 return deletedUser; // delete successful 
             }
-            throw new FailedDeleteException("Some applications failed to delete"); // some application(s) sent back a non 200 or 404 reponse
+            throw new FailedDeleteException("Some applications failed to delete." + responses); // some application(s) sent back a non 200 or 404 reponse
         }
     }
 }
