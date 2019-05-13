@@ -32,9 +32,9 @@ namespace ManagerLayer.Logout
 
         }
         IApplicationService _applicationService;
-        public async Task<Session> SendLogoutRequest(string token)
+        public void SendLogoutRequest(string token)
         {
-            var responseList = new List<HttpResponseMessage>();
+            
             var applist = _applicationService.GetAllApplicationsList();
             Session session = sessionServ.GetSession(token);
             User user = userService.GetUser(session.UserId);
@@ -57,17 +57,10 @@ namespace ManagerLayer.Logout
                 //This converts payload to JSON and sends it to each application logout URL.
                 var stringPayload = JsonConvert.SerializeObject(logoutPayload);
                 var jsonPayload = new StringContent(stringPayload, Encoding.UTF8, "application/json");
-                var request = await logoutServ.LogoutRequest(app.LogoutUrl, logoutPayload);
-                responseList.Add(request);
+                logoutServ.LogoutRequest(app.LogoutUrl, logoutPayload);
+                
             }
-            if (responseList.All(response => response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound))
-            {
-                return session;
-            }
-            else
-            {
-                return null;
-            }
+            
         }
 
     }
