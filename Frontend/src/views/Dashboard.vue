@@ -90,6 +90,8 @@
             </div>
           </v-flex>
         </v-layout>
+        <!-- Loads only if app is in progress of launching -->
+        <Loading :dialog="launchLoading" :text="loadingText" />
       </v-container>
 
       <!-- Shows additional functionality for the user -->
@@ -111,9 +113,11 @@
         </v-layout>
       </v-container>
     </v-card>
-
-    <!-- Shows a popup if there is an error -->
-    <v-alert :value=" error" type="error" transition="scale-transition">{{ error }}</v-alert>
+      
+    <div v-if="popupshow">
+      <PopupDialog :dialog="popupshow" :text="popuptext" :redirect="false" :route="true" :routeTo="popuprouteTo" />
+    </div>
+    <v-alert :value="error" type="error" transition="scale-transition">{{error}}</v-alert>
   </div>
 </template>
 
@@ -122,14 +126,17 @@ import Vue from "vue";
 import axios from "axios";
 import Loading from "@/components/Dialogs/Loading.vue";
 import AppDetails from "@/components/Dialogs/AppDetails.vue";
+import PopupDialog from '@/components/Dialogs/PopupDialog.vue';
 import { signAndLaunch } from "@/services/oauth";
 import { filter } from "@/services/TextFormat";
 import { apiURL } from "@/const.js";
+import { store } from '@/services/request';
 
 Vue.filter("truncate", filter);
 
 export default {
-  components: { Loading, AppDetails },
+  name: "Dashboard",
+  components: { Loading, AppDetails, PopupDialog },
   data() {
     return {
       // Main attributes of the page
@@ -137,8 +144,12 @@ export default {
       applications: [],
       appLoading: true,
       launchLoading: false,
+      loadingText: "",
       maintenance: false,
       error: "",
+      popupshow: false,
+      popuptext: "",
+      popuprouteTo: "/login",
 
       // Everything involving text goes here
       text: {
@@ -166,8 +177,9 @@ export default {
         LastHealthCheck: new Date(),
         HealthStatuses: {},
         interval: 11
-      }
-    };
+      },
+
+    }
   },
   computed: {
     maxTitleLength: function() {
@@ -196,11 +208,17 @@ export default {
       // Updates click count when launching app
       this.updateClickCount(app);
       this.launchLoading = true;
+      this.loadingText= "Launching Application...";
 
       // Using the appId, launches the app when click
       signAndLaunch(appId)
-        .catch(error => {
-          this.error = error.message;
+        .catch(e=> {
+          this.popuprouteTo = "/login";
+          this.popuptext = e.message;
+          this.popupshow = true;
+          localStorage.removeItem('token');
+          store.state.isLogin = false;
+          this.error = e.message;
         })
         // Regardless of passing or failing, cancel launch loading animation
         .finally(() => {

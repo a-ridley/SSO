@@ -2,7 +2,7 @@
   <v-dialog v-model="dialog" hide-overlay persistent width="300">
     <v-card color="primary" dark>
       <v-card-text>
-        Launching application... Please stand by!
+        {{text}}
         <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
       </v-card-text>
     </v-card>
@@ -12,7 +12,7 @@
 <script>
 export default {
   name: "Loading",
-  props: ["dialog"],
+  props: ["dialog", "text"],
   watch: {
     dialog(val) {
       if (val) setTimeout(() => this.$emit("stopLoading", false), 1000);

@@ -37,6 +37,11 @@ let router = new VueRouter({
       component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
     },
     {
+      path: '/legal',
+      name: 'legal',
+      component: () => import(/* webpackChunkName: "about" */ './views/Legal.vue')
+    },
+    {
       path: '/register',
       name: 'register',
       component: () => import(/* webpackChunkName: "about" */ './views/Register.vue')
@@ -109,7 +114,7 @@ let router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  if(to.fullPath === '/dashboard' && from.fullPath !== '/login'){
+  if((to.fullPath === '/dashboard' || to.fullPath === '/home') && from.fullPath !== '/login'){
     if(!localStorage.getItem('token')){
       next('/login');
     }

@@ -1,166 +1,156 @@
 <template>
-  <div class="register-wrapper">
-    <h1>Register</h1>
+  <v-layout id="register">
+    <div id="register">
+      <h1 class="display-1">Register</h1>
+      <v-divider class="my-3"/>
+      <v-form>
+        Credentials:
+        <br />
+        <v-text-field
+          name="email"
+          id="email"
+          v-model="email"
+          type="email"
+          label="Email" /><br />
+        <v-text-field
+          name="password"
+          id="password"
+          type="password"
+          v-model="password"
+          label="Password" /><br />
+        <v-text-field
+          name="confirm"
+          id="confirm"
+          type="password"
+          v-model="confirmPassword"
+          label="Confirm Password" /><br />
 
-    <br />
-    <v-form>
-      Credentials:<br />
-      <v-text-field
-        name="email"
-        id="email"
-        v-model="email"
-        type="email"
-        label="Email" /><br />
-      <v-text-field
-        name="password"
-        id="password"
-        type="password"
-        v-model="password"
-        label="Password" /><br />
-      <v-text-field
-        name="confirm"
-        id="confirm"
-        type="password"
-        v-model="confirmPassword"
-        label="Confirm Password" /><br />
-
-      <br /><br />
-      Personal Details:<br />
-      <v-menu
-        ref="menu"
-        v-model="menu"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        lazy
-        transition="scale-transition"
-        offset-y
-        full-width
-        min-width="290px"
-      >
-        <template v-slot:activator="{ on }">
-          <v-text-field
+        <br /><br />
+        Personal Details:<br />
+        <v-menu
+          ref="menu"
+          v-model="menu"
+          :close-on-content-click="false"
+          :nudge-right="40"
+          lazy
+          transition="scale-transition"
+          offset-y
+          full-width
+          min-width="290px"
+        >
+          <template v-slot:activator="{ on }">
+            <v-text-field
+              v-model="dob"
+              label="Date of Birth"
+              prepend-icon="event"
+              readonly
+              v-on="on"
+              id="dob"
+            ></v-text-field>
+          </template>
+          <v-date-picker
+            ref="picker"
             v-model="dob"
-            label="Date of Birth"
-            prepend-icon="event"
-            readonly
-            v-on="on"
-            id="dob"
-          ></v-text-field>
-        </template>
-        <v-date-picker
-          ref="picker"
-          v-model="dob"
-          :max="new Date().toISOString().substr(0, 10)"
-          min="1900-01-01"
-          @change="updateDate"
-        ></v-date-picker>
-      </v-menu>
+            :max="new Date().toISOString().substr(0, 10)"
+            min="1900-01-01"
+            @change="updateDate"
+          ></v-date-picker>
+        </v-menu>
 
-      <v-text-field
-        name="city"
-        id="city"
-        v-model="city"
-        label="City" /><br />
-      <v-text-field
-        name="state"
-        id="state"
-        v-model="state"
-        label="State" /><br />
-      <v-text-field
-        name="country"
-        id="country"
-        v-model="country"
-        label="Country" /><br />
+        <v-text-field
+          name="city"
+          id="city"
+          v-model="city"
+          label="City" /><br />
+        <v-text-field
+          name="state"
+          id="state"
+          v-model="state"
+          label="State" /><br />
+        <v-text-field
+          name="country"
+          id="country"
+          v-model="country"
+          label="Country" /><br />
 
-      <br /><br />
-      Security Questions:<br />
-      <v-select
-        :items="securityQuestions1"
-        v-model="securityQ1"
-        label="Security Question 1"
-        id="securityq1"
-      ></v-select><br />
-      <v-text-field
-        name="securitya1"
-        id="securitya1"
-        v-model="securityQ1Answer"
-        label="Security Answer 1" /><br />
+        <br /><br />
+        Security Questions:<br />
+        <v-select
+          :items="securityQuestions1"
+          v-model="securityQ1"
+          label="Security Question 1"
+          id="securityq1"
+        ></v-select>
+        <br />
+        <v-text-field
+          name="securitya1"
+          id="securitya1"
+          v-model="securityQ1Answer"
+          label="Security Answer 1" />
+        <br />
+        <br />
+        <v-select
+          :items="securityQuestions2"
+          v-model="securityQ2"
+          label="Security Question 2"
+          id="securityq2"
+        ></v-select><br />
+        <v-text-field
+          name="securitya2"
+          id="securitya2"
+          v-model="securityQ2Answer"
+          label="Security Answer 2" /><br />
 
-      <br />
+        <br />
 
-      <v-select
-        :items="securityQuestions2"
-        v-model="securityQ2"
-        label="Security Question 2"
-        id="securityq2"
-      ></v-select><br />
-      <v-text-field
-        name="securitya2"
-        id="securitya2"
-        v-model="securityQ2Answer"
-        label="Security Answer 2" /><br />
+        <v-select
+          :items="securityQuestions3"
+          v-model="securityQ3"
+          label="Security Question 3"
+          id="securityq3"
+        ></v-select><br />
+        <v-text-field
+          name="securitya3"
+          id="securitya3"
+          v-model="securityQ3Answer"
+          label="Security Answer 3" /><br />
 
-      <br />
+        <v-flex>
+          <v-btn id="legalButton" color="primary" flat small v-on:click="goToLegalPage">By registering, you're agreeing to our terms of service</v-btn>
+        </v-flex>
 
-      <v-select
-        :items="securityQuestions3"
-        v-model="securityQ3"
-        label="Security Question 3"
-        id="securityq3"
-      ></v-select><br />
-      <v-text-field
-        name="securitya3"
-        id="securitya3"
-        v-model="securityQ3Answer"
-        label="Security Answer 3" /><br />
+        <v-alert
+          :value="error"
+          type="error"
+          transition="scale-transition"
+        >
+          {{error}}
+        </v-alert>
+        <br />
+        <v-btn id="registerButton" color="success" v-on:click="submit">Register</v-btn>
 
-      <v-alert
-        :value="error"
-        type="error"
-        transition="scale-transition"
-      >
-        {{error}}
-      </v-alert>
-
-      <br />
-
-      <v-btn color="success" v-on:click="submit">Register</v-btn>
-
-    </v-form>
-    <v-dialog
-      v-model="loading"
-      hide-overlay
-      persistent
-      width="300"
-    >
-      <v-card
-        color="primary"
-        dark
-      >
-        <v-card-text>
-          Loading
-          <v-progress-linear
-            indeterminate
-            color="white"
-            class="mb-0"
-          ></v-progress-linear>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
-  </div>
+      </v-form>
+      <Loading :dialog="loading" :text="loadingText" />
+    </div>
+  </v-layout>
 </template>
 
 <script>
 import { register } from '@/services/request';
-import { store } from '@/services/request'
+import { store } from '@/services/request';
+import Loading from '@/components/Dialogs/Loading';
 
 export default {
   name: 'Register',
+  components:{
+    Loading,
+  },
   data: () => {
     return {
       menu: false,
       error: "",
       loading: false,
+      loadingText: "",
 
       email: '',
       password: '',
@@ -203,6 +193,7 @@ export default {
       if (this.error) return;
 
       this.loading = true;
+      this.loadingText = "Registering...";
       register({
         email: this.email,
         password: this.password,
@@ -249,14 +240,30 @@ export default {
       }).finally(() => {
         this.loading = false;
       })
-    }
+    },
+    goToLegalPage(){
+      this.$router.push('/legal');
+    },
   }
 }
 </script>
 
 <style scoped>
-.register-wrapper {
-    width: 70%;
-    margin: 1px auto;
+#register {
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  max-width: 800px;
+  margin: 1px auto;
+  align: center;
+}
+
+#registerButton {
+  margin: 0px
+}
+
+#legalButton {
+  margin: 0px;
+  padding: 3px;
 }
 </style>

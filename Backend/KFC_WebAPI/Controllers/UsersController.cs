@@ -101,14 +101,16 @@ namespace KFC_WebAPI.Controllers
             Session session = new Session();
             User user;
             string email;
-
             try
             {
                 using (var _db = new DatabaseContext())
                 {
                     SessionService ss = new SessionService(_db);
                     session = ss.GetSession(token);
-                    Console.WriteLine(session);
+                    if (session == null)
+                    {
+                        return "";
+                    }
                 }
 
                 var id = session.UserId;
@@ -292,27 +294,20 @@ namespace KFC_WebAPI.Controllers
             {
                 SessionService serv = new SessionService(_db);
                 IAuthorizationManager authorizationManager = new AuthorizationManager(_db);
-
-
-
                 try
                 {
                     var response = authorizationManager.DeleteSession(request.token);
                     _db.SaveChanges();
-
-                    if (response != null)
-                    {
-
-                        return Ok("User has logged out");
-                    }
-
+                    return Ok("User has logged out");
                 }
                 catch (DbUpdateException)
                 {
                     return Content(HttpStatusCode.InternalServerError, "There was an error on the server and the request could not be completed");
                 }
-                return Content(HttpStatusCode.ExpectationFailed, "Session has not been found.");
-
+                catch (Exception)
+                {
+                    return Content(HttpStatusCode.ExpectationFailed, "Session has not been found.");
+                }
             }
 
         }

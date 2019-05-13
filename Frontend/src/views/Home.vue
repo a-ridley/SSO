@@ -7,7 +7,16 @@
 
 <script>
 export default {
-  name: 'Home'
+  name: 'Home',
+  created() {
+    const token = localStorage.getItem("token");
+    if(!token){
+      this.$router.push('/login');
+    }
+    else{
+      this.$router.push('/dashboard');
+    }
+  },
 }
 </script>
 
