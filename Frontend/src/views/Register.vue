@@ -116,7 +116,7 @@
           label="Security Answer 3" /><br />
 
         <v-flex>
-          <v-btn color="primary" flat small v-on:click="goToLegalPage">By registering, you're agreeing to our terms of service</v-btn>
+          <v-btn id="legalButton" color="primary" flat small v-on:click="goToLegalPage">By registering, you're agreeing to our terms of service</v-btn>
         </v-flex>
 
         <v-alert
@@ -260,5 +260,10 @@ export default {
 
 #registerButton {
   margin: 0px
+}
+
+#legalButton {
+  margin: 0px;
+  padding: 3px;
 }
 </style>
