@@ -294,6 +294,26 @@ namespace KFC_WebAPI.Controllers
             {
                 SessionService serv = new SessionService(_db);
                 IAuthorizationManager authorizationManager = new AuthorizationManager(_db);
+                Session session = authorizationManager.ValidateAndUpdateSession(request.token);
+                if (session == null)
+                {
+                    return Content(HttpStatusCode.Unauthorized, "Session not valid!");
+                }
+                try
+                {
+                    var appresponse = logoutManager.SendLogoutRequest(request.token);
+                    if (appresponse == null)
+                    {
+                        return Content(HttpStatusCode.BadRequest, "Service is not available");
+
+                    }
+
+                }
+                catch
+                {
+                    return Content(HttpStatusCode.InternalServerError, "There was an error on the server and the request could not be completed.");
+                }
+
                 try
                 {
                     var response = authorizationManager.DeleteSession(request.token);
