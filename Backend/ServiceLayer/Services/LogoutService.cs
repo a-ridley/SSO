@@ -18,14 +18,15 @@ namespace ServiceLayer.Services
 
     public class LogoutService
     {
-        public async Task<HttpResponseMessage> LogoutRequest(string logoutUrl, Dictionary<string, string> payload)
+        public async void LogoutRequest(string logoutUrl, Dictionary<string, string> payload)
         {
             HttpClient client = new HttpClient();
 
+            //This converts payload to JSON and sends the request   
             var stringPayload = JsonConvert.SerializeObject(payload);
             var jsonPayload = new StringContent(stringPayload, Encoding.UTF8, "application/json");
             var request = await client.PostAsync(logoutUrl, jsonPayload);
-            return request;
+            
         }
 
     }

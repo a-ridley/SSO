@@ -54,9 +54,7 @@ namespace ManagerLayer.Logout
                 var signature = signatureService.Sign(app.SharedSecretKey, logoutPayload);
                 logoutPayload.Add("signature", signature);
 
-                //This converts payload to JSON and sends it to each application logout URL.
-                var stringPayload = JsonConvert.SerializeObject(logoutPayload);
-                var jsonPayload = new StringContent(stringPayload, Encoding.UTF8, "application/json");
+                //sends it to each application logout URL
                 logoutServ.LogoutRequest(app.LogoutUrl, logoutPayload);
                 
             }
