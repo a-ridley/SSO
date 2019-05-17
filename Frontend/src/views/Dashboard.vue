@@ -84,15 +84,13 @@
                 </div>
               </v-card>
             </div>
-            <!-- shows loading screen only if app is in progress of launching -->
-            <div v-if="launchLoading">
-              <Loading :dialog="launchLoading" />
-            </div>
           </v-flex>
         </v-layout>
-        <!-- Loads only if app is in progress of launching -->
-        <Loading :dialog="launchLoading" :text="loadingText" />
       </v-container>
+      <!-- shows loading screen only if app is in progress of launching -->
+      <div v-if="launchLoading">
+        <Loading :dialog="launchLoading" />
+      </div>
 
       <!-- Shows additional functionality for the user -->
       <v-container grid-list-sm text-xs-center>
@@ -114,6 +112,8 @@
       </v-container>
     </v-card>
       
+    <!-- Loads only if app is in progress of launching -->
+    <Loading :dialog="launchLoading" :text="loadingText" />
     <div v-if="popupshow">
       <PopupDialog :dialog="popupshow" :text="popuptext" :redirect="false" :route="true" :routeTo="popuprouteTo" />
     </div>
@@ -165,7 +165,7 @@ export default {
       // Everything involving pagination goes here
       pagination: {
         currentPage: 1,
-        pageSize: 2,
+        pageSize: 8,
         sortOrder: "",
         startingIndex: 1,
         totalPages: 1,

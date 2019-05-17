@@ -55,7 +55,7 @@ namespace KFC_WebAPI.Controllers
                         var response = _applicationService.GetApplicationHealth(app.HealthCheckUrl);
 
                         // If the status is not a 200 success, then the the app is down (true)
-                        _appHealthStatus.HealthStatuses[app.Id] = response.Result.IsSuccessStatusCode;
+                        _appHealthStatus.HealthStatuses[app.Id] = !response.Result.IsSuccessStatusCode;
 
                         // Achieving parallelism by not awaiting each http request
                         taskList.Add(response);
