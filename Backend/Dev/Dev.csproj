@@ -58,21 +58,21 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DataAccessLayer\DataAccessLayer.csproj">
-      <Project>{E5F0FE7C-FD4F-4A94-B425-3F9FE7B3F2D3}</Project>
-      <Name>DataAccessLayer</Name>
+    <ProjectReference Include="..\DataAccessLayer\03 - DataAccessLayer.csproj">
+      <Project>{F4772F25-0116-413B-BC7F-43EFF8A04F2E}</Project>
+      <Name>03 - DataAccessLayer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ManagerLayer\ManagerLayer.csproj">
+    <ProjectReference Include="..\ManagerLayer\01 - ManagerLayer.csproj">
       <Project>{DD7C51A6-44CD-4A05-9809-1171FE66F434}</Project>
-      <Name>ManagerLayer</Name>
+      <Name>01 - ManagerLayer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ServiceLayer\ServiceLayer.csproj">
+    <ProjectReference Include="..\ServiceLayer\02 - ServiceLayer.csproj">
       <Project>{41ade765-973a-4155-b3d6-2c24648cbc7a}</Project>
-      <Name>ServiceLayer</Name>
+      <Name>02 - ServiceLayer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\UnitTesting\UnitTesting.csproj">
+    <ProjectReference Include="..\UnitTesting\99 - UnitTesting.csproj">
       <Project>{69f3e1d0-dad5-4078-b839-97c80ce94a65}</Project>
-      <Name>UnitTesting</Name>
+      <Name>99 - UnitTesting</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

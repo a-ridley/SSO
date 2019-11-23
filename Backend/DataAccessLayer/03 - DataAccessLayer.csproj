@@ -138,6 +138,7 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Install.md" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

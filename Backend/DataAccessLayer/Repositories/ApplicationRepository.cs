@@ -75,7 +75,7 @@ namespace DataAccessLayer.Repositories
                     ClickCount = app.ClickCount
                 }).ToList();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return null;
             }

@@ -128,17 +128,17 @@
     <Folder Include="App_Data\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DataAccessLayer\DataAccessLayer.csproj">
+    <ProjectReference Include="..\DataAccessLayer\03 - DataAccessLayer.csproj">
       <Project>{F4772F25-0116-413B-BC7F-43EFF8A04F2E}</Project>
-      <Name>DataAccessLayer</Name>
+      <Name>03 - DataAccessLayer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ManagerLayer\ManagerLayer.csproj">
+    <ProjectReference Include="..\ManagerLayer\01 - ManagerLayer.csproj">
       <Project>{DD7C51A6-44CD-4A05-9809-1171FE66F434}</Project>
-      <Name>ManagerLayer</Name>
+      <Name>01 - ManagerLayer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ServiceLayer\ServiceLayer.csproj">
+    <ProjectReference Include="..\ServiceLayer\02 - ServiceLayer.csproj">
       <Project>{41ADE765-973A-4155-B3D6-2C24648CBC7A}</Project>
-      <Name>ServiceLayer</Name>
+      <Name>02 - ServiceLayer</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

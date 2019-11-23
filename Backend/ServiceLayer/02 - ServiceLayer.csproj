@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DD7C51A6-44CD-4A05-9809-1171FE66F434}</ProjectGuid>
+    <ProjectGuid>{41ADE765-973A-4155-B3D6-2C24648CBC7A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ManagerLayer</RootNamespace>
-    <AssemblyName>ManagerLayer</AssemblyName>
+    <RootNamespace>ServiceLayer</RootNamespace>
+    <AssemblyName>ServiceLayer</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -31,9 +31,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="BouncyCastle.Crypto, Version=1.8.2.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
       <HintPath>..\packages\BouncyCastle.1.8.2\lib\BouncyCastle.Crypto.dll</HintPath>
@@ -50,11 +47,15 @@
     <Reference Include="MimeKit, Version=2.1.0.0, Culture=neutral, PublicKeyToken=bede1c8a46c66814, processorArchitecture=MSIL">
       <HintPath>..\packages\MimeKit.2.1.3\lib\net45\MimeKit.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -63,37 +64,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApplicationManagement\ApplicationManager.cs" />
-    <Compile Include="ApplicationManagement\IApplicationManager.cs" />
-    <Compile Include="AuthorizationManagement\IAuthorizationManager.cs" />
-    <Compile Include="LaunchManagement\LaunchData.cs" />
-    <Compile Include="LaunchManagement\LaunchManager.cs" />
-    <Compile Include="LaunchManagement\ILaunchManager.cs" />
-    <Compile Include="LaunchManagement\LaunchPayload.cs" />
-    <Compile Include="Login\LoginManager.cs" />
-    <Compile Include="PasswordManagement\PasswordManager.cs" />
+    <Compile Include="Exceptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="AuthorizationManagement\AuthorizationManager.cs" />
-    <Compile Include="UserManagement\UserManagementManager.cs" />
-    <Compile Include="UserManager.cs" />
-    <Compile Include="ValidationManager.cs" />
+    <Compile Include="Services\ApiKeyService.cs" />
+    <Compile Include="Services\ApplicationService.cs" />
+    <Compile Include="Services\DataSerializer.cs" />
+    <Compile Include="Services\EmailService.cs" />
+    <Compile Include="Services\IApiKeyService.cs" />
+    <Compile Include="Services\IApplicationService.cs" />
+    <Compile Include="Services\IDataSerializer.cs" />
+    <Compile Include="Services\IEmailService.cs" />
+    <Compile Include="Services\IPasswordService.cs" />
+    <Compile Include="Services\IResetService.cs" />
+    <Compile Include="Services\ISessionService.cs" />
+    <Compile Include="Services\ITokenService.cs" />
+    <Compile Include="Services\IUserService.cs" />
+    <Compile Include="Services\PasswordService.cs" />
+    <Compile Include="Services\ResetService.cs" />
+    <Compile Include="Services\SessionService.cs" />
+    <Compile Include="Services\SignatureService.cs" />
+    <Compile Include="Services\TokenService.cs" />
+    <Compile Include="Services\UserDeleteService.cs" />
+    <Compile Include="Services\UserService.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
+    <ProjectReference Include="..\DataAccessLayer\03 - DataAccessLayer.csproj">
+      <Project>{F4772F25-0116-413B-BC7F-43EFF8A04F2E}</Project>
+      <Name>03 - DataAccessLayer</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DataAccessLayer\DataAccessLayer.csproj">
-      <Project>{f4772f25-0116-413b-bc7f-43eff8a04f2e}</Project>
-      <Name>DataAccessLayer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ServiceLayer\ServiceLayer.csproj">
-      <Project>{98446D55-4697-4C80-90D7-C9E63A34C847}</Project>
-      <Name>ServiceLayer</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

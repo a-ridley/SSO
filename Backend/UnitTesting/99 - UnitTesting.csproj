@@ -74,21 +74,21 @@
     <Compile Include="UserServiceUT.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\KFC_WebAPI\KFC_WebAPI.csproj">
+    <ProjectReference Include="..\KFC_WebAPI\00 - KFC_WebAPI.csproj">
       <Project>{235AF58A-9018-40B2-B3A0-BEC8219C6E69}</Project>
-      <Name>KFC_WebAPI</Name>
+      <Name>00 - KFC_WebAPI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ManagerLayer\ManagerLayer.csproj">
+    <ProjectReference Include="..\ManagerLayer\01 - ManagerLayer.csproj">
       <Project>{DD7C51A6-44CD-4A05-9809-1171FE66F434}</Project>
-      <Name>ManagerLayer</Name>
+      <Name>01 - ManagerLayer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ServiceLayer\ServiceLayer.csproj">
-      <Project>{98446d55-4697-4c80-90d7-c9e63a34c847}</Project>
-      <Name>ServiceLayer</Name>
+    <ProjectReference Include="..\ServiceLayer\02 - ServiceLayer.csproj">
+      <Project>{41ADE765-973A-4155-B3D6-2C24648CBC7A}</Project>
+      <Name>02 - ServiceLayer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DataAccessLayer\DataAccessLayer.csproj">
+    <ProjectReference Include="..\DataAccessLayer\03 - DataAccessLayer.csproj">
       <Project>{F4772F25-0116-413B-BC7F-43EFF8A04F2E}</Project>
-      <Name>DataAccessLayer</Name>
+      <Name>03 - DataAccessLayer</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

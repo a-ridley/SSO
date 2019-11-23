@@ -1,19 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29509.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagerLayer", "ManagerLayer\ManagerLayer.csproj", "{DD7C51A6-44CD-4A05-9809-1171FE66F434}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "01 - ManagerLayer", "ManagerLayer\01 - ManagerLayer.csproj", "{DD7C51A6-44CD-4A05-9809-1171FE66F434}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceLayer", "ServiceLayer\ServiceLayer.csproj", "{41ADE765-973A-4155-B3D6-2C24648CBC7A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "02 - ServiceLayer", "ServiceLayer\02 - ServiceLayer.csproj", "{41ADE765-973A-4155-B3D6-2C24648CBC7A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccessLayer", "DataAccessLayer\DataAccessLayer.csproj", "{F4772F25-0116-413B-BC7F-43EFF8A04F2E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "03 - DataAccessLayer", "DataAccessLayer\03 - DataAccessLayer.csproj", "{F4772F25-0116-413B-BC7F-43EFF8A04F2E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTesting", "UnitTesting\UnitTesting.csproj", "{69F3E1D0-DAD5-4078-B839-97C80CE94A65}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "99 - UnitTesting", "UnitTesting\99 - UnitTesting.csproj", "{69F3E1D0-DAD5-4078-B839-97C80CE94A65}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dev", "Dev\Dev.csproj", "{1057EA55-30CA-4B6D-83B5-232F2791456B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KFC_WebAPI", "KFC_WebAPI\KFC_WebAPI.csproj", "{235AF58A-9018-40B2-B3A0-BEC8219C6E69}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "00 - KFC_WebAPI", "KFC_WebAPI\00 - KFC_WebAPI.csproj", "{235AF58A-9018-40B2-B3A0-BEC8219C6E69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
