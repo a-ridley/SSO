@@ -11,19 +11,30 @@
           id="email"
           v-model="email"
           type="email"
-          label="Email" /><br />
+          :rules="emailRules"
+          label="Email"
+           /><br />
         <v-text-field
           name="password"
           id="password"
-          type="password"
+          :type="show1 ? 'text' : 'password'"
           v-model="password"
-          label="Password" /><br />
+          :append-icon="show1 ? 'visibility' : 'visibility_off'"
+          :rules="passwordRules"
+          label="Password"
+          hint="At least 12 characters"
+          required
+          @click:append="show1 = !show1" /><br />
         <v-text-field
           name="confirm"
           id="confirm"
-          type="password"
+          :type="show2 ? 'text' : 'password'"
           v-model="confirmPassword"
-          label="Confirm Password" /><br />
+          :append-icon="show2 ? 'visibility' : 'visibility_off'"
+          :rules="confirmPassRule"
+          label="Confirm Password"
+          required
+          @click:append="show2 = !show2" /><br />
 
         <br /><br />
         Personal Details:<br />
@@ -43,7 +54,7 @@
               v-model="dob"
               label="Date of Birth"
               prepend-icon="event"
-              readonly
+              :rules="requiredRule"
               v-on="on"
               id="dob"
             ></v-text-field>
@@ -80,13 +91,15 @@
           v-model="securityQ1"
           label="Security Question 1"
           id="securityq1"
+          :rules="securityQuestionRequired"
         ></v-select>
         <br />
         <v-text-field
           name="securitya1"
           id="securitya1"
           v-model="securityQ1Answer"
-          label="Security Answer 1" />
+          label="Security Answer 1"
+          :rules="securityQuestionRequired" />
         <br />
         <br />
         <v-select
@@ -94,12 +107,14 @@
           v-model="securityQ2"
           label="Security Question 2"
           id="securityq2"
+          :rules="securityQuestionRequired"
         ></v-select><br />
         <v-text-field
           name="securitya2"
           id="securitya2"
           v-model="securityQ2Answer"
-          label="Security Answer 2" /><br />
+          label="Security Answer 2"
+          :rules="securityQuestionRequired" /><br />
 
         <br />
 
@@ -108,12 +123,14 @@
           v-model="securityQ3"
           label="Security Question 3"
           id="securityq3"
+          :rules="securityQuestionRequired"
         ></v-select><br />
         <v-text-field
           name="securitya3"
           id="securitya3"
           v-model="securityQ3Answer"
-          label="Security Answer 3" /><br />
+          label="Security Answer 3"
+          :rules="securityQuestionRequired" /><br />
 
         <v-flex>
           <v-btn id="legalButton" color="primary" flat small v-on:click="goToLegalPage">By registering, you're agreeing to our terms of service</v-btn>
@@ -145,16 +162,42 @@ export default {
   components:{
     Loading,
   },
-  data: () => {
+  data() {
     return {
+      show1: false,
+      show2: false,
+      show3: false,
+      show4: false,
+
+      requiredRule: [
+        v => !!v || 'This field is required.',
+      ],
+
+      securityQuestionRequired: [
+        v => !!v || "Security Question is required."
+      ],
+
       menu: false,
       error: "",
       loading: false,
       loadingText: "",
 
       email: '',
+      emailRules: [
+        v => !!v || 'This field is required.',
+        v => /\S+@.+\..+/.test(v) || 'E-mail must be valid',
+      ],
       password: '',
       confirmPassword: '',
+      passwordRules: [
+        v => !!v || 'This field is required',
+        v => (v && v.length >= 12) || 'Password must be at least 12 characters',
+      ],
+      confirmPassRule: [
+        v => !!v || 'Password confirmation is required',
+        v => (v && v.length >= 12) || 'Password must be at least 12 characters',
+        v => (v && v === this.password) || "Passwords do not match!",
+      ],
 
       dob: '',
       city: '',
@@ -180,7 +223,7 @@ export default {
   },
   methods: {
     updateDate(date) {
-      this.$refs.menu.save(date)
+      this.$refs.menu.save(date);
     },
     submit: function() {
       this.error = "";

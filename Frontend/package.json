@@ -9,6 +9,7 @@
     "e2e": "mocha ./test/*.test.e2e.js --timeout 20000"
   },
   "dependencies": {
+    "@mdi/font": "^4.6.95",
     "axios": "^0.18.0",
     "vue": "^2.6.6",
     "vue-read-more": "^1.1.1",
