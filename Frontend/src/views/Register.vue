@@ -11,7 +11,7 @@
           id="email"
           v-model="email"
           type="email"
-          :rules="emailRules"
+          :rules="[rules.required, rules.emailRule]"
           label="Email"
            /><br />
         <v-text-field
@@ -20,9 +20,8 @@
           :type="show1 ? 'text' : 'password'"
           v-model="password"
           :append-icon="show1 ? 'visibility' : 'visibility_off'"
-          :rules="passwordRules"
+          :rules="[rules.required, rules.passwordRule]"
           label="Password"
-          hint="At least 12 characters"
           required
           @click:append="show1 = !show1" /><br />
         <v-text-field
@@ -31,7 +30,7 @@
           :type="show2 ? 'text' : 'password'"
           v-model="confirmPassword"
           :append-icon="show2 ? 'visibility' : 'visibility_off'"
-          :rules="confirmPassRule"
+          :rules="[rules.required, rules.PasswordRule, rules.confirmPasswordRule]"
           label="Confirm Password"
           required
           @click:append="show2 = !show2" /><br />
@@ -54,7 +53,7 @@
               v-model="dob"
               label="Date of Birth"
               prepend-icon="event"
-              :rules="requiredRule"
+              :rules="[rules.required]"
               v-on="on"
               id="dob"
             ></v-text-field>
@@ -91,7 +90,7 @@
           v-model="securityQ1"
           label="Security Question 1"
           id="securityq1"
-          :rules="securityQuestionRequired"
+          :rules="[rules.securityQuestionRule]"
         ></v-select>
         <br />
         <v-text-field
@@ -99,7 +98,7 @@
           id="securitya1"
           v-model="securityQ1Answer"
           label="Security Answer 1"
-          :rules="securityQuestionRequired" />
+          :rules="[rules.securityQuestionRule]" />
         <br />
         <br />
         <v-select
@@ -107,14 +106,14 @@
           v-model="securityQ2"
           label="Security Question 2"
           id="securityq2"
-          :rules="securityQuestionRequired"
+          :rules="[rules.securityQuestionRule]"
         ></v-select><br />
         <v-text-field
           name="securitya2"
           id="securitya2"
           v-model="securityQ2Answer"
           label="Security Answer 2"
-          :rules="securityQuestionRequired" /><br />
+          :rules="[rules.securityQuestionRule]" /><br />
 
         <br />
 
@@ -123,14 +122,14 @@
           v-model="securityQ3"
           label="Security Question 3"
           id="securityq3"
-          :rules="securityQuestionRequired"
+          :rules="[rules.securityQuestionRule]"
         ></v-select><br />
         <v-text-field
           name="securitya3"
           id="securitya3"
           v-model="securityQ3Answer"
           label="Security Answer 3"
-          :rules="securityQuestionRequired" /><br />
+          :rules="[rules.securityQuestionRule]" /><br />
 
         <v-flex>
           <v-btn id="legalButton" color="primary" flat small v-on:click="goToLegalPage">By registering, you're agreeing to our terms of service</v-btn>
@@ -169,13 +168,13 @@ export default {
       show3: false,
       show4: false,
 
-      requiredRule: [
-        v => !!v || 'This field is required.',
-      ],
-
-      securityQuestionRequired: [
-        v => !!v || "Security Question is required."
-      ],
+      rules: {
+        required: v => !!v || 'This field is required.',
+        emailRule: v => /\S+@.+\..+/.test(v) || 'E-mail must be valid.',
+        passwordRule: v => (v && v.length >= 12) || 'Password must be at least 12 characters',
+        confirmPasswordRule: v => (v && v === this.password) || "Passwords do not match!",
+        securityQuestionRule:  v => !!v || "Security Question is required.",
+      },
 
       menu: false,
       error: "",
@@ -183,21 +182,9 @@ export default {
       loadingText: "",
 
       email: '',
-      emailRules: [
-        v => !!v || 'This field is required.',
-        v => /\S+@.+\..+/.test(v) || 'E-mail must be valid',
-      ],
+
       password: '',
       confirmPassword: '',
-      passwordRules: [
-        v => !!v || 'This field is required',
-        v => (v && v.length >= 12) || 'Password must be at least 12 characters',
-      ],
-      confirmPassRule: [
-        v => !!v || 'Password confirmation is required',
-        v => (v && v.length >= 12) || 'Password must be at least 12 characters',
-        v => (v && v === this.password) || "Passwords do not match!",
-      ],
 
       dob: '',
       city: '',
