@@ -172,7 +172,7 @@ export default {
         required: v => !!v || 'This field is required.',
         emailRule: v => /\S+@.+\..+/.test(v) || 'E-mail must be valid.',
         passwordRule: v => (v && v.length >= 12) || 'Password must be at least 12 characters',
-        confirmPasswordRule: v => (v && v === this.password) || "Passwords do not match!",
+        confirmPasswordRule: v => (v && v === this.password) || "Passwords do not match.",
         securityQuestionRule:  v => !!v || "Security Question is required.",
       },
 
