@@ -1,4 +1,4 @@
-const apiURL = localStorage.getItem('apiURL') || process.env.VUE_APP_API_URL
+const apiURL = "https://sso-api.broadwaybuilder.xyz/api"
 
 export {
     apiURL
