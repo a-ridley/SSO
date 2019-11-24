@@ -14,7 +14,7 @@
         <v-layout row wrap>
           <v-flex xs12 md6 lg6 v-for="(app, index) in applications" :key="index">
             <!-- The card that shows up if the app is under maintenance -->
-            <v-card v-if="app.UnderMaintenance || healthCheck.HealthStatuses[app.Id]" class="transparent">
+            <v-card v-if="app.UnderMaintenance || !healthCheck.HealthStatuses[app.Id]" class="transparent">
               <v-card-title primary-title>
                 <!-- If there is no logo, then a default image will be shown -->
                 <img v-if="app.LogoUrl === null" src="@/assets/no-image-icon.png">
@@ -46,7 +46,7 @@
                 <!-- If there is no logo, then a default image will be shown -->
                 <img v-if="app.LogoUrl === null" src="@/assets/no-image-icon.png" @click="launch(app.Id, app)">
                 <img v-else :src="app.LogoUrl" @click="launch(app.Id, app)">
-                <div id="content" v-if="app.UnderMaintenance || healthCheck.HealthStatuses[app.Id]">
+                <div id="content" v-if="app.UnderMaintenance || !healthCheck.HealthStatuses[app.Id]">
                   <!-- Launching to an app can be done by clicking the app title -->
                   <h3 class="headline mb-0" row wrap>
                     <strong>{{ app.Title | truncate(maxTitleLength, textTail)}}</strong>
@@ -201,7 +201,7 @@ export default {
       .then(response => {
         this.applications = response.data;
         this.applications.forEach(app => {
-          this.healthCheck.HealthStatuses[app.Id] = false;
+          this.healthCheck.HealthStatuses[app.Id] = true;
         });
       });
   },
